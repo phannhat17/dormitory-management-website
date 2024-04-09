@@ -24,36 +24,6 @@ const Navbar = () => {
           <School className="h-6 w-6" />
           <span className="sr-only">Acme Inc</span>
         </Link>
-        <Link
-          href="#"
-          className="text-muted-foreground transition-colors hover:text-foreground"
-        >
-          Dashboard
-        </Link>
-        <Link
-          href="#"
-          className="text-muted-foreground transition-colors hover:text-foreground"
-        >
-          Orders
-        </Link>
-        <Link
-          href="#"
-          className="text-muted-foreground transition-colors hover:text-foreground"
-        >
-          Products
-        </Link>
-        <Link
-          href="#"
-          className="text-muted-foreground transition-colors hover:text-foreground"
-        >
-          Customers
-        </Link>
-        <Link
-          href="#"
-          className="text-foreground transition-colors hover:text-foreground"
-        >
-          Settings
-        </Link>
       </nav>
       <Sheet>
         <SheetTrigger asChild>
