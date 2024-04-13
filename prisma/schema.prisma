@@ -2,3 +2,60 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Room {
+  id          Int       @id
+  status      String
+  current     Int
+  max         Int
+  price       Float
+  Facilities  Facility[]
+  Students    Student[]
+  Contracts   Contract[]
+  Invoices    Invoice[]
+}
+
+model Facility {
+  id               Int     @id
+  currentRoomId    Int
+  status           String
+  price            Float
+  Room             Room    @relation(fields: [currentRoomId], references: [id])
+}
+
+model Student {
+  student_id       Int       @id
+  currentRoomId    Int?
+  amountPaid       Float
+  amountDue        Float
+  status           String
+  Room             Room?     @relation(fields: [currentRoomId], references: [id])
+  Contracts        Contract[]
+}
+
+model Contract {
+  id          Int       @id
+  contractType String
+  studentId   Int
+  roomId      Int
+  term        String
+  startDate   DateTime
+  endDate     DateTime
+  Student     Student   @relation(fields: [studentId], references: [student_id])
+  Room        Room      @relation(fields: [roomId], references: [id])
+  Invoices    Invoice[] // Indicating that one contract can have multiple invoices
+}
+
+model Invoice {
+  id          Int      @id
+  roomId      Int
+  contractId  Int
+  amountPaid  Float
+  Room        Room     @relation(fields: [roomId], references: [id])
+  Contract    Contract @relation(fields: [contractId], references: [id])
+  // No need for `@unique` here as multiple invoices can relate to one contract
+}
