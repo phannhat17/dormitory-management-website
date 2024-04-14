@@ -9,7 +9,6 @@ generator client {
 
 enum UserRole {
   ADMIN
-  STAFF
   STUDENT
 }
 
@@ -20,24 +19,24 @@ enum UserStatus {
 }
 
 model User {
-  id            Int    @id
+  id            String    @id
   name          String?
   email         String?   @unique
-  password      String?
+  password      String
   role          UserRole  @default(STUDENT)
   image         String?
   accounts      Account[]
   currentRoomId Int?
-  amountPaid    Float
-  amountDue     Float
-  status        UserStatus
+  amountPaid    Float?
+  amountDue     Float?
+  status        UserStatus?
   Room          Room?     @relation(fields: [currentRoomId], references: [id])
   Contracts     Contract[]
 }
 
 model Account {
   id                 String  @id @default(cuid())
-  userId             Int
+  userId             String
   type               String
   provider           String
   providerAccountId  String
@@ -77,7 +76,7 @@ model Facility {
 model Contract {
   id          Int       @id
   contractType String
-  userId      Int
+  userId      String
   roomId      Int
   term        String
   startDate   DateTime
