@@ -7,6 +7,52 @@ generator client {
   provider = "prisma-client-js"
 }
 
+enum UserRole {
+  ADMIN
+  STUDENT
+}
+
+enum UserStatus {
+  STAYING
+  NOT_STAYING
+  BANNED
+}
+
+model User {
+  id            String    @id
+  name          String?
+  email         String?   @unique
+  password      String
+  role          UserRole  @default(STUDENT)
+  image         String?
+  accounts      Account[]
+  currentRoomId Int?
+  amountPaid    Float?
+  amountDue     Float?
+  status        UserStatus @default(NOT_STAYING)
+  Room          Room?     @relation(fields: [currentRoomId], references: [id])
+  Contracts     Contract[]
+}
+
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?  @db.Text
+  access_token       String?  @db.Text
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?  @db.Text
+  session_state      String?
+ 
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+ 
+  @@unique([provider, providerAccountId])
+}
+
 model Room {
   id          Int       @id
   status      String
@@ -14,7 +60,7 @@ model Room {
   max         Int
   price       Float
   Facilities  Facility[]
-  Students    Student[]
+  Users       User[]
   Contracts   Contract[]
   Invoices    Invoice[]
 }
@@ -27,27 +73,17 @@ model Facility {
   Room             Room    @relation(fields: [currentRoomId], references: [id])
 }
 
-model Student {
-  student_id       Int       @id
-  currentRoomId    Int?
-  amountPaid       Float
-  amountDue        Float
-  status           String
-  Room             Room?     @relation(fields: [currentRoomId], references: [id])
-  Contracts        Contract[]
-}
-
 model Contract {
   id          Int       @id
   contractType String
-  studentId   Int
+  userId      String
   roomId      Int
   term        String
   startDate   DateTime
   endDate     DateTime
-  Student     Student   @relation(fields: [studentId], references: [student_id])
+  User        User      @relation(fields: [userId], references: [id])
   Room        Room      @relation(fields: [roomId], references: [id])
-  Invoices    Invoice[] // Indicating that one contract can have multiple invoices
+  Invoices    Invoice[]
 }
 
 model Invoice {
@@ -57,5 +93,4 @@ model Invoice {
   amountPaid  Float
   Room        Room     @relation(fields: [roomId], references: [id])
   Contract    Contract @relation(fields: [contractId], references: [id])
-  // No need for `@unique` here as multiple invoices can relate to one contract
 }
