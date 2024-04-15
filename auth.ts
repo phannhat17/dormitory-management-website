@@ -1,4 +1,4 @@
-import NextAuth from "next-auth";
+import NextAuth, { AuthError } from "next-auth";
 import authConfig from "./auth.config";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { db } from "@/lib/db";
@@ -19,7 +19,7 @@ export const {
       const existingUser = await getUserById(user.id);
 
       if (!existingUser || existingUser.status === "BANNED") {
-        return false;
+        throw new AuthError("BannedUser");
       }
 
       return true;

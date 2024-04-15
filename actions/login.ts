@@ -23,11 +23,17 @@ export const login = async (values: z.infer<typeof LoginSchema>) => {
     });
   } catch (error) {
     if (error instanceof AuthError) {
+      if (error.message.includes("BannedUser")) {
+        return {
+          error:
+            "You have been banned!",
+        };
+      }
       switch (error.type) {
         case "CredentialsSignin":
-          return {error: "Invalid credentials!"}
-        default: 
-          return {error: "An error occurred!"}
+          return { error: "Invalid credentials!" };
+        default:
+          return { error: "An error occurred!" };
       }
     }
 
