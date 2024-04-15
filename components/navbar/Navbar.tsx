@@ -49,18 +49,6 @@ const Navbar = () => {
         >
           Invoice
         </Link>
-        <Link
-          href="#"
-          className="text-muted-foreground transition-colors hover:text-foreground"
-        >
-          Customers
-        </Link>
-        <Link
-          href="#"
-          className="text-muted-foreground transition-colors hover:text-foreground"
-        >
-          Analytics
-        </Link>
       </nav>
       <Sheet>
         <SheetTrigger asChild>
@@ -93,18 +81,6 @@ const Navbar = () => {
             >
               Invoice
             </Link>
-            <Link
-              href="#"
-              className="text-muted-foreground hover:text-foreground"
-            >
-              Customers
-            </Link>
-            <Link
-              href="#"
-              className="text-muted-foreground hover:text-foreground"
-            >
-              Analytics
-            </Link>
           </nav>
         </SheetContent>
       </Sheet>
@@ -126,10 +102,8 @@ const Navbar = () => {
               <Link href="/profile">My Account</Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <button type="submit" onClick={logOut}>
+            <DropdownMenuItem onClick={logOut}>
                 Logout
-              </button>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
