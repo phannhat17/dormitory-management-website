@@ -3,7 +3,7 @@
 import * as z from "zod";
 import Link from "next/link";
 import { useState, useTransition } from "react";
-import { CreateUserSchema } from "@/schemas";
+import { CreateStaffSchema } from "@/schemas";
 import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -19,14 +19,13 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { FormError } from "@/components/form/form-error";
 import { FormSuccess } from "@/components/form/form-success";
-import { createUser } from "@/actions/create-user";
+import { createStaff } from "@/actions/create-staff";
 
 const CreateUserPage = () => {
   const [error, setError] = useState<string | undefined>("");
@@ -34,22 +33,22 @@ const CreateUserPage = () => {
 
   const [isPending, startTransition] = useTransition();
 
-  const form = useForm<z.infer<typeof CreateUserSchema>>({
-    resolver: zodResolver(CreateUserSchema),
+  const form = useForm<z.infer<typeof CreateStaffSchema>>({
+    resolver: zodResolver(CreateStaffSchema),
     defaultValues: {
       email: "",
       password: "",
       name: "",
-      studentid: "",
+      staffid: "",
     },
   });
 
-  const onSubmit = (values: z.infer<typeof CreateUserSchema>) => {
+  const onSubmit = (values: z.infer<typeof CreateStaffSchema>) => {
     setError("");
     setSuccess("");
 
     startTransition(() => {
-      createUser(values).then((data) => {
+      createStaff(values).then((data) => {
         setError(data.error);
         setSuccess(data.success);
       });
@@ -85,15 +84,15 @@ const CreateUserPage = () => {
                   <div className="grid gap-2">
                     <FormField
                       control={form.control}
-                      name="studentid"
+                      name="staffid"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Student ID</FormLabel>
+                          <FormLabel>Staff ID</FormLabel>
                           <FormControl>
                             <Input
                               {...field}
                               disabled={isPending}
-                              placeholder="2021XXXX"
+                              placeholder="STAFFXXXX"
                             />
                           </FormControl>
                           <FormMessage />
@@ -163,7 +162,7 @@ const CreateUserPage = () => {
                   <FormError message={error} />
                   <FormSuccess message={success} />
                   <Button type="submit" disabled={isPending} className="w-full">
-                    Add Student
+                    Add Staff
                   </Button>
                 </form>
               </Form>

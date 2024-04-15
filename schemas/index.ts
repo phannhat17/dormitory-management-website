@@ -19,3 +19,17 @@ export const CreateUserSchema = z.object({
     message: "Minimum password length is 8 characters",
   }),
 });
+
+
+export const CreateStaffSchema = z.object({
+  staffid: z.string().min(1, {
+    message: "Staff id is required",
+  }),
+  name: z.string().min(1, {
+    message: "Name is required",
+  }),
+  email: z.string().email(),
+  password: z.string().min(8, {
+    message: "Minimum password length is 8 characters",
+  }),
+});
