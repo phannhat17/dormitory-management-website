@@ -72,7 +72,7 @@ export default {
       return token;
     },
   },
-  session: { strategy: "jwt", maxAge: 365 * 24 * 60 * 60 },
-  jwt: { maxAge: 365 * 24 * 60 * 60 },
+  session: { strategy: "jwt", maxAge: 60 * 60 },
+  jwt: { maxAge: 60 * 60 },
   adapter: PrismaAdapter(db),
 } satisfies NextAuthConfig;
