@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import { CircleUser, Menu, School, Search } from "lucide-react";
+import { logout } from "@/actions/logout";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -14,6 +17,10 @@ import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 const Navbar = () => {
+  const logOut = () => {
+    logout();
+  };
+
   return (
     <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6 z-50">
       <nav className="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
@@ -57,11 +64,7 @@ const Navbar = () => {
       </nav>
       <Sheet>
         <SheetTrigger asChild>
-          <Button
-            variant="outline"
-            size="icon"
-            className="shrink-0 md:hidden"
-          >
+          <Button variant="outline" size="icon" className="shrink-0 md:hidden">
             <Menu className="h-5 w-5" />
             <span className="sr-only">Toggle navigation menu</span>
           </Button>
@@ -106,7 +109,7 @@ const Navbar = () => {
         </SheetContent>
       </Sheet>
       <div className="flex w-full items-center gap-4 md:ml-auto md:gap-2 lg:gap-4">
-        <form className="ml-auto flex-1 sm:flex-initial">
+        {/* <form className="ml-auto flex-1 sm:flex-initial">
           <div className="relative">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
@@ -115,7 +118,7 @@ const Navbar = () => {
               className="pl-8 sm:w-[300px] md:w-[200px] lg:w-[300px]"
             />
           </div>
-        </form>
+        </form> */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="secondary" size="icon" className="rounded-full">
@@ -127,13 +130,17 @@ const Navbar = () => {
             <DropdownMenuLabel>My Account</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem>Settings</DropdownMenuItem>
-            <DropdownMenuItem>Support</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Logout</DropdownMenuItem>
+            <DropdownMenuItem>
+              <button type="submit" onClick={logOut}>
+                Logout
+              </button>
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-    </header>);
+    </header>
+  );
 };
 
 export default Navbar;
