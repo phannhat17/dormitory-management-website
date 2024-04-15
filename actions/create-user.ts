@@ -27,7 +27,7 @@ export const createUser = async (values: z.infer<typeof CreateUserSchema>) => {
     data: {
       id: studentid,
       name,
-      email,
+      email: email.toLowerCase(),
       password: hashedPassword,
     },
   });
