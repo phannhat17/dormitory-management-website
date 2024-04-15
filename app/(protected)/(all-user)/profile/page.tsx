@@ -57,14 +57,27 @@ export default function Dashboard() {
                     user?.status === "NOT_STAYING"
                       ? "border-transparent bg-[#fbcb14] text-[#543107]-foreground shadow hover:bg-[#fbcb14]/80"
                       : user?.status === "STAYING"
-                      ? "border-transparent bg-emerald-500 text-primary-foreground shadow hover:bg-emerald-500/80"
-                      : ""
+                        ? "border-transparent bg-emerald-500 text-primary-foreground shadow hover:bg-emerald-500/80"
+                        : ""
                   }
                 >
                   {user?.status}
                 </Badge>
               </p>
             </div>
+            {user?.role === "ADMIN" && (
+              <div className="flex flex-row items-center justify-between my-4">
+                <p className="font-medium mx-5">Role</p>
+                <p className="font-medium mx-5">
+                  <Badge
+                    className="border-transparent bg-emerald-500 text-primary-foreground shadow hover:bg-emerald-500/80"
+                  >
+                    {user?.role}
+                  </Badge>
+                </p>
+              </div>
+            )}
+
           </CardContent>
           <CardFooter className="border-t px-6 py-4">
             <Dialog>
