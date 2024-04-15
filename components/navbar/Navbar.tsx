@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { CircleUser, Menu, School, Search } from "lucide-react";
+import { CircleUser, Menu, School } from "lucide-react";
 import { logout } from "@/actions/logout";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -29,37 +29,25 @@ const Navbar = () => {
           className="flex items-center gap-2 text-lg font-semibold md:text-base"
         >
           <School className="h-6 w-6" />
-          <span className="sr-only">Acme Inc</span>
+          <span className="sr-only">Dorm</span>
         </Link>
         <Link
           href="/"
-          className="text-foreground transition-colors hover:text-foreground"
+          className={`transition-colors hover:text-foreground ${pathname === "/" ? "text-foreground" : "text-muted-foreground"}`}
         >
           Dashboard
         </Link>
         <Link
           href="/contract"
-          className="text-muted-foreground transition-colors hover:text-foreground"
+          className={`transition-colors hover:text-foreground ${pathname === "/contract" ? "text-foreground" : "text-muted-foreground"}`}
         >
           Contract
         </Link>
         <Link
           href="/invoice"
-          className="text-muted-foreground transition-colors hover:text-foreground"
+          className={`transition-colors hover:text-foreground ${pathname === "/invoice" ? "text-foreground" : "text-muted-foreground"}`}
         >
           Invoice
-        </Link>
-        <Link
-          href="#"
-          className="text-muted-foreground transition-colors hover:text-foreground"
-        >
-          Customers
-        </Link>
-        <Link
-          href="#"
-          className="text-muted-foreground transition-colors hover:text-foreground"
-        >
-          Analytics
         </Link>
       </nav>
       <Sheet>
@@ -76,34 +64,23 @@ const Navbar = () => {
               className="flex items-center gap-2 text-lg font-semibold"
             >
               <School className="h-6 w-6" />
-              <span className="sr-only">Acme Inc</span>
+              <span className="sr-only">Dorm</span>
             </Link>
-            <Link href="/" className="hover:text-foreground">
+            <Link href="/" className={`hover:text-foreground ${pathname === "/" ? "" : "text-muted-foreground"}`}
+            >
               Dashboard
             </Link>
             <Link
               href="/contract"
-              className="text-muted-foreground hover:text-foreground"
+              className={`hover:text-foreground ${pathname === "/contract" ? "" : "text-muted-foreground"}`}
             >
               Contract
             </Link>
             <Link
               href="/invoice"
-              className="text-muted-foreground hover:text-foreground"
+              className={`hover:text-foreground ${pathname === "/invoice" ? "" : "text-muted-foreground"}`}
             >
               Invoice
-            </Link>
-            <Link
-              href="#"
-              className="text-muted-foreground hover:text-foreground"
-            >
-              Customers
-            </Link>
-            <Link
-              href="#"
-              className="text-muted-foreground hover:text-foreground"
-            >
-              Analytics
             </Link>
           </nav>
         </SheetContent>
@@ -126,10 +103,8 @@ const Navbar = () => {
               <Link href="/profile">My Account</Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <button type="submit" onClick={logOut}>
-                Logout
-              </button>
+            <DropdownMenuItem onClick={logOut}>
+              Logout
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

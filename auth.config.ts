@@ -34,24 +34,27 @@ export default {
       }
 
       const existingUser = await getUserById(user.id);
-
-      if (!existingUser || existingUser.status === "BANNED") {
-        throw new AuthError("BannedUser");
+      if (!existingUser) return false;
+      if (existingUser.status === "BANNED") {
+        throw new AuthError("BannedUser via signin");
       }
 
       return true;
     },
     async session({ token, session }) {
+      if (token.status && session.user) {
+        if (token.status === "BANNED") {
+          throw new AuthError("BannedUser via session");
+        }
+        session.user.status = token.status;
+      }
+
       if (token.sub && session.user) {
         session.user.id = token.sub;
       }
 
       if (token.role && session.user) {
         session.user.role = token.role;
-      }
-
-      if (token.status && session.user) {
-        session.user.status = token.status;
       }
 
       return session;
@@ -69,7 +72,7 @@ export default {
       return token;
     },
   },
-  session: { strategy: "jwt", maxAge: 365 * 24 * 60 * 60 },
-  jwt: { maxAge: 365 * 24 * 60 * 60 },
+  session: { strategy: "jwt", maxAge: 60 * 60 },
+  jwt: { maxAge: 60 * 60 },
   adapter: PrismaAdapter(db),
 } satisfies NextAuthConfig;

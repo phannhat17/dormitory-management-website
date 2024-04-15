@@ -33,3 +33,14 @@ export const getUserByEmailId = async (email: string, id: string) => {
     return null;
   }
 };
+
+export const getUserCount = async () => {
+  try {
+    const count = await db.user.count();
+    console.log(count);
+    return count;
+  } catch  {
+    return null; 
+  }
+};
+
