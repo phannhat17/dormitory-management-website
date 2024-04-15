@@ -2,7 +2,7 @@ import {auth, signOut} from "@/auth";
 
 const AdminPage = async () => {
     const session = await auth();
-
+    
     return (
         <div>
             {JSON.stringify(session)}

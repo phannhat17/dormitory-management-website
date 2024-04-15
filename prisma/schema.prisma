@@ -29,7 +29,7 @@ model User {
   currentRoomId Int?
   amountPaid    Float?
   amountDue     Float?
-  status        UserStatus?
+  status        UserStatus @default(NOT_STAYING)
   Room          Room?     @relation(fields: [currentRoomId], references: [id])
   Contracts     Contract[]
 }
