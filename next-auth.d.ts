@@ -17,6 +17,6 @@ declare module "next-auth" {
 declare module "@auth/core/jwt" {
   interface JWT {
     role?: UserRole;
-    status?: UserStatus;
+    status: UserStatus;
   }
 }
