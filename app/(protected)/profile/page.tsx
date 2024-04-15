@@ -1,7 +1,13 @@
 "use client";
 
-import { CircleUser } from "lucide-react";
-import { UserStatus } from "@prisma/client";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -61,7 +67,19 @@ export default function Dashboard() {
             </div>
           </CardContent>
           <CardFooter className="border-t px-6 py-4">
-            <Button disabled>Update profile</Button>
+            <Dialog>
+              <DialogTrigger>
+                <Button>Update profile</Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Need permission</DialogTitle>
+                  <DialogDescription>
+                    This action cannot be done. You need administrator permission to perform this action.
+                  </DialogDescription>
+                </DialogHeader>
+              </DialogContent>
+            </Dialog>
           </CardFooter>
         </Card>
       </div>
