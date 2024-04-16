@@ -10,6 +10,6 @@ export const getTotalUser = async () => {
 
 export const getListUsers = async (page: number) => {
   const listUser = await getUsers(page);
-  const numUser = listUser.length;
+  const numUser = await getTotalUser().then((res) => res.totalUsers);
   return { users: listUser, total: numUser };
 };
