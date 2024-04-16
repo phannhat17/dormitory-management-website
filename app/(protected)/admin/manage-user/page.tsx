@@ -65,9 +65,9 @@ export default function ManageUsers() {
 
   useEffect(() => {
     const fetchUsers = async () => {
-      const response = await getListUsers(currentPage - 1); // Fetch users for the current page (0-indexed)
+      const response = await getListUsers(currentPage - 1);
       setUsers(response.users);
-      setUserCount(response.total); // Assuming API returns total number of users
+      setUserCount(response.total);
     };
 
     fetchUsers();
@@ -151,8 +151,8 @@ export default function ManageUsers() {
               <TableBody>
                 {users.map((user) => (
                   <TableRow key={user.id}>
-                    <TableCell>{user.id}</TableCell>
-                    <TableCell>{user.name}</TableCell>
+                    <TableCell className="font-medium">{user.id}</TableCell>
+                    <TableCell className="font-medium">{user.name}</TableCell>
                     <TableCell>{user.email}</TableCell>
                     <TableCell>
                       <Badge
