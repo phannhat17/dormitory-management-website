@@ -67,10 +67,8 @@ export const getTotalUserCount = async () => {
   };
 };
 
-export const getUsers = async (page: number, limit: number = 10) => {
+export const getUsers = async () => {
   const users = await db.user.findMany({
-    skip: page * limit,
-    take: limit,
     orderBy: { id: "asc" },
     select: {
       id: true,

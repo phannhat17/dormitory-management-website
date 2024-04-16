@@ -40,6 +40,7 @@
     "@radix-ui/react-toggle": "^1.0.3",
     "@radix-ui/react-toggle-group": "^1.0.4",
     "@radix-ui/react-tooltip": "^1.0.7",
+    "@tanstack/react-table": "^8.16.0",
     "@vercel/postgres": "^0.8.0",
     "bcrypt": "^5.1.1",
     "bcryptjs": "^2.4.3",

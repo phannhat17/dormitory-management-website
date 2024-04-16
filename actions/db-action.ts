@@ -8,8 +8,8 @@ export const getTotalUser = async () => {
   return numUser;
 };
 
-export const getListUsers = async (page: number) => {
-  const listUser = await getUsers(page);
+export const getListUsers = async () => {
+  const listUser = await getUsers();
   const numUser = await getTotalUser().then((res) => res.totalUsers);
   return { users: listUser, total: numUser };
 };
