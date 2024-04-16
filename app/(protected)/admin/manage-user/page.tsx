@@ -65,7 +65,7 @@ export default function ManageUsers() {
 
   useEffect(() => {
     const fetchUsers = async () => {
-      const response = await getListUsers(currentPage - 1);
+      const response: { users: User[], total: number } = await getListUsers(currentPage - 1);
       setUsers(response.users);
       setUserCount(response.total);
     };
