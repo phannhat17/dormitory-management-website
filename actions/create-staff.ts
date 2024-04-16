@@ -18,7 +18,7 @@ export const createStaff = async (values: z.infer<typeof CreateStaffSchema>) => 
   const existingUser = await getUserByEmailId(email, staffid);
 
   if (existingUser) {
-    return { error: "Email or Student ID already in use!" };
+    return { error: "Email or Staff ID already in use!" };
   }
 
   const hashedPassword = await bcrypt.hash(password, 14);
