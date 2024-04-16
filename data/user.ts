@@ -34,13 +34,23 @@ export const getUserByEmailId = async (email: string, id: string) => {
   }
 };
 
-export const getUserCount = async () => {
-  try {
-    const count = await db.user.count();
-    console.log(count);
-    return count;
-  } catch  {
-    return null; 
-  }
+export const getTotalUserCount = async () => {
+  const count = await db.user.count();
+  return count;
 };
 
+export const getUsers = async (page: number, limit: number = 30) => {
+  const users = await db.user.findMany({
+    skip: page * limit,
+    take: limit,
+    orderBy: { id: "asc" },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      status: true,
+    },
+  });
+  return users;
+};
