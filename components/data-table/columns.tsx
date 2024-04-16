@@ -66,17 +66,30 @@ export const columns: ColumnDef<Usertable>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Role" />
     ),
-    cell: ({ row }) =>
-      <div>
-        <Badge className={
-          row.getValue("role") === "ADMIN"
-            ? "border-transparent bg-emerald-500 text-primary-foreground shadow hover:bg-emerald-500/80"
-            : row.getValue("role") === "STUDENT"
-              ? "border-transparent bg-[#fbcb14] text-[#543107]-foreground shadow hover:bg-[#fbcb14]/80"
-              : ""
-        }>{row.getValue("role")}</Badge>
+    cell: ({ row }) => {
+      const status = statuses.find(
+        (status) => status.value === row.getValue("status")
+      )
 
-      </div>,
+      if (!status) {
+        return null
+      }
+
+      return (
+        <div>
+          <Badge className={
+            row.getValue("role") === "ADMIN"
+              ? "border-transparent bg-emerald-500 text-primary-foreground shadow hover:bg-emerald-500/80"
+              : row.getValue("role") === "STUDENT"
+                ? "border-transparent bg-[#fbcb14] text-[#543107]-foreground shadow hover:bg-[#fbcb14]/80"
+                : ""
+          }>{row.getValue("role")}</Badge>
+
+        </div>)
+    },
+    filterFn: (row, id, value) => {
+      return value.includes(row.getValue(id))
+    },
     enableSorting: true,
     enableHiding: false,
   },
@@ -96,19 +109,19 @@ export const columns: ColumnDef<Usertable>[] = [
 
       return (
         <div>
-        <Badge variant={
-          row.getValue("status") === "BANNED" ? "destructive" : null
-        }
-          className={
-            row.getValue("status") === "NOT_STAYING"
-              ? "border-transparent bg-[#fbcb14] text-[#543107]-foreground shadow hover:bg-[#fbcb14]/80"
-              : row.getValue("status") === "STAYING"
-                ? "border-transparent bg-emerald-500 text-primary-foreground shadow hover:bg-emerald-500/80"
-                : ""
+          <Badge variant={
+            row.getValue("status") === "BANNED" ? "destructive" : null
           }
-        >{row.getValue("status")}</Badge>
+            className={
+              row.getValue("status") === "NOT_STAYING"
+                ? "border-transparent bg-[#fbcb14] text-[#543107]-foreground shadow hover:bg-[#fbcb14]/80"
+                : row.getValue("status") === "STAYING"
+                  ? "border-transparent bg-emerald-500 text-primary-foreground shadow hover:bg-emerald-500/80"
+                  : ""
+            }
+          >{row.getValue("status")}</Badge>
 
-      </div>
+        </div>
       )
     },
     filterFn: (row, id, value) => {
