@@ -3,7 +3,7 @@ import Link from "next/link";
 import { School } from "lucide-react";
 import { usePathname } from "next/navigation";
 
-const MobileNavLinks = () => {
+const MobileUserNavLinks = () => {
   const pathname = usePathname();
 
   return (
@@ -34,4 +34,4 @@ const MobileNavLinks = () => {
   );
 };
 
-export default MobileNavLinks;
+export default MobileUserNavLinks;

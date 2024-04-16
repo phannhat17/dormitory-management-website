@@ -3,7 +3,7 @@ import Link from "next/link";
 import { School } from "lucide-react";
 import { usePathname } from "next/navigation";
 
-const MainNavLinks = () => {
+const MainUserNavLinks = () => {
   const pathname = usePathname();
 
   return (
@@ -37,4 +37,4 @@ const MainNavLinks = () => {
   );
 };
 
-export default MainNavLinks;
+export default MainUserNavLinks;
