@@ -91,6 +91,8 @@ export function DataTableFacetedFilter<TData, TValue>({
                 return (
                   <CommandItem
                     key={option.value}
+                    data-disabled={undefined} // Attempt to unset the data attribute if the component logic allows
+                    style={{ pointerEvents: 'auto', opacity: 1 }} // Direct
                     onSelect={() => {
                       if (isSelected) {
                         selectedValues.delete(option.value)
