@@ -5,6 +5,7 @@ import { FeedbackSchema } from "@/schemas";
 import escapeHtml from "escape-html";
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
+import {checkAdmin} from "./check-permission";
 
 export const feedback = async (values: z.infer<typeof FeedbackSchema>) => {
   const session = await auth();
@@ -30,4 +31,20 @@ export const feedback = async (values: z.infer<typeof FeedbackSchema>) => {
     },
   });
   return { success: "Feedback sent!" };
-}
+};
+
+export const deleteFeedback = async (id: number) => {
+  const isAdmin = await checkAdmin();
+
+  if (isAdmin) {
+    console.log("work")
+    return { success: "Feedback deleted successfully" };
+  }
+  // await db.feedback.delete({
+  //   where: {
+  //     id: id,
+  //   },
+  // });
+  return { error: "You must be an admin to delete feedback!" };
+
+};
