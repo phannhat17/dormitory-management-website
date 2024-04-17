@@ -19,78 +19,88 @@ enum UserStatus {
 }
 
 model User {
-  id            String    @id
+  id            String     @id
   name          String?
-  email         String?   @unique
+  email         String?    @unique
   password      String
-  role          UserRole  @default(STUDENT)
+  role          UserRole   @default(STUDENT)
   image         String?
   accounts      Account[]
   currentRoomId Int?
   amountPaid    Float?
   amountDue     Float?
   status        UserStatus @default(NOT_STAYING)
-  Room          Room?     @relation(fields: [currentRoomId], references: [id])
+  Room          Room?      @relation(fields: [currentRoomId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   Contracts     Contract[]
+  Feedbacks     Feedback[]
 }
 
 model Account {
-  id                 String  @id @default(cuid())
-  userId             String
-  type               String
-  provider           String
-  providerAccountId  String
-  refresh_token      String?  @db.Text
-  access_token       String?  @db.Text
-  expires_at         Int?
-  token_type         String?
-  scope              String?
-  id_token           String?  @db.Text
-  session_state      String?
- 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
- 
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
   @@unique([provider, providerAccountId])
 }
 
 model Room {
-  id          Int       @id
-  status      String
-  current     Int
-  max         Int
-  price       Float
-  Facilities  Facility[]
-  Users       User[]
-  Contracts   Contract[]
-  Invoices    Invoice[]
+  id         Int        @id
+  status     String
+  current    Int
+  max        Int
+  price      Float
+  Facilities Facility[]
+  Users      User[]
+  Contracts  Contract[]
+  Invoices   Invoice[]
 }
 
 model Facility {
-  id               Int     @id
-  currentRoomId    Int
-  status           String
-  price            Float
-  Room             Room    @relation(fields: [currentRoomId], references: [id])
+  id            Int    @id
+  currentRoomId Int
+  status        String
+  price         Float
+  Room          Room   @relation(fields: [currentRoomId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
 
 model Contract {
-  id          Int       @id
+  id           Int       @id
   contractType String
-  userId      String
-  roomId      Int
-  term        String
-  startDate   DateTime
-  endDate     DateTime
-  User        User      @relation(fields: [userId], references: [id])
-  Room        Room      @relation(fields: [roomId], references: [id])
-  Invoices    Invoice[]
+  userId       String
+  roomId       Int
+  term         String
+  startDate    DateTime
+  endDate      DateTime
+  User         User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  Room         Room      @relation(fields: [roomId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  Invoices     Invoice[]
 }
 
 model Invoice {
-  id          Int      @id
-  roomId      Int
-  contractId  Int
-  amountPaid  Float
-  Room        Room     @relation(fields: [roomId], references: [id])
-  Contract    Contract @relation(fields: [contractId], references: [id])
+  id         Int      @id
+  roomId     Int
+  contractId Int
+  amountPaid Float
+  Room       Room     @relation(fields: [roomId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  Contract   Contract @relation(fields: [contractId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+}
+
+model Feedback {
+  id        Int      @id @default(autoincrement())
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    String
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
