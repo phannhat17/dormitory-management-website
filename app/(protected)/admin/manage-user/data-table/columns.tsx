@@ -11,8 +11,23 @@ import {
   DropdownMenuTrigger,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal } from "lucide-react";
+import { deleteUser } from "@/actions/user";
+import { toast } from "sonner"
+import { useRouter } from 'next/navigation';
+import { useState } from "react";
 
 export type Usertable = {
   id: string;
@@ -45,6 +60,13 @@ export const roles = [
     value: "ADMIN",
   },
 ];
+export const excelColumn = [
+  { header: "ID", key: "id", width: 10 },
+  { header: "Name", key: "name", width: 32 },
+  { header: "Email", key: "email", width: 32 },
+  { header: "Role", key: "role", width: 32 },
+  { header: "Status", key: "status", width: 32 },
+]
 
 export const columns: ColumnDef<Usertable>[] = [
   {
@@ -91,8 +113,8 @@ export const columns: ColumnDef<Usertable>[] = [
               row.getValue("role") === "ADMIN"
                 ? "border-transparent bg-emerald-500 text-primary-foreground shadow hover:bg-emerald-500/80"
                 : row.getValue("role") === "STUDENT"
-                ? "border-transparent bg-[#fbcb14] text-[#543107]-foreground shadow hover:bg-[#fbcb14]/80"
-                : ""
+                  ? "border-transparent bg-[#fbcb14] text-[#543107]-foreground shadow hover:bg-[#fbcb14]/80"
+                  : ""
             }
           >
             {row.getValue("role")}
@@ -128,8 +150,8 @@ export const columns: ColumnDef<Usertable>[] = [
               row.getValue("status") === "NOT_STAYING"
                 ? "border-transparent bg-[#fbcb14] text-[#543107]-foreground shadow hover:bg-[#fbcb14]/80"
                 : row.getValue("status") === "STAYING"
-                ? "border-transparent bg-emerald-500 text-primary-foreground shadow hover:bg-emerald-500/80"
-                : ""
+                  ? "border-transparent bg-emerald-500 text-primary-foreground shadow hover:bg-emerald-500/80"
+                  : ""
             }
           >
             {row.getValue("status")}
@@ -144,30 +166,78 @@ export const columns: ColumnDef<Usertable>[] = [
   {
     id: "actions",
     cell: ({ row }) => {
+      const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+      const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+
+      const router = useRouter();
+
+      const fb = row.original
+
+      const handleDelete = () => {
+        deleteUser(fb.id)
+          .then((data) => {
+            if (data.success) {
+              toast.success(data.success);
+              router.refresh();
+            } else if (data.error) { 
+              toast.error(data.error); 
+            }
+          });
+      };
+
       return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button aria-haspopup="true" size="icon" variant="ghost">
-              <MoreHorizontal className="h-4 w-4" />
-              <span className="sr-only">Toggle menu</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem>View</DropdownMenuItem>
-            <DropdownMenuItem>Edit</DropdownMenuItem>
-            <DropdownMenuItem>Delete</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button aria-haspopup="true" size="icon" variant="ghost">
+                <MoreHorizontal className="h-4 w-4" />
+                <span className="sr-only">Toggle menu</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuItem>View</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setIsEditDialogOpen(true)}>Edit</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setIsDeleteDialogOpen(true)}>Delete</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <AlertDialog open={isEditDialogOpen}
+            onOpenChange={isEditDialogOpen ?
+              setIsEditDialogOpen : setIsDeleteDialogOpen}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Edit</AlertDialogTitle>
+                <AlertDialogDescription>
+                  EDIT                
+                  </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction>Continue</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+
+
+          <AlertDialog open={isDeleteDialogOpen}
+            onOpenChange={isDeleteDialogOpen ?
+              setIsDeleteDialogOpen : setIsEditDialogOpen}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action cannot be undone. This will permanently delete this user and remove user's data from our servers.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleDelete}>Continue</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </>
       );
     },
   },
 ];
-
-export const excelColumn = [
-  { header: "ID", key: "id", width: 10 },
-  { header: "Name", key: "name", width: 32 },
-  { header: "Email", key: "email", width: 32 },
-  { header: "Role", key: "role", width: 32 },
-  { header: "Status", key: "status", width: 32 },
-]

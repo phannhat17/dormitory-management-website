@@ -1,4 +1,4 @@
-import { FileUp } from "lucide-react";
+import { FileUp, RotateCw } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -15,6 +15,7 @@ import { DataTable } from "./data-table/data-table";
 import { Usertable, columns, excelColumn } from "./data-table/columns";
 import { getListUsers } from "@/actions/db-action";
 import { ExportButton } from "@/components/data-table/export-button";
+import { RefreshButton } from "@/components/data-table/refresh-button";
 
 async function getData(): Promise<Usertable[]> {
   const response: { users: Usertable[]; total: number } = await getListUsers();
@@ -63,6 +64,7 @@ export default async function ManageUsers() {
                 </DialogFooter>
               </DialogContent>
             </Dialog>
+            <RefreshButton />
           </div>
         </div>
         <DataTable columns={columns} data={users} />

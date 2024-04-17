@@ -66,9 +66,11 @@ const FeedbackCard: React.FC<FeedbackCardProps> = ({
                 </FormItem>
               )}
             />
-            <FormError message={error} />
-            <FormSuccess message={success} />
-            <Button type="submit" className="mt-4">
+            <div className="my-4">            
+              <FormError message={error} />
+              <FormSuccess message={success} />
+            </div>
+            <Button type="submit">
               Submit
             </Button>
           </form>

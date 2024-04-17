@@ -1,6 +1,7 @@
 import { DataTable } from "./data-table/data-table";
 import { Feedbacktable, columns, excelColumn} from "./data-table/columns";
 import { getListFB } from "@/actions/db-action";
+import { RefreshButton } from "@/components/data-table/refresh-button";
 import { ExportButton } from "@/components/data-table/export-button";
 
 async function getData(): Promise<Feedbacktable[]> {
@@ -20,6 +21,7 @@ export default async function ManageFeedback() {
           </div>
           <div className="ml-auto flex items-center gap-2">
             <ExportButton data={feedbacks} columns={excelColumn} filename="all_users" />
+            <RefreshButton />
           </div>
         </div>
         <DataTable columns={columns} data={feedbacks} />
