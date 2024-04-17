@@ -165,9 +165,9 @@ export const columns: ColumnDef<Usertable>[] = [
 ];
 
 export const excelColumn = [
-  { header: "ID", key: "id" },
-  { header: "Name", key: "name" },
-  { header: "Email", key: "email" },
-  { header: "Role", key: "role" },
-  { header: "Status", key: "status" },
-];
+  { header: "ID", key: "id", width: 10 },
+  { header: "Name", key: "name", width: 32 },
+  { header: "Email", key: "email", width: 32 },
+  { header: "Role", key: "role", width: 32 },
+  { header: "Status", key: "status", width: 32 },
+]

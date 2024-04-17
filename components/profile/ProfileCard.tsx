@@ -23,11 +23,11 @@ const ProfileCard = () => {
       </CardHeader>
       <CardContent>
         <div className="flex flex-row items-center justify-between my-4">
-          <p className="font-medium mx-5">Student ID</p>
+          <p className="font-medium mx-5">User ID</p>
           <p className="font-medium mx-5">{user?.id}</p>
         </div>
         <div className="flex flex-row items-center justify-between my-4">
-          <p className="font-medium mx-5">Student Name</p>
+          <p className="font-medium mx-5">User Name</p>
           <p className="font-medium mx-5">{user?.name}</p>
         </div>
         <div className="flex flex-row items-center justify-between my-4">
