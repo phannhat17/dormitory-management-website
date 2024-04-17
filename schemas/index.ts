@@ -33,7 +33,7 @@ export const CreateStaffSchema = z.object({
   }),
 });
 
-const FeedbackSchema = z.object({
+export const FeedbackSchema = z.object({
   feedback: z.string().min(10, {
     message: "Feedback must be at least 10 characters.",
   }),
