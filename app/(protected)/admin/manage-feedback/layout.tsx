@@ -1,8 +1,7 @@
-import { Toaster } from 'sonner'
 
 export const metadata = {
-    title: "Admin Dashboard",
-    description: "Admin Dashboard Page",
+    title: "View Feedbacks",
+    description: "View Feedbacks Page",
 };
 
 export default function CreateUserLayout({
@@ -13,7 +12,6 @@ export default function CreateUserLayout({
     return (
         <>
             {children}
-            <Toaster richColors />
         </>
     );
 }

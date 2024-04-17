@@ -34,13 +34,49 @@ export const getUserByEmailId = async (email: string, id: string) => {
   }
 };
 
-export const getUserCount = async () => {
-  try {
-    const count = await db.user.count();
-    console.log(count);
-    return count;
-  } catch  {
-    return null; 
-  }
+export const getTotalUserCount = async () => {
+  const totalUsers = await db.user.count();
+
+  const studentCount = await db.user.count({
+    where: { role: "STUDENT" },
+  });
+
+  const adminCount = await db.user.count({
+    where: { role: "ADMIN" },
+  });
+
+  const stayingCount = await db.user.count({
+    where: { status: "STAYING" },
+  });
+
+  const notStayingCount = await db.user.count({
+    where: { status: "NOT_STAYING" },
+  });
+
+  const bannedCount = await db.user.count({
+    where: { status: "BANNED" },
+  });
+
+  return {
+    totalUsers: totalUsers,
+    studentCount: studentCount,
+    adminCount: adminCount,
+    stayingCount: stayingCount,
+    notStayingCount: notStayingCount,
+    bannedCount: bannedCount,
+  };
 };
 
+export const getUsers = async () => {
+  const users = await db.user.findMany({
+    orderBy: { id: "asc" },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      status: true,
+    },
+  });
+  return users;
+};

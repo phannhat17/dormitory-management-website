@@ -5,7 +5,7 @@ import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CreateUserSchema } from "@/schemas";
 import { CreateStaffSchema } from "@/schemas"; // Ensure this is correct
-import { createUser } from "@/actions/create-user";
+import { createUser } from "@/actions/user";
 import { createStaff } from "@/actions/create-staff"; // Ensure this is imported correctly
 import AddStudentCard from "@/components/createuser/AddStudentCard";
 import AddStaffCard from "@/components/createuser/AddStaffCard"; // Ensure this is imported correctly
