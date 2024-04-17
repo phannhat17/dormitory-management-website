@@ -44,22 +44,22 @@ const EditUserCard: React.FC<ReusableAlertDialogProps> = ({ isOpen, userID, setI
     const [userFeedbackCount, setUserFeedbackCount] = useState<number>(0);
   
     useEffect(() => {
-      const fetchUserInfo = async () => {
-        const response = await getUserInfo(userID);
-        console.log(response)
-        setUserId(response.id);
-        setUserName(response.name);
-        setUserEmail(response.email);
-        setUserRole(response.role);
-        setUserStatus(response.status);
-        setUserFeedbackCount(response.feedbackCount);
-        setUserRoomId(response.currentRoomId);
-        setUserAmountPaid(response.amountPaid);
-        setUserAmountDue(response.amountDue);
-      };
-  
-      fetchUserInfo();
-    });
+        const fetchUserInfo = async () => {
+          const response = await getUserInfo(userID);
+          console.log(response)
+          setUserId(response.id);
+          setUserName(response.name);
+          setUserEmail(response.email);
+          setUserRole(response.role);
+          setUserStatus(response.status);
+          setUserFeedbackCount(response.feedbackCount);
+          setUserRoomId(response.currentRoomId);
+          setUserAmountPaid(response.amountPaid);
+          setUserAmountDue(response.amountDue);
+        };
+      
+        fetchUserInfo();
+      }, [userID]); 
   
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -75,19 +75,19 @@ const EditUserCard: React.FC<ReusableAlertDialogProps> = ({ isOpen, userID, setI
                         <Label htmlFor="id" className="text-right">
                         ID
                         </Label>
-                        <Input id="userId" value={userId} className="col-span-2" />
+                        <Input id="id" value={userId} onChange={(e) => setUserId(e.target.value)} className="col-span-2" />
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label htmlFor="name" className="text-right">
                         Name
                         </Label>
-                        <Input id="name" value={userName} className="col-span-2" />
+                        <Input id="name" value={userName} onChange={(e) => setUserName(e.target.value)} className="col-span-2" />
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label htmlFor="email" className="text-right">
                         Email
                         </Label>
-                        <Input id="email" value={userEmail} className="col-span-2" />
+                        <Input id="email" value={userEmail} onChange={(e) => setUserEmail(e.target.value)} className="col-span-2" />
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label htmlFor="username" className="text-right">
@@ -133,19 +133,19 @@ const EditUserCard: React.FC<ReusableAlertDialogProps> = ({ isOpen, userID, setI
                         <Label htmlFor="roomid" className="text-right">
                         Room ID
                         </Label>
-                        <Input id="roomid" value={userRoomId} className="col-span-2" />
+                        <Input id="roomid" value={userRoomId} onChange={(e) => setUserRoomId(e.target.value)} className="col-span-2" />
                     </div>    
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label htmlFor="AmountPaid" className="text-right">
                         Amount Paid
                         </Label>
-                        <Input id="AmountPaid" value={userAmountPaid} className="col-span-2" />
+                        <Input id="AmountPaid" value={userAmountPaid} onChange={(e) => setUserAmountPaid(e.target.value)} className="col-span-2" />
                     </div> 
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label htmlFor="AmountPaid" className="text-right">
                         Amount Due
                         </Label>
-                        <Input id="AmountPaid" value={userAmountDue} className="col-span-2" />
+                        <Input id="AmountPaid" value={userAmountDue} onChange={(e) => setUserAmountDue(e.target.value)} className="col-span-2" />
                     </div> 
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label htmlFor="username" className="text-right">
