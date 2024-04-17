@@ -47,6 +47,7 @@ export const columns: ColumnDef<Usertable>[] = [
     accessorKey: "id",
     header: "ID",
     cell: ({ row }) => <div className="w-[80px] font-medium">{row.getValue("id")}</div>,
+    enableSorting: true,
   },
   {
     accessorKey: "name",
@@ -55,11 +56,11 @@ export const columns: ColumnDef<Usertable>[] = [
     ),
     cell: ({ row }) => <div className="w-[150px] font-medium">{row.getValue("name")}</div>,
     enableSorting: true,
-    enableHiding: false,
   },
   {
     accessorKey: "email",
     header: "Email",
+    enableSorting: true,
   },
   {
     accessorKey: "role",
