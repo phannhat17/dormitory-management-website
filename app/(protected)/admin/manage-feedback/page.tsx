@@ -8,7 +8,7 @@ async function getData(): Promise<Feedbacktable[]> {
   return response.feedbacks;
 }
 
-export default async function ManageUsers() {
+export default async function ManageFeedback() {
   const feedbacks = await getData();
 
   return (

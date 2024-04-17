@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { MoreHorizontal } from "lucide-react";
 import { deleteFeedback } from "@/actions/feedback";
 import { toast } from "sonner"
+import { useRouter } from 'next/navigation';
 
 export type Feedbacktable = {
   id: number;
@@ -66,12 +67,16 @@ export const columns: ColumnDef<Feedbacktable>[] = [
   {
     id: "actions",
     cell: ({ row }) => {
+      const router = useRouter();
+
+      const fb = row.original
 
       const handleDelete = () => {
-        deleteFeedback(row.getValue("id"))
+        deleteFeedback(fb.id)
           .then((data) => {
             if (data.success) {
               toast.success(data.success);
+              router.refresh();
             } else if (data.error) { 
               toast.error(data.error); 
             }
