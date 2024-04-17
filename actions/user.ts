@@ -6,8 +6,15 @@ import { db } from "@/lib/db";
 import { CreateUserSchema } from "@/schemas";
 import { getUserByEmailId } from "@/data/user";
 import escapeHtml from "escape-html";
+import { checkAdmin } from "./check-permission";
 
 export const createUser = async (values: z.infer<typeof CreateUserSchema>) => {
+  const isAdmin = await checkAdmin();
+
+  if (!isAdmin) {
+    return { error: "You must be an admin to create user!" };
+  }
+  
   const validatedFields = CreateUserSchema.safeParse(values);
 
   if (!validatedFields.success) {
@@ -41,4 +48,21 @@ export const createUser = async (values: z.infer<typeof CreateUserSchema>) => {
   });
 
   return { success: "User Created!" };
+};
+
+
+export const deleteUser = async (id: string) => {
+  const isAdmin = await checkAdmin();
+
+  if (!isAdmin) {
+    return { error: "You must be an admin to delete user!" };
+  }
+
+  await db.user.delete({
+    where: {
+      id: id,
+    },
+  });
+
+  return { success: "User deleted successfully" };
 };
