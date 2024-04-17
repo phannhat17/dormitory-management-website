@@ -52,6 +52,14 @@ const MobileAdminNavLinks = () => {
       >
         Rooms
       </Link>
+      <Link
+        href="/admin/manage-feedback"
+        className={`hover:text-foreground ${
+          pathname === "/admin/manage-feedback" ? "" : "text-muted-foreground"
+        }`}
+      >
+        Feedbacks
+      </Link>
     </nav>
   );
 };

@@ -63,6 +63,16 @@ const MainAdminNavLinks = () => {
       >
         Rooms
       </Link>
+      <Link
+        href="/admin/manage-feedback"
+        className={`transition-colors hover:text-foreground ${
+          pathname === "/admin/manage-feedback"
+            ? "text-foreground"
+            : "text-muted-foreground"
+        }`}
+      >
+        Feedbacks
+      </Link>
     </nav>
   );
 };
