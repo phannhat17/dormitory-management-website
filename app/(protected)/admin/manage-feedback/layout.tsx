@@ -1,3 +1,4 @@
+import { Toaster } from 'sonner'
 
 export const metadata = {
     title: "View Feedbacks",
@@ -10,6 +11,9 @@ export default function CreateUserLayout({
     children: React.ReactNode;
 }) {
     return (
-        <>{children}</>
+        <>
+            {children}
+            <Toaster richColors  />
+        </>
     );
 }

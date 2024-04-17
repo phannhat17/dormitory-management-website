@@ -10,6 +10,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal } from "lucide-react";
+import { deleteFeedback } from "@/actions/feedback";
+import { toast } from "sonner"
 
 export type Feedbacktable = {
   id: number;
@@ -20,6 +22,10 @@ export type Feedbacktable = {
 };
 
 export const columns: ColumnDef<Feedbacktable>[] = [
+  {
+    accessorKey: "id",
+    header: "ID",
+  },
   {
     accessorKey: "userId",
     header: "User Id",
@@ -38,28 +44,40 @@ export const columns: ColumnDef<Feedbacktable>[] = [
     accessorKey: "content",
     header: "Content",
     cell: ({ row }) => (
-      <div style={{ 
-        width: '200px', 
-        overflow: 'hidden', 
-        textOverflow: 'ellipsis', 
-        whiteSpace: 'nowrap' 
+      <div style={{
+        width: '200px',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap'
       }}>
         {row.getValue("content")}
       </div>
     ),
   },
-{
+  {
     accessorKey: "createdAt",
     header: "Created At",
     cell: ({ row }: { row: { getValue: (key: string) => unknown } }) => (
-        <div>
-            {(row.getValue("createdAt") as Date).toLocaleDateString()}
-        </div>
+      <div>
+        {(row.getValue("createdAt") as Date).toLocaleDateString()}
+      </div>
     ),
-},
+  },
   {
     id: "actions",
     cell: ({ row }) => {
+
+      const handleDelete = () => {
+        deleteFeedback(row.getValue("id"))
+          .then((data) => {
+            if (data.success) {
+              toast.success(data.success);
+            } else if (data.error) { 
+              toast.error(data.error); 
+            }
+          });
+      };
+
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -71,7 +89,7 @@ export const columns: ColumnDef<Feedbacktable>[] = [
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem>View</DropdownMenuItem>
-            <DropdownMenuItem>Delete</DropdownMenuItem>
+            <DropdownMenuItem onClick={handleDelete}>Delete</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       );
