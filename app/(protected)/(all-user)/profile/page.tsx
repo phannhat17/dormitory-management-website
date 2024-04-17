@@ -57,8 +57,8 @@ export default function Dashboard() {
                     user?.status === "NOT_STAYING"
                       ? "border-transparent bg-[#fbcb14] text-[#543107]-foreground shadow hover:bg-[#fbcb14]/80"
                       : user?.status === "STAYING"
-                        ? "border-transparent bg-emerald-500 text-primary-foreground shadow hover:bg-emerald-500/80"
-                        : ""
+                      ? "border-transparent bg-emerald-500 text-primary-foreground shadow hover:bg-emerald-500/80"
+                      : ""
                   }
                 >
                   {user?.status}
@@ -69,31 +69,13 @@ export default function Dashboard() {
               <div className="flex flex-row items-center justify-between my-4">
                 <p className="font-medium mx-5">Role</p>
                 <p className="font-medium mx-5">
-                  <Badge
-                    className="border-transparent bg-emerald-500 text-primary-foreground shadow hover:bg-emerald-500/80"
-                  >
+                  <Badge className="border-transparent bg-emerald-500 text-primary-foreground shadow hover:bg-emerald-500/80">
                     {user?.role}
                   </Badge>
                 </p>
               </div>
             )}
-
           </CardContent>
-          <CardFooter className="border-t px-6 py-4">
-            <Dialog>
-              <DialogTrigger>
-                <Button>Update profile</Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Need permission</DialogTitle>
-                  <DialogDescription>
-                    This action cannot be done. You need administrator permission to perform this action.
-                  </DialogDescription>
-                </DialogHeader>
-              </DialogContent>
-            </Dialog>
-          </CardFooter>
         </Card>
       </div>
     </main>

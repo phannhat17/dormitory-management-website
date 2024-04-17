@@ -5,6 +5,7 @@ import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
 import { CreateUserSchema } from "@/schemas";
 import { getUserByEmailId } from "@/data/user";
+import escapeHtml from "escape-html";
 
 export const createUser = async (values: z.infer<typeof CreateUserSchema>) => {
   const validatedFields = CreateUserSchema.safeParse(values);
@@ -15,7 +16,14 @@ export const createUser = async (values: z.infer<typeof CreateUserSchema>) => {
 
   const { studentid, name, email, password } = validatedFields.data;
 
-  const existingUser = await getUserByEmailId(email, studentid);
+  const sanitizedStudentId = escapeHtml(studentid);
+  const sanitizedName = escapeHtml(name);
+  const sanitizedEmail = escapeHtml(email.toLowerCase());
+
+  const existingUser = await getUserByEmailId(
+    sanitizedEmail,
+    sanitizedStudentId
+  );
 
   if (existingUser) {
     return { error: "Email or Student ID already in use!" };
@@ -25,9 +33,9 @@ export const createUser = async (values: z.infer<typeof CreateUserSchema>) => {
 
   await db.user.create({
     data: {
-      id: studentid,
-      name,
-      email: email.toLowerCase(),
+      id: sanitizedStudentId,
+      name: sanitizedName,
+      email: sanitizedEmail,
       password: hashedPassword,
     },
   });
