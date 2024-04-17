@@ -78,3 +78,11 @@ export const columns: ColumnDef<Feedbacktable>[] = [
     },
   },
 ];
+
+export const excelColumn = [
+  { header: "ID", key: "id" },
+  { header: "User ID", key: "userId" },
+  { header: "User Name", key: "userName" },
+  { header: "Feedback Content", key: "content" },
+  { header: "Created At", key: "createdAt" },
+];

@@ -11,10 +11,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { DataTable } from "@/app/(protected)/admin/manage-user/data-table/data-table";
-import { Usertable, columns } from "@/app/(protected)/admin/manage-user/data-table/columns";
+import { DataTable } from "./data-table/data-table";
+import { Usertable, columns, excelColumn } from "./data-table/columns";
 import { getListUsers } from "@/actions/db-action";
-import { ExportButton } from "@/app/(protected)/admin/manage-user/data-table/export-button";
+import { ExportButton } from "@/components/data-table/export-button";
 
 async function getData(): Promise<Usertable[]> {
   const response: { users: Usertable[]; total: number } = await getListUsers();
@@ -32,7 +32,7 @@ export default async function ManageUsers() {
             <h1 className="text-2xl font-semibold">Manage User</h1>
           </div>
           <div className="ml-auto flex items-center gap-2">
-            <ExportButton users={users} />
+            <ExportButton data={users} columns={excelColumn} filename="all_users" />
             <Dialog>
               <DialogTrigger asChild>
                 <Button

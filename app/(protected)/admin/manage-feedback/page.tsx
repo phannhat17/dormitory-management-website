@@ -1,6 +1,7 @@
 import { DataTable } from "./data-table/data-table";
-import { Feedbacktable, columns } from "./data-table/columns";
+import { Feedbacktable, columns, excelColumn} from "./data-table/columns";
 import { getListFB } from "@/actions/db-action";
+import { ExportButton } from "@/components/data-table/export-button";
 
 async function getData(): Promise<Feedbacktable[]> {
   const response: { feedbacks: Feedbacktable[] } = await getListFB();
@@ -8,7 +9,7 @@ async function getData(): Promise<Feedbacktable[]> {
 }
 
 export default async function ManageUsers() {
-  const users = await getData();
+  const feedbacks = await getData();
 
   return (
     <main className="flex min-h-[calc(100vh_-_theme(spacing.16))] flex-1 flex-col gap-4 bg-muted/40 p-4 md:gap-8 md:p-10">
@@ -18,9 +19,10 @@ export default async function ManageUsers() {
             <h1 className="text-2xl font-semibold">View Feedback</h1>
           </div>
           <div className="ml-auto flex items-center gap-2">
+            <ExportButton data={feedbacks} columns={excelColumn} filename="all_users" />
           </div>
         </div>
-        <DataTable columns={columns} data={users} />
+        <DataTable columns={columns} data={feedbacks} />
       </div>
     </main>
   );
