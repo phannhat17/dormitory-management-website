@@ -1,3 +1,5 @@
+import { Toaster } from 'sonner'
+
 export const metadata = {
     title: "Admin Dashboard",
     description: "Admin Dashboard Page",
@@ -9,6 +11,9 @@ export default function CreateUserLayout({
     children: React.ReactNode;
 }) {
     return (
-        <>{children}</>
+        <>
+            {children}
+            <Toaster richColors />
+        </>
     );
 }
