@@ -27,6 +27,7 @@ import {
 import { DataTablePagination } from "@/components/data-table/DataTablePagination"
 import { DataTableToolbar } from "@/components/data-table//DataTableToolbarProps"
 
+
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
