@@ -1,22 +1,26 @@
-"use client"
+"use client";
 
-import { ColumnDef } from "@tanstack/react-table"
+import { ColumnDef } from "@tanstack/react-table";
 import { UserRole, UserStatus } from "@prisma/client";
-import { DataTableColumnHeader } from "./DataTableColumnHeader";
-import { Badge } from "../ui/badge";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuItem } from "../ui/dropdown-menu";
-import { Button } from "../ui/button";
+import { DataTableColumnHeader } from "@/components/data-table/DataTableColumnHeader";
+import { Badge } from "@/components/ui/badge";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
 import { MoreHorizontal } from "lucide-react";
 
-// This type is used to define the shape of our data.
-// You can use a Zod schema here if` you want.
 export type Usertable = {
-  id: string
+  id: string;
   name: string | null;
   email: string | null;
-  role: UserRole
-  status: UserStatus
-}
+  role: UserRole;
+  status: UserStatus;
+};
 export const statuses = [
   {
     label: "STAYING",
@@ -30,7 +34,7 @@ export const statuses = [
     label: "BANNED",
     value: "BANNED",
   },
-]
+];
 export const roles = [
   {
     label: "STUDENT",
@@ -40,13 +44,15 @@ export const roles = [
     label: "ADMIN",
     value: "ADMIN",
   },
-]
+];
 
 export const columns: ColumnDef<Usertable>[] = [
   {
     accessorKey: "id",
     header: "ID",
-    cell: ({ row }) => <div className="w-[80px] font-medium">{row.getValue("id")}</div>,
+    cell: ({ row }) => (
+      <div className="w-[80px] font-medium">{row.getValue("id")}</div>
+    ),
     enableSorting: true,
   },
   {
@@ -54,7 +60,9 @@ export const columns: ColumnDef<Usertable>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Name" />
     ),
-    cell: ({ row }) => <div className="w-[150px] font-medium">{row.getValue("name")}</div>,
+    cell: ({ row }) => (
+      <div className="w-[150px] font-medium">{row.getValue("name")}</div>
+    ),
     enableSorting: true,
   },
   {
@@ -70,26 +78,30 @@ export const columns: ColumnDef<Usertable>[] = [
     cell: ({ row }) => {
       const status = statuses.find(
         (status) => status.value === row.getValue("status")
-      )
+      );
 
       if (!status) {
-        return null
+        return null;
       }
 
       return (
         <div>
-          <Badge className={
-            row.getValue("role") === "ADMIN"
-              ? "border-transparent bg-emerald-500 text-primary-foreground shadow hover:bg-emerald-500/80"
-              : row.getValue("role") === "STUDENT"
+          <Badge
+            className={
+              row.getValue("role") === "ADMIN"
+                ? "border-transparent bg-emerald-500 text-primary-foreground shadow hover:bg-emerald-500/80"
+                : row.getValue("role") === "STUDENT"
                 ? "border-transparent bg-[#fbcb14] text-[#543107]-foreground shadow hover:bg-[#fbcb14]/80"
                 : ""
-          }>{row.getValue("role")}</Badge>
-
-        </div>)
+            }
+          >
+            {row.getValue("role")}
+          </Badge>
+        </div>
+      );
     },
     filterFn: (row, id, value) => {
-      return value.includes(row.getValue(id))
+      return value.includes(row.getValue(id));
     },
     enableSorting: true,
     enableHiding: false,
@@ -102,31 +114,31 @@ export const columns: ColumnDef<Usertable>[] = [
     cell: ({ row }) => {
       const status = statuses.find(
         (status) => status.value === row.getValue("status")
-      )
+      );
 
       if (!status) {
-        return null
+        return null;
       }
 
       return (
         <div>
-          <Badge variant={
-            row.getValue("status") === "BANNED" ? "destructive" : null
-          }
+          <Badge
+            variant={row.getValue("status") === "BANNED" ? "destructive" : null}
             className={
               row.getValue("status") === "NOT_STAYING"
                 ? "border-transparent bg-[#fbcb14] text-[#543107]-foreground shadow hover:bg-[#fbcb14]/80"
                 : row.getValue("status") === "STAYING"
-                  ? "border-transparent bg-emerald-500 text-primary-foreground shadow hover:bg-emerald-500/80"
-                  : ""
+                ? "border-transparent bg-emerald-500 text-primary-foreground shadow hover:bg-emerald-500/80"
+                : ""
             }
-          >{row.getValue("status")}</Badge>
-
+          >
+            {row.getValue("status")}
+          </Badge>
         </div>
-      )
+      );
     },
     filterFn: (row, id, value) => {
-      return value.includes(row.getValue(id))
+      return value.includes(row.getValue(id));
     },
   },
   {
@@ -135,11 +147,7 @@ export const columns: ColumnDef<Usertable>[] = [
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button
-              aria-haspopup="true"
-              size="icon"
-              variant="ghost"
-            >
+            <Button aria-haspopup="true" size="icon" variant="ghost">
               <MoreHorizontal className="h-4 w-4" />
               <span className="sr-only">Toggle menu</span>
             </Button>
@@ -151,7 +159,7 @@ export const columns: ColumnDef<Usertable>[] = [
             <DropdownMenuItem>Delete</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-      )
+      );
     },
   },
-]
+];

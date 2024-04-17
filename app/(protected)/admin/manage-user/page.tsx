@@ -11,10 +11,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { DataTable } from "@/components/data-table/data-table";
-import { Usertable, columns } from "@/components/data-table/columns";
+import { DataTable } from "@/app/(protected)/admin/manage-user/data-table/data-table";
+import { Usertable, columns } from "@/app/(protected)/admin/manage-user/data-table/columns";
 import { getListUsers } from "@/actions/db-action";
-import { ExportButton } from "@/components/data-table/export-button";
+import { ExportButton } from "@/app/(protected)/admin/manage-user/data-table/export-button";
 
 async function getData(): Promise<Usertable[]> {
   const response: { users: Usertable[]; total: number } = await getListUsers();
@@ -33,10 +33,6 @@ export default async function ManageUsers() {
           </div>
           <div className="ml-auto flex items-center gap-2">
             <ExportButton users={users} />
-            {/* <Button size="sm" variant="outline" className="h-7 gap-1 text-sm">
-              <FileDown className="h-3.5 w-3.5" />
-              <span className="sr-only sm:not-sr-only">Export</span>
-            </Button> */}
             <Dialog>
               <DialogTrigger asChild>
                 <Button
