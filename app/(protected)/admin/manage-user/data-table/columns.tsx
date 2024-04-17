@@ -20,7 +20,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal } from "lucide-react";
@@ -28,6 +27,8 @@ import { deleteUser } from "@/actions/user";
 import { toast } from "sonner"
 import { useRouter } from 'next/navigation';
 import { useState } from "react";
+import ReusableAlertDialog from "@/components/modify/ReusableAlertDialog";
+import EditUserCard from "@/components/modify/EditUser";
 
 export type Usertable = {
   id: string;
@@ -171,16 +172,16 @@ export const columns: ColumnDef<Usertable>[] = [
 
       const router = useRouter();
 
-      const fb = row.original
+      const user = row.original
 
       const handleDelete = () => {
-        deleteUser(fb.id)
+        deleteUser(user.id)
           .then((data) => {
             if (data.success) {
               toast.success(data.success);
               router.refresh();
-            } else if (data.error) { 
-              toast.error(data.error); 
+            } else if (data.error) {
+              toast.error(data.error);
             }
           });
       };
@@ -196,46 +197,32 @@ export const columns: ColumnDef<Usertable>[] = [
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuItem>View</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setIsEditDialogOpen(true)}>Edit</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setIsEditDialogOpen(true)}>View/Edit</DropdownMenuItem>
               <DropdownMenuItem onClick={() => setIsDeleteDialogOpen(true)}>Delete</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <AlertDialog open={isEditDialogOpen}
-            onOpenChange={isEditDialogOpen ?
-              setIsEditDialogOpen : setIsDeleteDialogOpen}>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Edit</AlertDialogTitle>
-                <AlertDialogDescription>
-                  EDIT                
-                  </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction>Continue</AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+      
+          <EditUserCard
+            isOpen={isEditDialogOpen}
+            setIsOpen={isEditDialogOpen ?
+              setIsEditDialogOpen : setIsDeleteDialogOpen}
+            userID = {user.id}
+            confirmButtonText="Continue"
+            cancelButtonText="Cancel"
+            onConfirm={() => {}}
+          />
 
-
-          <AlertDialog open={isDeleteDialogOpen}
-            onOpenChange={isDeleteDialogOpen ?
-              setIsDeleteDialogOpen : setIsEditDialogOpen}>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This action cannot be undone. This will permanently delete this user and remove user's data from our servers.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleDelete}>Continue</AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+          <ReusableAlertDialog
+            isOpen={isDeleteDialogOpen}
+            setIsOpen={isDeleteDialogOpen ?
+              setIsDeleteDialogOpen : setIsEditDialogOpen}
+            title="Are you absolutely sure?"
+            description="This action cannot be undone. This will permanently delete your account and remove your data from our servers."
+            confirmButtonText="Continue"
+            cancelButtonText="Cancel"
+            onConfirm={handleDelete}
+          />
         </>
       );
     },

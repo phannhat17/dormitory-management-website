@@ -5,6 +5,7 @@ import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
 import { CreateUserSchema } from "@/schemas";
 import { getUserByEmailId } from "@/data/user";
+import { getUserById } from "@/data/user";
 import escapeHtml from "escape-html";
 import { checkAdmin } from "./check-permission";
 
@@ -65,4 +66,32 @@ export const deleteUser = async (id: string) => {
   });
 
   return { success: "User deleted successfully" };
+};
+
+
+export const getUserInfo = async (id: string) => {
+  const user = await db.user.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      image: true,
+      currentRoomId: true,
+      amountPaid: true,
+      amountDue: true,
+      status: true,
+    },
+  });
+
+  const feedbackCount = await db.feedback.count({
+    where: {
+      userId: id,
+    },
+  });
+
+  user.feedbackCount = feedbackCount;
+
+  return user;
 };
