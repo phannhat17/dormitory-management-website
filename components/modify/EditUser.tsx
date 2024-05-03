@@ -65,9 +65,9 @@ const EditUserCard: React.FC<ReusableAlertDialogProps> = ({ isOpen, userID, setI
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogContent className="sm:max-w-3xl">
                 <DialogHeader>
-                <DialogTitle>{userName}'s Profile</DialogTitle>
+                <DialogTitle>{userName}&apos;s Profile</DialogTitle>
                 <DialogDescription>
-                    View or make changes to user profile here. Click save when you're done.
+                    View or make changes to user profile here. Click save when you&apos;re done.
                 </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
@@ -99,7 +99,7 @@ const EditUserCard: React.FC<ReusableAlertDialogProps> = ({ isOpen, userID, setI
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectGroup>
-                                <SelectLabel>Select user's role</SelectLabel>
+                                <SelectLabel>Select user&apos;s role</SelectLabel>
                                 {Object.values(UserRole).map((role) => (
                                 <SelectItem key={role} value={role}>
                                     {role}
@@ -119,7 +119,7 @@ const EditUserCard: React.FC<ReusableAlertDialogProps> = ({ isOpen, userID, setI
                             </SelectTrigger>
                             <SelectContent>
                             <SelectGroup>
-                                <SelectLabel>Modify user's status</SelectLabel>
+                                <SelectLabel>Modify user&apos;s status</SelectLabel>
                                 {Object.values(UserStatus).map((status) => (
                                 <SelectItem key={status} value={status}>
                                     {status}

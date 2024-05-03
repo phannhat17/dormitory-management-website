@@ -22,6 +22,45 @@ export type Feedbacktable = {
   createdAt: Date;
 };
 
+interface ActionsCellProps {
+  row: any;
+}
+
+const ActionsCell: React.FC<ActionsCellProps> = ({ row }) => {
+  const router = useRouter();
+
+      const fb = row.original
+
+      const handleDelete = () => {
+        deleteFeedback(fb.id)
+          .then((data) => {
+            if (data.success) {
+              toast.success(data.success);
+              router.refresh();
+            } else if (data.error) { 
+              toast.error(data.error); 
+            }
+          });
+      };
+
+      return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button aria-haspopup="true" size="icon" variant="ghost">
+              <MoreHorizontal className="h-4 w-4" />
+              <span className="sr-only">Toggle menu</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            <DropdownMenuItem>View</DropdownMenuItem>
+            <DropdownMenuItem onClick={handleDelete}>Delete</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      );
+};
+
+
 export const columns: ColumnDef<Feedbacktable>[] = [
   {
     accessorKey: "id",
@@ -66,39 +105,7 @@ export const columns: ColumnDef<Feedbacktable>[] = [
   },
   {
     id: "actions",
-    cell: ({ row }) => {
-      const router = useRouter();
-
-      const fb = row.original
-
-      const handleDelete = () => {
-        deleteFeedback(fb.id)
-          .then((data) => {
-            if (data.success) {
-              toast.success(data.success);
-              router.refresh();
-            } else if (data.error) { 
-              toast.error(data.error); 
-            }
-          });
-      };
-
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button aria-haspopup="true" size="icon" variant="ghost">
-              <MoreHorizontal className="h-4 w-4" />
-              <span className="sr-only">Toggle menu</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem>View</DropdownMenuItem>
-            <DropdownMenuItem onClick={handleDelete}>Delete</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
-    },
+    cell: ActionsCell,
   },
 ];
 

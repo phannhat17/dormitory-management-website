@@ -69,6 +69,68 @@ export const excelColumn = [
   { header: "Status", key: "status", width: 32 },
 ]
 
+interface ActionsCellProps {
+  row: any;
+}
+const ActionsCell: React.FC<ActionsCellProps> = ({ row }) => {
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+      const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+
+      const router = useRouter();
+
+      const user = row.original
+
+      const handleDelete = () => {
+        deleteUser(user.id)
+          .then((data) => {
+            if (data.success) {
+              toast.success(data.success);
+              router.refresh();
+            } else if (data.error) {
+              toast.error(data.error);
+            }
+          });
+      };
+
+      return (
+        <>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button aria-haspopup="true" size="icon" variant="ghost">
+                <MoreHorizontal className="h-4 w-4" />
+                <span className="sr-only">Toggle menu</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuItem onClick={() => setIsEditDialogOpen(true)}>View/Edit</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setIsDeleteDialogOpen(true)}>Delete</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+      
+          <EditUserCard
+            isOpen={isEditDialogOpen}
+            setIsOpen={isEditDialogOpen ?
+              setIsEditDialogOpen : setIsDeleteDialogOpen}
+            userID = {user.id}
+            onConfirm={() => {}}
+          />
+
+          <ReusableAlertDialog
+            isOpen={isDeleteDialogOpen}
+            setIsOpen={isDeleteDialogOpen ?
+              setIsDeleteDialogOpen : setIsEditDialogOpen}
+            title="Are you absolutely sure?"
+            description="This action cannot be undone. This will permanently delete your account and remove your data from our servers."
+            confirmButtonText="Continue"
+            cancelButtonText="Cancel"
+            onConfirm={handleDelete}
+          />
+        </>
+      );
+};
+
 export const columns: ColumnDef<Usertable>[] = [
   {
     accessorKey: "id",
@@ -166,65 +228,6 @@ export const columns: ColumnDef<Usertable>[] = [
   },
   {
     id: "actions",
-    cell: ({ row }) => {
-      const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
-      const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
-
-      const router = useRouter();
-
-      const user = row.original
-
-      const handleDelete = () => {
-        deleteUser(user.id)
-          .then((data) => {
-            if (data.success) {
-              toast.success(data.success);
-              router.refresh();
-            } else if (data.error) {
-              toast.error(data.error);
-            }
-          });
-      };
-
-      return (
-        <>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button aria-haspopup="true" size="icon" variant="ghost">
-                <MoreHorizontal className="h-4 w-4" />
-                <span className="sr-only">Toggle menu</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuItem onClick={() => setIsEditDialogOpen(true)}>View/Edit</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setIsDeleteDialogOpen(true)}>Delete</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-      
-          <EditUserCard
-            isOpen={isEditDialogOpen}
-            setIsOpen={isEditDialogOpen ?
-              setIsEditDialogOpen : setIsDeleteDialogOpen}
-            userID = {user.id}
-            confirmButtonText="Continue"
-            cancelButtonText="Cancel"
-            onConfirm={() => {}}
-          />
-
-          <ReusableAlertDialog
-            isOpen={isDeleteDialogOpen}
-            setIsOpen={isDeleteDialogOpen ?
-              setIsDeleteDialogOpen : setIsEditDialogOpen}
-            title="Are you absolutely sure?"
-            description="This action cannot be undone. This will permanently delete your account and remove your data from our servers."
-            confirmButtonText="Continue"
-            cancelButtonText="Cancel"
-            onConfirm={handleDelete}
-          />
-        </>
-      );
-    },
+    cell: ActionsCell,
   },
 ];
