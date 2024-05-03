@@ -46,16 +46,23 @@ const EditUserCard: React.FC<ReusableAlertDialogProps> = ({ isOpen, userID, setI
     useEffect(() => {
         const fetchUserInfo = async () => {
           const response = await getUserInfo(userID);
-          console.log(response)
-          setUserId(response.id);
-          setUserName(response.name);
-          setUserEmail(response.email);
-          setUserRole(response.role);
-          setUserStatus(response.status);
-          setUserFeedbackCount(response.feedbackCount);
-          setUserRoomId(response.currentRoomId);
-          setUserAmountPaid(response.amountPaid);
-          setUserAmountDue(response.amountDue);
+          if (response) {
+            setUserId(response.id);
+            setUserName(response.name || '');
+            setUserEmail(response.email || '');
+            setUserRole(response.role);
+            setUserStatus(response.status);
+            setUserFeedbackCount(response.feedbackCount);
+
+            const currentRoomId = response.currentRoomId ?? 0; 
+            setUserRoomId(currentRoomId.toString());
+
+            const amountPaid = response.amountPaid ?? 0; 
+            setUserAmountPaid(amountPaid.toString());
+
+            const amountDue = response.amountDue ?? 0; 
+            setUserAmountDue(amountDue.toString());
+          } 
         };
       
         fetchUserInfo();

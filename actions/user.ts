@@ -8,6 +8,9 @@ import { getUserByEmailId } from "@/data/user";
 import { getUserById } from "@/data/user";
 import escapeHtml from "escape-html";
 import { checkAdmin } from "./check-permission";
+import { User } from "@prisma/client";
+
+
 
 export const createUser = async (values: z.infer<typeof CreateUserSchema>) => {
   const isAdmin = await checkAdmin();
@@ -15,7 +18,7 @@ export const createUser = async (values: z.infer<typeof CreateUserSchema>) => {
   if (!isAdmin) {
     return { error: "You must be an admin to create user!" };
   }
-  
+
   const validatedFields = CreateUserSchema.safeParse(values);
 
   if (!validatedFields.success) {
@@ -68,8 +71,12 @@ export const deleteUser = async (id: string) => {
   return { success: "User deleted successfully" };
 };
 
+interface UserWithFeedbackCount extends User {
+  feedbackCount: number;
+  password: string;
+}
 
-export const getUserInfo = async (id: string) => {
+export const getUserInfo = async (id: string): Promise<UserWithFeedbackCount | null> => {
   const user = await db.user.findUnique({
     where: { id },
     select: {
@@ -82,16 +89,22 @@ export const getUserInfo = async (id: string) => {
       amountPaid: true,
       amountDue: true,
       status: true,
+      password: true,
     },
   });
 
-  const feedbackCount = await db.feedback.count({
-    where: {
-      userId: id,
-    },
-  });
+  if (user) {
+    const feedbackCount = await db.feedback.count({
+      where: {
+        userId: id,
+      },
+    });
+    const userWithFeedbackCount: UserWithFeedbackCount = {
+      ...user,
+      feedbackCount,
+    };
+    return userWithFeedbackCount;
+  }
 
-  user.feedbackCount = feedbackCount;
-
-  return user;
+  return null;
 };
