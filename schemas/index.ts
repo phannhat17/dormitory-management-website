@@ -8,16 +8,19 @@ export const LoginSchema = z.object({
 });
 
 export const CreateUserSchema = z.object({
-  studentid: z.string().min(1, {
-    message: "Student id is required",
-  }),
-  name: z.string().min(1, {
-    message: "Name is required",
-  }),
-  email: z.string().email(),
-  password: z.string().min(8, {
-    message: "Minimum password length is 8 characters",
-  }),
+  students: z.array(
+    z.object({
+      studentid: z.string().min(1, {
+        message: "Student ID is required",
+      }),
+      name: z.string().min(1, {
+        message: "Name is required",
+      }),
+      email: z.string().email().min(1, {
+        message: "Email is required",
+      }),
+    })
+  ),
 });
 
 export const CreateStaffSchema = z.object({
@@ -38,3 +41,5 @@ export const FeedbackSchema = z.object({
     message: "Feedback must be at least 10 characters.",
   }),
 });
+
+export const CreateUsersSchema = z.array(CreateUserSchema);

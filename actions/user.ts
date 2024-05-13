@@ -90,6 +90,7 @@ export const getUserInfo = async (id: string): Promise<UserWithFeedbackCount | n
       amountDue: true,
       status: true,
       password: true,
+      gender: true,
     },
   });
 
