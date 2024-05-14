@@ -6,14 +6,24 @@ import {
   Card,
   CardContent,
   CardHeader,
-  CardTitle,
-  CardDescription,
+  CardTitle
 } from "@/components/ui/card";
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { FormError } from "@/components/form/form-error";
 import { FormSuccess } from "@/components/form/form-success";
+import { useState } from 'react';
+import ExcelJS from 'exceljs';
+import { Label } from "@/components/ui/label";
+import { Gender } from '@prisma/client';
+
+interface StudentData {
+  studentid: string;
+  name: string;
+  email: string;
+  gender: Gender;
+}
 
 interface AddStudentCardProps {
   isPending: boolean;
@@ -24,78 +34,111 @@ interface AddStudentCardProps {
 
 const AddStudentCard: React.FC<AddStudentCardProps> = ({ isPending, error, success, onSubmit }) => {
   const form = useFormContext<z.infer<typeof CreateUserSchema>>();
+  const [studentData, setStudentData] = useState<StudentData[]>([]);
+
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const workbook = new ExcelJS.Workbook();
+      const buffer = await file.arrayBuffer();
+      await workbook.xlsx.load(buffer);
+      const worksheet = workbook.getWorksheet(1);
+      const jsonData: StudentData[] = [];
+
+
+      if (worksheet) {
+        worksheet.eachRow((row, rowNumber) => {
+          if (rowNumber > 1) {
+            const [studentidCell, nameCell, emailCell, genderCell] = Array.prototype.slice.call(row.values, 1, 5);
+            const studentid = studentidCell?.toString() || '';
+            const name = nameCell?.toString() || '';
+            const email = emailCell?.toString() || '';
+            const gender = genderCell?.toString() || '';
+
+            jsonData.push({ studentid, name, email, gender});
+          }
+        });
+      }
+
+      setStudentData(jsonData);
+      
+      form.setValue("students", jsonData); // Update form values with the student data
+
+    }
+  };
+
+
 
   return (
     <Card x-chunk="dashboard-04-chunk-1">
       <CardHeader>
         <CardTitle className="text-2xl">Add new student</CardTitle>
-        <CardDescription>
-          Add new students to the system in special cases
-        </CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
+          
+          <div className="flex w-full max-w-md items-center space-x-2 mb-4">
+            <Label htmlFor="excel" className="w-1/3">Import excel file</Label>
+            <Input type="file" accept=".xlsx" onChange={handleFileUpload}/>
+          </div>
           <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
-            <div className="grid gap-2">
-              <FormField
-                control={form.control}
-                name="studentid"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Student ID</FormLabel>
-                    <FormControl>
-                      <Input {...field} disabled={isPending} placeholder="2021XXXX" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            <div className="grid gap-2">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Name</FormLabel>
-                    <FormControl>
-                      <Input {...field} disabled={isPending} placeholder="Nguyen Van A" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            <div className="grid gap-2">
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input {...field} type="email" disabled={isPending} placeholder="example@sis.hust.edu.vn" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            <div className="grid gap-2">
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <Input {...field} type="password" disabled={isPending} placeholder="**********" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+            {studentData.map((student, index) => (
+              <div key={index} className="grid grid-cols-4 gap-2">
+                <FormField
+                  control={form.control}
+                  name={`students.${index}.studentid`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Student ID</FormLabel>
+                      <FormControl>
+                        <Input {...field} disabled={isPending} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name={`students.${index}.name`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Name</FormLabel>
+                      <FormControl>
+                        <Input {...field} disabled={isPending} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name={`students.${index}.email`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <Input {...field} type="email" disabled={isPending} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name={`students.${index}.gender`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Gender</FormLabel>
+                      <FormControl>
+                        <Input {...field} disabled={isPending} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            ))}
+
             <FormError message={error} />
             <FormSuccess message={success} />
             <Button type="submit" disabled={isPending} className="w-full">

@@ -87,7 +87,7 @@ export default function Dashboard() {
                       <FormControl>
                         <Textarea
                           placeholder="Your feedback..."
-                          rows="10"
+                          rows={10}
                           {...field}
                         />
                       </FormControl>

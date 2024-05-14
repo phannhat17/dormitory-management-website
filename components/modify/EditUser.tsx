@@ -41,21 +41,26 @@ const EditUserCard: React.FC<ReusableAlertDialogProps> = ({ isOpen, userID, setI
     const [userRoomId, setUserRoomId] = useState<string>("");
     const [userAmountPaid, setUserAmountPaid] = useState<string>("");
     const [userAmountDue, setUserAmountDue] = useState<string>("");
-    const [userFeedbackCount, setUserFeedbackCount] = useState<number>(0);
   
     useEffect(() => {
         const fetchUserInfo = async () => {
           const response = await getUserInfo(userID);
-          console.log(response)
-          setUserId(response.id);
-          setUserName(response.name);
-          setUserEmail(response.email);
-          setUserRole(response.role);
-          setUserStatus(response.status);
-          setUserFeedbackCount(response.feedbackCount);
-          setUserRoomId(response.currentRoomId);
-          setUserAmountPaid(response.amountPaid);
-          setUserAmountDue(response.amountDue);
+          if (response) {
+            setUserId(response.id);
+            setUserName(response.name || '');
+            setUserEmail(response.email || '');
+            setUserRole(response.role);
+            setUserStatus(response.status);
+
+            const currentRoomId = response.currentRoomId ?? 0; 
+            setUserRoomId(currentRoomId.toString());
+
+            const amountPaid = response.amountPaid ?? 0; 
+            setUserAmountPaid(amountPaid.toString());
+
+            const amountDue = response.amountDue ?? 0; 
+            setUserAmountDue(amountDue.toString());
+          } 
         };
       
         fetchUserInfo();
@@ -65,9 +70,9 @@ const EditUserCard: React.FC<ReusableAlertDialogProps> = ({ isOpen, userID, setI
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogContent className="sm:max-w-3xl">
                 <DialogHeader>
-                <DialogTitle>{userName}'s Profile</DialogTitle>
+                <DialogTitle>{userName}&apos;s Profile</DialogTitle>
                 <DialogDescription>
-                    View or make changes to user profile here. Click save when you're done.
+                    View or make changes to user profile here. Click save when you&apos;re done.
                 </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
@@ -99,7 +104,7 @@ const EditUserCard: React.FC<ReusableAlertDialogProps> = ({ isOpen, userID, setI
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectGroup>
-                                <SelectLabel>Select user's role</SelectLabel>
+                                <SelectLabel>Select user&apos;s role</SelectLabel>
                                 {Object.values(UserRole).map((role) => (
                                 <SelectItem key={role} value={role}>
                                     {role}
@@ -119,7 +124,7 @@ const EditUserCard: React.FC<ReusableAlertDialogProps> = ({ isOpen, userID, setI
                             </SelectTrigger>
                             <SelectContent>
                             <SelectGroup>
-                                <SelectLabel>Modify user's status</SelectLabel>
+                                <SelectLabel>Modify user&apos;s status</SelectLabel>
                                 {Object.values(UserStatus).map((status) => (
                                 <SelectItem key={status} value={status}>
                                     {status}
@@ -147,12 +152,6 @@ const EditUserCard: React.FC<ReusableAlertDialogProps> = ({ isOpen, userID, setI
                         </Label>
                         <Input id="AmountPaid" value={userAmountDue} onChange={(e) => setUserAmountDue(e.target.value)} className="col-span-2" />
                     </div> 
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="username" className="text-right">
-                        Number of feedbacks
-                        </Label>
-                        <div className="font-medium text-sm col-span-2"><p className="text-primary">{userFeedbackCount}</p></div>
-                    </div>
                 </div>
                 <DialogFooter>
                     <Button type="submit" onClick={onConfirm}>Save changes</Button>

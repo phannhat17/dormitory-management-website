@@ -1,25 +1,20 @@
-import { FileUp, RotateCw } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { FileUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { DataTable } from "./data-table/data-table";
 import { Usertable, columns, excelColumn } from "./data-table/columns";
 import { getListUsers } from "@/actions/db-action";
 import { ExportButton } from "@/components/data-table/export-button";
 import { RefreshButton } from "@/components/data-table/refresh-button";
+import Link from "next/link";
 
 async function getData(): Promise<Usertable[]> {
-  const response: { users: Usertable[]; total: number } = await getListUsers();
-  return response.users;
+  const response = await getListUsers();
+
+  if (response.users && response.total) {
+    return response.users;
+  } else {
+    throw new Error("Invalid response from when get list users!");
+  }
 }
 
 export default async function ManageUsers() {
@@ -34,36 +29,18 @@ export default async function ManageUsers() {
           </div>
           <div className="ml-auto flex items-center gap-2">
             <ExportButton data={users} columns={excelColumn} filename="all_users" />
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="h-7 gap-1 text-sm"
-                >
-                  <FileUp className="h-3.5 w-3.5" />
-                  <span className="sr-only sm:not-sr-only">Import</span>
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                  <DialogTitle>Import data</DialogTitle>
-                  <DialogDescription>
-                    Import data from an XLSX file, noting that all the current
-                    data will be replaced by the new data.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="name" className="text-right">
-                    File
-                  </Label>
-                  <Input id="importfile" type="file" className="col-span-3" />
-                </div>
-                <DialogFooter>
-                  <Button type="submit">Import</Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
+            <Link
+              href="/admin/create-user"
+            >
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-7 gap-1 text-sm"
+              >
+                <FileUp className="h-3.5 w-3.5" />
+                <span className="sr-only sm:not-sr-only">Add student</span>
+              </Button>
+            </Link>
             <RefreshButton />
           </div>
         </div>

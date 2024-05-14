@@ -30,6 +30,12 @@ export const login = async (values: z.infer<typeof LoginSchema>) => {
           error: "You have been banned!",
         };
       }
+      if (error.message.includes("TemporarilyLocked")) {
+        return {
+          error:
+            "Account is temporarily locked due to multiple failed login attempts!",
+        };
+      }
       switch (error.type) {
         case "CredentialsSignin":
           return { error: "Invalid credentials!" };

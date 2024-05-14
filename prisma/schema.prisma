@@ -18,45 +18,33 @@ enum UserStatus {
   BANNED
 }
 
-model User {
-  id            String     @id
-  name          String?
-  email         String?    @unique
-  password      String
-  role          UserRole   @default(STUDENT)
-  image         String?
-  accounts      Account[]
-  currentRoomId Int?
-  amountPaid    Float?
-  amountDue     Float?
-  status        UserStatus @default(NOT_STAYING)
-  Room          Room?      @relation(fields: [currentRoomId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  Contracts     Contract[]
-  Feedbacks     Feedback[]
+enum Gender {
+  MALE
+  FEMALE
 }
 
-model Account {
-  id                String  @id @default(cuid())
-  userId            String
-  type              String
-  provider          String
-  providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String? @db.Text
-  session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-
-  @@unique([provider, providerAccountId])
+model User {
+  id             String     @id
+  name           String?
+  gender         Gender     @default(FEMALE)
+  email          String?    @unique
+  password       String
+  role           UserRole   @default(STUDENT)
+  status         UserStatus @default(NOT_STAYING)
+  currentRoomId  Int?
+  amountPaid     Float?
+  amountDue      Float?
+  Room           Room?      @relation(fields: [currentRoomId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  Contracts      Contract[]
+  Feedbacks      Feedback[]
+  failedAttempts Int        @default(0)
+  lockoutUntil   DateTime?
 }
 
 model Room {
   id         Int        @id
   status     String
+  gender     Gender     @default(FEMALE)
   current    Int
   max        Int
   price      Float
