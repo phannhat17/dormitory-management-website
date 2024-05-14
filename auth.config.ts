@@ -5,6 +5,10 @@ import { getUserByEmail, getUserById } from "@/data/user";
 import bcrypt from "bcryptjs";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { db } from "@/lib/db";
+import { addMinutes, isBefore } from "date-fns";
+
+const MAX_FAILED_ATTEMPTS = 5;
+const LOCKOUT_DURATION = 10; // in minutes
 
 export default {
   providers: [
@@ -17,16 +21,51 @@ export default {
 
           const user = await getUserByEmail(email);
           if (!user) return null;
+
+          const now = new Date();
+          
           if (user.status === "BANNED") throw new AuthError("BannedUser");
 
-          const passwordMath = await bcrypt.compare(password, user.password);
-          if (passwordMath) return user;
+          // Check if the user is locked out
+          if (user.lockoutUntil && isBefore(now, user.lockoutUntil)) {
+            throw new AuthError("TemporarilyLocked");
+          }
+
+          const passwordMatch = await bcrypt.compare(password, user.password);
+          if (passwordMatch) {
+            // Reset failed attempts on successful login
+            await db.user.update({
+              where: { id: user.id },
+              data: { failedAttempts: 0, lockoutUntil: null },
+            });
+            return user;
+          } else {
+            // Increment failed attempts
+            const newFailedAttempts = user.failedAttempts + 1;
+
+            let lockoutUntil = null;
+            if (newFailedAttempts >= MAX_FAILED_ATTEMPTS) {
+              lockoutUntil = addMinutes(now, LOCKOUT_DURATION);
+            }
+
+            await db.user.update({
+              where: { id: user.id },
+              data: { failedAttempts: newFailedAttempts, lockoutUntil },
+            });
+
+            if (newFailedAttempts >= MAX_FAILED_ATTEMPTS) {
+              throw new AuthError("TemporarilyLocked");
+            }
+
+            return null;
+          }
         }
 
         return null;
       },
     }),
   ],
+
   callbacks: {
     async signIn({ user }) {
       if (!user?.id) {
