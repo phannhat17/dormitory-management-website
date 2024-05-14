@@ -55,7 +55,7 @@ const ChangePasswordForm = () => {
   return (
     <Card x-chunk="dashboard-04-chunk-1">
       <CardHeader>
-        <CardTitle className="text-2xl">New Password</CardTitle>
+        <CardTitle className="text-2xl">Change Password</CardTitle>
         <CardDescription>
           Enter your new password below
         </CardDescription>

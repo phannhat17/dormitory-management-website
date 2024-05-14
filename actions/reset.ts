@@ -14,6 +14,12 @@ import { generatePasswordResetToken } from "@/lib/token";
 import { getPasswordResetTokenByToken } from "@/data/password-reset-token";
 import { getUserByEmail, getUserById } from "@/data/user";
 import escapeHtml from "escape-html";
+import { addMinutes, isBefore, differenceInMinutes } from "date-fns";
+import { signOut } from "@/auth";
+
+const MAX_FAILED_ATTEMPTS = 5;
+const LOCKOUT_DURATION = 10; // in minutes
+const RESET_DURATION = 3; // in minutes
 
 export const forgotPassword = async (
   values: z.infer<typeof ResetPassword>,
@@ -67,6 +73,27 @@ export const resetPassword = async (
   const user = await getUserById(session.user.id);
   if (!user) return { error: "Cannot found user!" };
 
+  const now = new Date();
+
+  // Check if the user is locked out
+  if (user.lockoutUntil && isBefore(now, user.lockoutUntil)) {
+    return {
+      error:
+        "Your account is temporarily locked due to multiple failed attempts.",
+    };
+  }
+
+  // Reset failed attempts if the last failed attempt was more than RESET_DURATION minutes ago
+  if (
+    user.lastFailedAttempt &&
+    differenceInMinutes(now, user.lastFailedAttempt) > RESET_DURATION
+  ) {
+    await db.user.update({
+      where: { id: user.id },
+      data: { failedAttempts: 0 },
+    });
+  }
+
   const validatedFields = ResetPasswordLoggedIn.safeParse(values);
 
   if (!validatedFields.success) {
@@ -77,6 +104,27 @@ export const resetPassword = async (
   const passwordMatch = await bcrypt.compare(oldPassword, user.password);
 
   if (!passwordMatch) {
+    // Increment failed attempts
+    const newFailedAttempts = user.failedAttempts + 1;
+    let lockoutUntil = null;
+
+    if (newFailedAttempts >= MAX_FAILED_ATTEMPTS) {
+      lockoutUntil = addMinutes(now, LOCKOUT_DURATION);
+    }
+
+    await db.user.update({
+      where: { id: user.id },
+      data: {
+        failedAttempts: newFailedAttempts,
+        lockoutUntil,
+        lastFailedAttempt: now,
+      },
+    });
+
+    if (newFailedAttempts >= MAX_FAILED_ATTEMPTS) {
+      await signOut();
+    }
+
     return { error: "Wrong current password!" };
   }
 
@@ -91,7 +139,6 @@ export const resetPassword = async (
       success: "Password successfully updated.",
     };
   } catch (error) {
-    console.error("Failed to update password:", error);
     return { error: "Failed to update password." };
   }
 };
