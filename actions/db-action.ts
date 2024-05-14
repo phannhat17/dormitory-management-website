@@ -22,7 +22,6 @@ export const getListUsers = async () => {
   return { users: listUser, total: numUser };
 };
 
-
 export const getListFB = async () => {
   const session = await auth();
 
