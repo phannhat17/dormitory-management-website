@@ -2,9 +2,10 @@
 
 import * as z from "zod";
 import { useState, useTransition } from "react";
-import { ResetFromSchema } from "@/schemas";
+import { ResetPassword } from "@/schemas";
 import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
+import { useSearchParams } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Form,
@@ -24,29 +25,33 @@ import {
 import { Input } from "@/components/ui/input";
 import { FormError } from "@/components/form/form-error";
 import { FormSuccess } from "@/components/form/form-success";
-import { reset } from "@/actions/reset";
+import { forgotPassword } from "@/actions/reset";
 
-const ForgotPage = () => {
+const ResetPage = () => {
+  const searchParams = useSearchParams();
+  const token = searchParams.get("token");
+
   const [error, setError] = useState<string | undefined>("");
   const [success, setSuccess] = useState<string | undefined>("");
   const [isPending, startTransition] = useTransition();
 
-  const form = useForm<z.infer<typeof ResetFromSchema>>({
-    resolver: zodResolver(ResetFromSchema),
+  const form = useForm<z.infer<typeof ResetPassword>>({
+    resolver: zodResolver(ResetPassword),
     defaultValues: {
-      email: "",
+      newPassword: "",
+      confirmPassword: "",
     }
   });
 
-  const onSubmit = (values: z.infer<typeof ResetFromSchema>) => {
+  const onSubmit = (values: z.infer<typeof ResetPassword>) => {
     setError("");
     setSuccess("");
 
     startTransition(() => {
-      reset(values) 
+      forgotPassword(values, token) 
         .then((data) => {
           setError(data?.error);
-          setSuccess(data?.sucess);
+          setSuccess(data?.success);
         })
     });
   };
@@ -55,9 +60,9 @@ const ForgotPage = () => {
     <div className="flex min-h-screen items-center justify-center">
       <Card className="my-auto mx-auto max-w-sm w-96">
         <CardHeader>
-          <CardTitle className="text-2xl mx-auto">Reset Password</CardTitle>
+          <CardTitle className="text-2xl mx-auto">New Password</CardTitle>
           <CardDescription className="mx-auto">
-            Forgot your password? 
+            Enter your new password below
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -66,19 +71,39 @@ const ForgotPage = () => {
               onSubmit={form.handleSubmit(onSubmit)}
               className="grid gap-4"
             >
-              <div className="grid gap-2 mb-3">
+              <div className="grid gap-2">
                 <FormField
                   control={form.control}
-                  name="email"
+                  name="newPassword"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email</FormLabel>
+                      <FormLabel>New Password</FormLabel>
                       <FormControl>
                         <Input
                           {...field}
                           disabled={isPending}
-                          placeholder="example@sis.hust.edu.vn"
-                          type="email"
+                          placeholder="********"
+                          type="password"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="grid gap-2">
+                <FormField
+                  control={form.control}
+                  name="confirmPassword"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Confirm Password</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          disabled={isPending}
+                          placeholder="********"
+                          type="password"
                         />
                       </FormControl>
                       <FormMessage />
@@ -99,4 +124,4 @@ const ForgotPage = () => {
   );
 };
 
-export default ForgotPage;
+export default ResetPage;

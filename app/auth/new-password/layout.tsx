@@ -1,7 +1,7 @@
 
 export const metadata = {
-    title: "Forgot Password",
-    description: "Forgot Password Page",
+    title: "Reset Password",
+    description: "Reset Password Page",
 };
 
 export default function LoginLayout({
