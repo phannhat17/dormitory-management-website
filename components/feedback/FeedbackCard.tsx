@@ -39,7 +39,7 @@ const FeedbackCard: React.FC<FeedbackCardProps> = ({
   return (
     <Card x-chunk="dashboard-04-chunk-1">
       <CardHeader>
-        <CardTitle>Feedback</CardTitle>
+        <CardTitle className="text-2xl">Feedback</CardTitle>
         <CardDescription>
           We appreciate your interest in sharing your thoughts, questions, or
           feedback with us. To ensure we can address your concerns effectively,

@@ -1,0 +1,127 @@
+'use client';
+
+import * as z from "zod";
+import { useState, useTransition } from "react";
+import { ResetPassword } from "@/schemas";
+import { Button } from "@/components/ui/button";
+import { useForm } from "react-hook-form";
+import { useSearchParams } from "next/navigation";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { FormError } from "@/components/form/form-error";
+import { FormSuccess } from "@/components/form/form-success";
+import { forgotPassword } from "@/actions/reset";
+
+const ResetPage = () => {
+  const searchParams = useSearchParams();
+  const token = searchParams.get("token");
+
+  const [error, setError] = useState<string | undefined>("");
+  const [success, setSuccess] = useState<string | undefined>("");
+  const [isPending, startTransition] = useTransition();
+
+  const form = useForm<z.infer<typeof ResetPassword>>({
+    resolver: zodResolver(ResetPassword),
+    defaultValues: {
+      newPassword: "",
+      confirmPassword: "",
+    }
+  });
+
+  const onSubmit = (values: z.infer<typeof ResetPassword>) => {
+    setError("");
+    setSuccess("");
+
+    startTransition(() => {
+      forgotPassword(values, token) 
+        .then((data) => {
+          setError(data?.error);
+          setSuccess(data?.success);
+        })
+    });
+  };
+
+  return (
+    <div className="flex min-h-screen items-center justify-center">
+      <Card className="my-auto mx-auto max-w-sm w-96">
+        <CardHeader>
+          <CardTitle className="text-2xl mx-auto">New Password</CardTitle>
+          <CardDescription className="mx-auto">
+            Enter your new password below
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="grid gap-4"
+            >
+              <div className="grid gap-2">
+                <FormField
+                  control={form.control}
+                  name="newPassword"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>New Password</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          disabled={isPending}
+                          placeholder="********"
+                          type="password"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="grid gap-2">
+                <FormField
+                  control={form.control}
+                  name="confirmPassword"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Confirm Password</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          disabled={isPending}
+                          placeholder="********"
+                          type="password"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <FormError message={error} />
+              <FormSuccess message={success} />
+              <Button type="submit" disabled={isPending} className="w-full">
+                Reset Password
+              </Button>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+export default ResetPage;

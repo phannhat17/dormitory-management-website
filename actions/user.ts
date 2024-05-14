@@ -6,7 +6,7 @@ import { db } from "@/lib/db";
 import { CreateUserSchema } from "@/schemas";
 import escapeHtml from "escape-html";
 import { checkAdmin } from "./check-permission";
-import { User, Gender } from "@prisma/client";
+import { Gender } from "@prisma/client";
 
 export const createUser = async (values: z.infer<typeof CreateUserSchema>) => {
   const isAdmin = await checkAdmin();
