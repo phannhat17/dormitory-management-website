@@ -68,7 +68,7 @@ export const resetPassword = async (
   const session = await auth();
 
   if (!session?.user.id) {
-    return { error: "You must be logged in to submit feedback!" };
+    return { error: "You must be logged in to change password!" };
   }
   const user = await getUserById(session.user.id);
   if (!user) return { error: "Cannot found user!" };
