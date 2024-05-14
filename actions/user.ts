@@ -80,14 +80,7 @@ export const deleteUser = async (id: string) => {
   return { success: "User deleted successfully" };
 };
 
-interface UserWithFeedbackCount extends User {
-  feedbackCount: number;
-  password: string;
-}
-
-export const getUserInfo = async (
-  id: string
-): Promise<UserWithFeedbackCount | null> => {
+export const getUserInfo = async (id: string) => {
   const user = await db.user.findUnique({
     where: { id },
     select: {
@@ -105,16 +98,7 @@ export const getUserInfo = async (
   });
 
   if (user) {
-    const feedbackCount = await db.feedback.count({
-      where: {
-        userId: id,
-      },
-    });
-    const userWithFeedbackCount: UserWithFeedbackCount = {
-      ...user,
-      feedbackCount,
-    };
-    return userWithFeedbackCount;
+    return user;
   }
 
   return null;

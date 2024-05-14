@@ -41,7 +41,6 @@ const EditUserCard: React.FC<ReusableAlertDialogProps> = ({ isOpen, userID, setI
     const [userRoomId, setUserRoomId] = useState<string>("");
     const [userAmountPaid, setUserAmountPaid] = useState<string>("");
     const [userAmountDue, setUserAmountDue] = useState<string>("");
-    const [userFeedbackCount, setUserFeedbackCount] = useState<number>(0);
   
     useEffect(() => {
         const fetchUserInfo = async () => {
@@ -52,7 +51,6 @@ const EditUserCard: React.FC<ReusableAlertDialogProps> = ({ isOpen, userID, setI
             setUserEmail(response.email || '');
             setUserRole(response.role);
             setUserStatus(response.status);
-            setUserFeedbackCount(response.feedbackCount);
 
             const currentRoomId = response.currentRoomId ?? 0; 
             setUserRoomId(currentRoomId.toString());
@@ -154,12 +152,6 @@ const EditUserCard: React.FC<ReusableAlertDialogProps> = ({ isOpen, userID, setI
                         </Label>
                         <Input id="AmountPaid" value={userAmountDue} onChange={(e) => setUserAmountDue(e.target.value)} className="col-span-2" />
                     </div> 
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="username" className="text-right">
-                        Number of feedbacks
-                        </Label>
-                        <div className="font-medium text-sm col-span-2"><p className="text-primary">{userFeedbackCount}</p></div>
-                    </div>
                 </div>
                 <DialogFooter>
                     <Button type="submit" onClick={onConfirm}>Save changes</Button>

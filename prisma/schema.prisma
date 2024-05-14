@@ -24,19 +24,21 @@ enum Gender {
 }
 
 model User {
-  id            String     @id
-  name          String?
-  gender        Gender     @default(FEMALE)
-  email         String?    @unique
-  password      String
-  role          UserRole   @default(STUDENT)
-  status        UserStatus @default(NOT_STAYING)
-  currentRoomId Int?
-  amountPaid    Float?
-  amountDue     Float?
-  Room          Room?      @relation(fields: [currentRoomId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  Contracts     Contract[]
-  Feedbacks     Feedback[]
+  id             String     @id
+  name           String?
+  gender         Gender     @default(FEMALE)
+  email          String?    @unique
+  password       String
+  role           UserRole   @default(STUDENT)
+  status         UserStatus @default(NOT_STAYING)
+  currentRoomId  Int?
+  amountPaid     Float?
+  amountDue      Float?
+  Room           Room?      @relation(fields: [currentRoomId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  Contracts      Contract[]
+  Feedbacks      Feedback[]
+  failedAttempts Int        @default(0)
+  lockoutUntil   DateTime?
 }
 
 model Room {
