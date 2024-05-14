@@ -16,9 +16,7 @@ const CreateUserPage = () => {
   const formMethodsStudent = useForm<z.infer<typeof CreateUserSchema>>({
     resolver: zodResolver(CreateUserSchema),
     defaultValues: {
-      email: "",
-      name: "",
-      studentid: "",
+      students: [],
     },
   });
 

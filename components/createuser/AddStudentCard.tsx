@@ -16,11 +16,13 @@ import { FormSuccess } from "@/components/form/form-success";
 import { useState } from 'react';
 import ExcelJS from 'exceljs';
 import { Label } from "@/components/ui/label";
+import { Gender } from '@prisma/client';
 
 interface StudentData {
   studentid: string;
   name: string;
   email: string;
+  gender: Gender;
 }
 
 interface AddStudentCardProps {
@@ -47,16 +49,21 @@ const AddStudentCard: React.FC<AddStudentCardProps> = ({ isPending, error, succe
       if (worksheet) {
         worksheet.eachRow((row, rowNumber) => {
           if (rowNumber > 1) {
-            const [studentidCell, nameCell, emailCell] = Array.prototype.slice.call(row.values, 1, 4);
+            const [studentidCell, nameCell, emailCell, genderCell] = Array.prototype.slice.call(row.values, 1, 5);
             const studentid = studentidCell?.toString() || '';
             const name = nameCell?.toString() || '';
             const email = emailCell?.toString() || '';
-            jsonData.push({ studentid, name, email });
+            const gender = genderCell?.toString() || '';
+
+            jsonData.push({ studentid, name, email, gender});
           }
         });
       }
 
       setStudentData(jsonData);
+      
+      form.setValue("students", jsonData); // Update form values with the student data
+
     }
   };
 
@@ -76,11 +83,10 @@ const AddStudentCard: React.FC<AddStudentCardProps> = ({ isPending, error, succe
           </div>
           <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
             {studentData.map((student, index) => (
-              <div key={index} className="grid grid-cols-3 gap-2">
+              <div key={index} className="grid grid-cols-4 gap-2">
                 <FormField
                   control={form.control}
                   name={`students.${index}.studentid`}
-                  defaultValue={student.studentid}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Student ID</FormLabel>
@@ -94,7 +100,6 @@ const AddStudentCard: React.FC<AddStudentCardProps> = ({ isPending, error, succe
                 <FormField
                   control={form.control}
                   name={`students.${index}.name`}
-                  defaultValue={student.name}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Name</FormLabel>
@@ -108,12 +113,24 @@ const AddStudentCard: React.FC<AddStudentCardProps> = ({ isPending, error, succe
                 <FormField
                   control={form.control}
                   name={`students.${index}.email`}
-                  defaultValue={student.email}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Email</FormLabel>
                       <FormControl>
                         <Input {...field} type="email" disabled={isPending} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name={`students.${index}.gender`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Gender</FormLabel>
+                      <FormControl>
+                        <Input {...field} disabled={isPending} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

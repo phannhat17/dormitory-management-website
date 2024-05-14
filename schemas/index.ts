@@ -19,6 +19,7 @@ export const CreateUserSchema = z.object({
       email: z.string().email().min(1, {
         message: "Email is required",
       }),
+      gender: z.enum(["MALE", "FEMALE"]).optional(),
     })
   ),
 });
@@ -41,5 +42,3 @@ export const FeedbackSchema = z.object({
     message: "Feedback must be at least 10 characters.",
   }),
 });
-
-export const CreateUsersSchema = z.array(CreateUserSchema);

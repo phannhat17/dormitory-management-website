@@ -1,7 +1,7 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { UserRole, UserStatus } from "@prisma/client";
+import { Gender, UserStatus } from "@prisma/client";
 import { DataTableColumnHeader } from "@/components/data-table/DataTableColumnHeader";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -24,7 +24,7 @@ export type Usertable = {
   id: string;
   name: string | null;
   email: string | null;
-  role: UserRole;
+  gender: Gender;
   status: UserStatus;
 };
 export const statuses = [
@@ -41,21 +41,21 @@ export const statuses = [
     value: "BANNED",
   },
 ];
-export const roles = [
+export const gender = [
   {
-    label: "STUDENT",
-    value: "STUDENT",
+    label: "MALE",
+    value: "MALE",
   },
   {
-    label: "ADMIN",
-    value: "ADMIN",
+    label: "FEMALE",
+    value: "FEMALE",
   },
 ];
 export const excelColumn = [
   { header: "ID", key: "id", width: 10 },
   { header: "Name", key: "name", width: 32 },
   { header: "Email", key: "email", width: 32 },
-  { header: "Role", key: "role", width: 32 },
+  { header: "Gender", key: "gender", width: 32 },
   { header: "Status", key: "status", width: 32 },
 ]
 
@@ -146,9 +146,9 @@ export const columns: ColumnDef<Usertable>[] = [
     enableSorting: true,
   },
   {
-    accessorKey: "role",
+    accessorKey: "gender",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Role" />
+      <DataTableColumnHeader column={column} title="Gender" />
     ),
     cell: ({ row }) => {
       const status = statuses.find(
@@ -163,14 +163,14 @@ export const columns: ColumnDef<Usertable>[] = [
         <div>
           <Badge
             className={
-              row.getValue("role") === "ADMIN"
+              row.getValue("gender") === "MALE"
                 ? "border-transparent bg-emerald-500 text-primary-foreground shadow hover:bg-emerald-500/80"
-                : row.getValue("role") === "STUDENT"
-                  ? "border-transparent bg-[#fbcb14] text-[#543107]-foreground shadow hover:bg-[#fbcb14]/80"
+                : row.getValue("gender") === "FEMALE"
+                  ? "border-transparent bg-[#d7dbfa] text-[#543107]-foreground shadow hover:bg-[#d7dbfa]/80"
                   : ""
             }
           >
-            {row.getValue("role")}
+            {row.getValue("gender")}
           </Badge>
         </div>
       );
