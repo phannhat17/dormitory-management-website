@@ -35,6 +35,22 @@ const ProfileCard = () => {
           <p className="font-medium mx-5">{user?.email}</p>
         </div>
         <div className="flex flex-row items-center justify-between my-4">
+          <p className="font-medium mx-5">Gender</p>
+          <p className="font-medium mx-5">
+            <Badge
+              className={
+                user?.gender === "FEMALE"
+                  ? "border-transparent bg-[#d7dbfa] text-[#543107]-foreground shadow hover:bg-[#d7dbfa]/80"
+                  : user?.gender === "MALE"
+                  ? "border-transparent bg-emerald-500 text-primary-foreground shadow hover:bg-emerald-500/80"
+                  : ""
+              }
+            >
+              {user?.gender}
+            </Badge>
+          </p>
+        </div>
+        <div className="flex flex-row items-center justify-between my-4">
           <p className="font-medium mx-5">Status</p>
           <p className="font-medium mx-5">
             <Badge

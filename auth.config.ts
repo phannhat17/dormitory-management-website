@@ -95,6 +95,9 @@ export default {
       if (token.role && session.user) {
         session.user.role = token.role;
       }
+      if (token.gender && session.user) {
+        session.user.gender = token.gender;
+      }
 
       return session;
     },
@@ -107,6 +110,7 @@ export default {
 
       token.role = existingUser.role;
       token.status = existingUser.status;
+      token.gender = existingUser.gender;
 
       return token;
     },
