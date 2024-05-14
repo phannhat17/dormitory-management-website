@@ -5,10 +5,11 @@ import { getUserByEmail, getUserById } from "@/data/user";
 import bcrypt from "bcryptjs";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { db } from "@/lib/db";
-import { addMinutes, isBefore } from "date-fns";
+import { addMinutes, isBefore, differenceInMinutes } from "date-fns";
 
 const MAX_FAILED_ATTEMPTS = 5;
 const LOCKOUT_DURATION = 10; // in minutes
+const RESET_DURATION = 3; // in minutes
 
 export default {
   providers: [
@@ -23,12 +24,23 @@ export default {
           if (!user) return null;
 
           const now = new Date();
-          
+
           if (user.status === "BANNED") throw new AuthError("BannedUser");
 
           // Check if the user is locked out
           if (user.lockoutUntil && isBefore(now, user.lockoutUntil)) {
             throw new AuthError("TemporarilyLocked");
+          }
+
+          // Reset failed attempts if the last failed attempt was more than RESET_DURATION minutes ago
+          if (
+            user.lastFailedAttempt &&
+            differenceInMinutes(now, user.lastFailedAttempt) > RESET_DURATION
+          ) {
+            await db.user.update({
+              where: { id: user.id },
+              data: { failedAttempts: 0 },
+            });
           }
 
           const passwordMatch = await bcrypt.compare(password, user.password);
@@ -95,6 +107,9 @@ export default {
       if (token.role && session.user) {
         session.user.role = token.role;
       }
+      if (token.gender && session.user) {
+        session.user.gender = token.gender;
+      }
 
       return session;
     },
@@ -107,6 +122,7 @@ export default {
 
       token.role = existingUser.role;
       token.status = existingUser.status;
+      token.gender = existingUser.gender;
 
       return token;
     },
