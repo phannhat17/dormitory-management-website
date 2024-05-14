@@ -1,7 +1,7 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { UserRole, UserStatus } from "@prisma/client";
+import { Gender, UserStatus } from "@prisma/client";
 import { DataTableColumnHeader } from "@/components/data-table/DataTableColumnHeader";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -11,16 +11,6 @@ import {
   DropdownMenuTrigger,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal } from "lucide-react";
 import { deleteUser } from "@/actions/user";
@@ -34,7 +24,7 @@ export type Usertable = {
   id: string;
   name: string | null;
   email: string | null;
-  role: UserRole;
+  gender: Gender;
   status: UserStatus;
 };
 export const statuses = [
@@ -51,23 +41,85 @@ export const statuses = [
     value: "BANNED",
   },
 ];
-export const roles = [
+export const gender = [
   {
-    label: "STUDENT",
-    value: "STUDENT",
+    label: "MALE",
+    value: "MALE",
   },
   {
-    label: "ADMIN",
-    value: "ADMIN",
+    label: "FEMALE",
+    value: "FEMALE",
   },
 ];
 export const excelColumn = [
   { header: "ID", key: "id", width: 10 },
   { header: "Name", key: "name", width: 32 },
   { header: "Email", key: "email", width: 32 },
-  { header: "Role", key: "role", width: 32 },
+  { header: "Gender", key: "gender", width: 32 },
   { header: "Status", key: "status", width: 32 },
 ]
+
+interface ActionsCellProps {
+  row: any;
+}
+const ActionsCell: React.FC<ActionsCellProps> = ({ row }) => {
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+      const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+
+      const router = useRouter();
+
+      const user = row.original
+
+      const handleDelete = () => {
+        deleteUser(user.id)
+          .then((data) => {
+            if (data.success) {
+              toast.success(data.success);
+              router.refresh();
+            } else if (data.error) {
+              toast.error(data.error);
+            }
+          });
+      };
+
+      return (
+        <>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button aria-haspopup="true" size="icon" variant="ghost">
+                <MoreHorizontal className="h-4 w-4" />
+                <span className="sr-only">Toggle menu</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuItem onClick={() => setIsEditDialogOpen(true)}>View/Edit</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setIsDeleteDialogOpen(true)}>Delete</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+      
+          <EditUserCard
+            isOpen={isEditDialogOpen}
+            setIsOpen={isEditDialogOpen ?
+              setIsEditDialogOpen : setIsDeleteDialogOpen}
+            userID = {user.id}
+            onConfirm={() => {}}
+          />
+
+          <ReusableAlertDialog
+            isOpen={isDeleteDialogOpen}
+            setIsOpen={isDeleteDialogOpen ?
+              setIsDeleteDialogOpen : setIsEditDialogOpen}
+            title="Are you absolutely sure?"
+            description="This action cannot be undone. This will permanently delete your account and remove your data from our servers."
+            confirmButtonText="Continue"
+            cancelButtonText="Cancel"
+            onConfirm={handleDelete}
+          />
+        </>
+      );
+};
 
 export const columns: ColumnDef<Usertable>[] = [
   {
@@ -94,9 +146,9 @@ export const columns: ColumnDef<Usertable>[] = [
     enableSorting: true,
   },
   {
-    accessorKey: "role",
+    accessorKey: "gender",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Role" />
+      <DataTableColumnHeader column={column} title="Gender" />
     ),
     cell: ({ row }) => {
       const status = statuses.find(
@@ -111,14 +163,14 @@ export const columns: ColumnDef<Usertable>[] = [
         <div>
           <Badge
             className={
-              row.getValue("role") === "ADMIN"
+              row.getValue("gender") === "MALE"
                 ? "border-transparent bg-emerald-500 text-primary-foreground shadow hover:bg-emerald-500/80"
-                : row.getValue("role") === "STUDENT"
-                  ? "border-transparent bg-[#fbcb14] text-[#543107]-foreground shadow hover:bg-[#fbcb14]/80"
+                : row.getValue("gender") === "FEMALE"
+                  ? "border-transparent bg-[#d7dbfa] text-[#543107]-foreground shadow hover:bg-[#d7dbfa]/80"
                   : ""
             }
           >
-            {row.getValue("role")}
+            {row.getValue("gender")}
           </Badge>
         </div>
       );
@@ -166,65 +218,6 @@ export const columns: ColumnDef<Usertable>[] = [
   },
   {
     id: "actions",
-    cell: ({ row }) => {
-      const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
-      const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
-
-      const router = useRouter();
-
-      const user = row.original
-
-      const handleDelete = () => {
-        deleteUser(user.id)
-          .then((data) => {
-            if (data.success) {
-              toast.success(data.success);
-              router.refresh();
-            } else if (data.error) {
-              toast.error(data.error);
-            }
-          });
-      };
-
-      return (
-        <>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button aria-haspopup="true" size="icon" variant="ghost">
-                <MoreHorizontal className="h-4 w-4" />
-                <span className="sr-only">Toggle menu</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuItem onClick={() => setIsEditDialogOpen(true)}>View/Edit</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setIsDeleteDialogOpen(true)}>Delete</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-      
-          <EditUserCard
-            isOpen={isEditDialogOpen}
-            setIsOpen={isEditDialogOpen ?
-              setIsEditDialogOpen : setIsDeleteDialogOpen}
-            userID = {user.id}
-            confirmButtonText="Continue"
-            cancelButtonText="Cancel"
-            onConfirm={() => {}}
-          />
-
-          <ReusableAlertDialog
-            isOpen={isDeleteDialogOpen}
-            setIsOpen={isDeleteDialogOpen ?
-              setIsDeleteDialogOpen : setIsEditDialogOpen}
-            title="Are you absolutely sure?"
-            description="This action cannot be undone. This will permanently delete your account and remove your data from our servers."
-            confirmButtonText="Continue"
-            cancelButtonText="Cancel"
-            onConfirm={handleDelete}
-          />
-        </>
-      );
-    },
+    cell: ActionsCell,
   },
 ];

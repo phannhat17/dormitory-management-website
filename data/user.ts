@@ -69,12 +69,13 @@ export const getTotalUserCount = async () => {
 
 export const getUsers = async () => {
   const users = await db.user.findMany({
+    where: { role: "STUDENT" },
     orderBy: { id: "asc" },
     select: {
       id: true,
       name: true,
       email: true,
-      role: true,
+      gender: true,
       status: true,
     },
   });

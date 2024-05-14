@@ -4,10 +4,9 @@ import * as z from "zod";
 import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
 import { CreateUserSchema } from "@/schemas";
-import { getUserByEmailId } from "@/data/user";
-import { getUserById } from "@/data/user";
 import escapeHtml from "escape-html";
 import { checkAdmin } from "./check-permission";
+import { User, Gender } from "@prisma/client";
 
 export const createUser = async (values: z.infer<typeof CreateUserSchema>) => {
   const isAdmin = await checkAdmin();
@@ -15,42 +14,55 @@ export const createUser = async (values: z.infer<typeof CreateUserSchema>) => {
   if (!isAdmin) {
     return { error: "You must be an admin to create user!" };
   }
-  
+
   const validatedFields = CreateUserSchema.safeParse(values);
 
   if (!validatedFields.success) {
     return { error: "Invalid fields!" };
   }
 
-  const { studentid, name, email, password } = validatedFields.data;
+  const { students } = validatedFields.data;
 
-  const sanitizedStudentId = escapeHtml(studentid);
-  const sanitizedName = escapeHtml(name);
-  const sanitizedEmail = escapeHtml(email.toLowerCase());
+  // Sanitize and prepare student data
+  const sanitizedStudents = await Promise.all(
+    students.map(async (student) => {
+      const { studentid, name, email, gender } = student;
+      const sanitizedStudentId = escapeHtml(studentid);
+      const sanitizedName = escapeHtml(name);
+      const sanitizedEmail = escapeHtml(email.toLowerCase());
+      const hashedPassword = await bcrypt.hash(studentid, 14); // Assuming student ID is used as password
+      const sanitizedGender = escapeHtml(gender);
 
-  const existingUser = await getUserByEmailId(
-    sanitizedEmail,
-    sanitizedStudentId
+      return {
+        id: sanitizedStudentId,
+        name: sanitizedName,
+        email: sanitizedEmail,
+        password: hashedPassword,
+        gender: sanitizedGender as Gender,
+      };
+    })
   );
 
-  if (existingUser) {
-    return { error: "Email or Student ID already in use!" };
+  try {
+    const result = await db.user.createMany({
+      data: sanitizedStudents,
+      skipDuplicates: true,
+    });
+
+    const createdCount = result.count;
+    const totalCount = sanitizedStudents.length;
+
+    if (createdCount < totalCount) {
+      return {
+        success: `Created ${createdCount} out of ${totalCount} users. Some users were skipped due to duplicate IDs or emails.`,
+      };
+    }
+
+    return { success: "All users created successfully!" };
+  } catch (error) {
+    return { error: `Error creating users: ${(error as Error).message}` };
   }
-
-  const hashedPassword = await bcrypt.hash(password, 14);
-
-  await db.user.create({
-    data: {
-      id: sanitizedStudentId,
-      name: sanitizedName,
-      email: sanitizedEmail,
-      password: hashedPassword,
-    },
-  });
-
-  return { success: "User Created!" };
 };
-
 
 export const deleteUser = async (id: string) => {
   const isAdmin = await checkAdmin();
@@ -68,7 +80,6 @@ export const deleteUser = async (id: string) => {
   return { success: "User deleted successfully" };
 };
 
-
 export const getUserInfo = async (id: string) => {
   const user = await db.user.findUnique({
     where: { id },
@@ -77,21 +88,18 @@ export const getUserInfo = async (id: string) => {
       name: true,
       email: true,
       role: true,
-      image: true,
       currentRoomId: true,
       amountPaid: true,
       amountDue: true,
       status: true,
+      password: true,
+      gender: true,
     },
   });
 
-  const feedbackCount = await db.feedback.count({
-    where: {
-      userId: id,
-    },
-  });
+  if (user) {
+    return user;
+  }
 
-  user.feedbackCount = feedbackCount;
-
-  return user;
+  return null;
 };
