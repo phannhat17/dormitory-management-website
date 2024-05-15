@@ -25,7 +25,7 @@ export default async function ManageUsers() {
       <div className="mx-auto grid w-full max-w-6xl gap-2">
         <div className="flex items-center">
           <div>
-            <h1 className="text-2xl font-semibold">Manage User</h1>
+            <h1 className="text-2xl font-semibold">Manage Room</h1>
           </div>
           <div className="ml-auto flex items-center gap-2">
             <ExportButton data={users} columns={excelColumn} filename="all_users" />
