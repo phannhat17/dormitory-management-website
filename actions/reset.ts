@@ -80,7 +80,7 @@ export const resetPassword = async (
       error:
         "Your account is temporarily locked due to multiple failed attempts.",
     };
-  }
+  }   
 
   if (
     user.lastFailedAttempt &&
@@ -99,7 +99,8 @@ export const resetPassword = async (
   }
 
   const { oldPassword, newPassword } = validatedFields.data;
-  const passwordMatch = await bcrypt.compare(oldPassword, user.password);
+  const passwordMatch =
+    user.password && (await bcrypt.compare(oldPassword, user.password));
 
   if (!passwordMatch) {
     const newFailedAttempts = user.failedAttempts + 1;
