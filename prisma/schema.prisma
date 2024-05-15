@@ -28,7 +28,7 @@ model User {
   name              String?
   gender            Gender     @default(FEMALE)
   email             String?    @unique
-  password          String
+  password          String?
   role              UserRole   @default(STUDENT)
   status            UserStatus @default(NOT_STAYING)
   currentRoomId     String?

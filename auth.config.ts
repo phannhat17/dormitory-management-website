@@ -27,6 +27,8 @@ export default {
 
           if (user.status === "BANNED") throw new AuthError("BannedUser");
 
+          if (user.password === null) throw new AuthError("FirstLogin");
+
           // Check if the user is locked out
           if (user.lockoutUntil && isBefore(now, user.lockoutUntil)) {
             throw new AuthError("TemporarilyLocked");

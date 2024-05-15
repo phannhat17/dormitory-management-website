@@ -30,14 +30,12 @@ export const createUser = async (values: z.infer<typeof CreateUserSchema>) => {
       const sanitizedStudentId = escapeHtml(studentid);
       const sanitizedName = escapeHtml(name);
       const sanitizedEmail = escapeHtml(email.toLowerCase());
-      const hashedPassword = await bcrypt.hash(studentid, 14); // Assuming student ID is used as password
       const sanitizedGender = escapeHtml(gender);
 
       return {
         id: sanitizedStudentId,
         name: sanitizedName,
         email: sanitizedEmail,
-        password: hashedPassword,
         gender: sanitizedGender as Gender,
       };
     })

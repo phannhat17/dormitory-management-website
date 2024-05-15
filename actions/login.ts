@@ -36,6 +36,12 @@ export const login = async (values: z.infer<typeof LoginSchema>) => {
             "Account is temporarily locked due to multiple failed login attempts!",
         };
       }
+      if (error.message.includes("FirstLogin")) {
+        return {
+          error:
+            "This is your first login attempt. Click forgot password to reset your password!",
+        };
+      }
       switch (error.type) {
         case "CredentialsSignin":
           return { error: "Invalid credentials!" };
