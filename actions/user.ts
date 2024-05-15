@@ -1,7 +1,6 @@
 "use server";
 
 import * as z from "zod";
-import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
 import { CreateUserSchema } from "@/schemas";
 import escapeHtml from "escape-html";

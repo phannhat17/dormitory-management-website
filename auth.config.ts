@@ -12,6 +12,7 @@ const LOCKOUT_DURATION = 10; // in minutes
 const RESET_DURATION = 3; // in minutes
 
 export default {
+  trustHost: true,
   providers: [
     Credentials({
       async authorize(credentials) {
