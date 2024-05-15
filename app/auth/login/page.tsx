@@ -25,6 +25,9 @@ import { Input } from "@/components/ui/input";
 import { FormError } from "@/components/form/form-error";
 import { FormSuccess } from "@/components/form/form-success";
 import { login } from "@/actions/login";
+import Link from "next/link"
+import { Label } from "@/components/ui/label";
+
 
 const LoginPage = () => {
   const [error, setError] = useState<string | undefined>("");
@@ -93,7 +96,12 @@ const LoginPage = () => {
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Password</FormLabel>
+                      <div className="flex items-center">
+                        <FormLabel>Password</FormLabel>
+                        <Link href="/auth/reset" className="ml-auto inline-block text-sm underline">
+                          Forgot your password?
+                        </Link>
+                      </div>
                       <FormControl>
                         <Input
                           {...field}
