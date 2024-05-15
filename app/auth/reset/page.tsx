@@ -2,7 +2,7 @@
 
 import * as z from "zod";
 import { useState, useTransition } from "react";
-import { LoginSchema } from "@/schemas";
+import { ResetFromSchema } from "@/schemas";
 import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -23,43 +23,41 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { FormError } from "@/components/form/form-error";
-import { login } from "@/actions/login";
-import Link from "next/link"
+import { FormSuccess } from "@/components/form/form-success";
+import { reset } from "@/actions/reset";
 
-
-const LoginPage = () => {
+const ForgotPage = () => {
   const [error, setError] = useState<string | undefined>("");
-
+  const [success, setSuccess] = useState<string | undefined>("");
   const [isPending, startTransition] = useTransition();
 
-  const form = useForm<z.infer<typeof LoginSchema>>({
-    resolver: zodResolver(LoginSchema),
+  const form = useForm<z.infer<typeof ResetFromSchema>>({
+    resolver: zodResolver(ResetFromSchema),
     defaultValues: {
       email: "",
-      password: "",
     }
   });
 
-  const onSubmit = (values: z.infer<typeof LoginSchema>) => {
+  const onSubmit = (values: z.infer<typeof ResetFromSchema>) => {
     setError("");
+    setSuccess("");
 
     startTransition(() => {
-      login(values)
+      reset(values) 
         .then((data) => {
-          if (data) {
-            setError(data.error);
-          }
+          setError(data?.error);
+          setSuccess(data?.sucess);
         })
     });
-  }
+  };
 
   return (
     <div className="flex min-h-screen items-center justify-center">
-      <Card className="my-auto mx-auto max-w-sm">
+      <Card className="my-auto mx-auto max-w-sm w-96">
         <CardHeader>
-          <CardTitle className="text-2xl mx-auto">Login</CardTitle>
-          <CardDescription>
-            Enter your email below to login to your account
+          <CardTitle className="text-2xl mx-auto">Reset Password</CardTitle>
+          <CardDescription className="mx-auto">
+            Forgot your password? 
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -68,7 +66,7 @@ const LoginPage = () => {
               onSubmit={form.handleSubmit(onSubmit)}
               className="grid gap-4"
             >
-              <div className="grid gap-2">
+              <div className="grid gap-2 mb-3">
                 <FormField
                   control={form.control}
                   name="email"
@@ -79,7 +77,7 @@ const LoginPage = () => {
                         <Input
                           {...field}
                           disabled={isPending}
-                          placeholder="email@example.com"
+                          placeholder="example@sis.hust.edu.vn"
                           type="email"
                         />
                       </FormControl>
@@ -88,34 +86,10 @@ const LoginPage = () => {
                   )}
                 />
               </div>
-              <div className="grid gap-2">
-                <FormField
-                  control={form.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <div className="flex items-center">
-                        <FormLabel>Password</FormLabel>
-                        <Link href="/auth/reset" className="ml-auto inline-block text-sm underline">
-                          Forgot your password?
-                        </Link>
-                      </div>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          disabled={isPending}
-                          placeholder="**********"
-                          type="password"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
               <FormError message={error} />
+              <FormSuccess message={success} />
               <Button type="submit" disabled={isPending} className="w-full">
-                Login
+                Reset Password
               </Button>
             </form>
           </Form>
@@ -125,4 +99,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default ForgotPage;

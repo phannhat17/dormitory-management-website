@@ -18,7 +18,7 @@ const ProfileCard = () => {
   return (
     <Card x-chunk="dashboard-04-chunk-1">
       <CardHeader>
-        <CardTitle>Profile</CardTitle>
+        <CardTitle className="text-2xl">Profile</CardTitle>
         <CardDescription>Your profile information.</CardDescription>
       </CardHeader>
       <CardContent>

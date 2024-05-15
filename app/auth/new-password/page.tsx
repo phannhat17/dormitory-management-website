@@ -1,10 +1,12 @@
 'use client';
 
 import * as z from "zod";
-import { useState, useTransition } from "react";
-import { LoginSchema } from "@/schemas";
+import { useState, useTransition, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { ResetPassword } from "@/schemas";
 import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
+import { useSearchParams } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Form,
@@ -23,43 +25,57 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { FormError } from "@/components/form/form-error";
-import { login } from "@/actions/login";
-import Link from "next/link"
+import { FormSuccess } from "@/components/form/form-success";
+import { forgotPassword } from "@/actions/reset";
 
+const ResetPage = () => {
+  const searchParams = useSearchParams();
+  const token = searchParams.get("token");
+  const router = useRouter();
 
-const LoginPage = () => {
   const [error, setError] = useState<string | undefined>("");
-
+  const [success, setSuccess] = useState<string | undefined>("");
   const [isPending, startTransition] = useTransition();
 
-  const form = useForm<z.infer<typeof LoginSchema>>({
-    resolver: zodResolver(LoginSchema),
+  const form = useForm<z.infer<typeof ResetPassword>>({
+    resolver: zodResolver(ResetPassword),
     defaultValues: {
-      email: "",
-      password: "",
+      newPassword: "",
+      confirmPassword: "",
     }
   });
 
-  const onSubmit = (values: z.infer<typeof LoginSchema>) => {
+  const onSubmit = (values: z.infer<typeof ResetPassword>) => {
     setError("");
+    setSuccess("");
 
     startTransition(() => {
-      login(values)
+      forgotPassword(values, token)
         .then((data) => {
-          if (data) {
-            setError(data.error);
-          }
+          setError(data?.error);
+          setSuccess(data?.success);
         })
     });
-  }
+  };
+
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => {
+        router.push('/auth/login');
+      }, 2000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [success, router]);
+
 
   return (
     <div className="flex min-h-screen items-center justify-center">
-      <Card className="my-auto mx-auto max-w-sm">
+      <Card className="my-auto mx-auto max-w-sm w-96">
         <CardHeader>
-          <CardTitle className="text-2xl mx-auto">Login</CardTitle>
-          <CardDescription>
-            Enter your email below to login to your account
+          <CardTitle className="text-2xl mx-auto">New Password</CardTitle>
+          <CardDescription className="mx-auto">
+            Enter your new password below
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -71,16 +87,16 @@ const LoginPage = () => {
               <div className="grid gap-2">
                 <FormField
                   control={form.control}
-                  name="email"
+                  name="newPassword"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email</FormLabel>
+                      <FormLabel>New Password</FormLabel>
                       <FormControl>
                         <Input
                           {...field}
                           disabled={isPending}
-                          placeholder="email@example.com"
-                          type="email"
+                          placeholder="********"
+                          type="password"
                         />
                       </FormControl>
                       <FormMessage />
@@ -91,20 +107,15 @@ const LoginPage = () => {
               <div className="grid gap-2">
                 <FormField
                   control={form.control}
-                  name="password"
+                  name="confirmPassword"
                   render={({ field }) => (
                     <FormItem>
-                      <div className="flex items-center">
-                        <FormLabel>Password</FormLabel>
-                        <Link href="/auth/reset" className="ml-auto inline-block text-sm underline">
-                          Forgot your password?
-                        </Link>
-                      </div>
+                      <FormLabel>Confirm Password</FormLabel>
                       <FormControl>
                         <Input
                           {...field}
                           disabled={isPending}
-                          placeholder="**********"
+                          placeholder="********"
                           type="password"
                         />
                       </FormControl>
@@ -114,8 +125,9 @@ const LoginPage = () => {
                 />
               </div>
               <FormError message={error} />
+              <FormSuccess message={success} />
               <Button type="submit" disabled={isPending} className="w-full">
-                Login
+                Reset Password
               </Button>
             </form>
           </Form>
@@ -125,4 +137,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default ResetPage;
