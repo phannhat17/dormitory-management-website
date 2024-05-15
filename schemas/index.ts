@@ -52,6 +52,10 @@ export const ResetPasswordLoggedIn = z
   .refine((data) => data.newPassword === data.confirmPassword, {
     message: "Passwords must match",
     path: ["confirmPassword"],
+  })
+  .refine((data) => data.oldPassword !== data.newPassword, {
+    message: "New password must be different from old password",
+    path: ["newPassword"],
   });
 
 export const CreateUserSchema = z.object({

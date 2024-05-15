@@ -1,7 +1,8 @@
 'use client';
 
 import * as z from "zod";
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { ResetPassword } from "@/schemas";
 import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
@@ -30,6 +31,7 @@ import { forgotPassword } from "@/actions/reset";
 const ResetPage = () => {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
+  const router = useRouter();
 
   const [error, setError] = useState<string | undefined>("");
   const [success, setSuccess] = useState<string | undefined>("");
@@ -48,13 +50,24 @@ const ResetPage = () => {
     setSuccess("");
 
     startTransition(() => {
-      forgotPassword(values, token) 
+      forgotPassword(values, token)
         .then((data) => {
           setError(data?.error);
           setSuccess(data?.success);
         })
     });
   };
+
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => {
+        router.push('/auth/login');
+      }, 2000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [success, router]);
+
 
   return (
     <div className="flex min-h-screen items-center justify-center">

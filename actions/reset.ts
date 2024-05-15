@@ -18,8 +18,8 @@ import { addMinutes, isBefore, differenceInMinutes } from "date-fns";
 import { signOut } from "@/auth";
 
 const MAX_FAILED_ATTEMPTS = 5;
-const LOCKOUT_DURATION = 10; // in minutes
-const RESET_DURATION = 3; // in minutes
+const LOCKOUT_DURATION = 10;
+const RESET_DURATION = 3;
 
 export const forgotPassword = async (
   values: z.infer<typeof ResetPassword>,
@@ -75,7 +75,6 @@ export const resetPassword = async (
 
   const now = new Date();
 
-  // Check if the user is locked out
   if (user.lockoutUntil && isBefore(now, user.lockoutUntil)) {
     return {
       error:
@@ -83,7 +82,6 @@ export const resetPassword = async (
     };
   }
 
-  // Reset failed attempts if the last failed attempt was more than RESET_DURATION minutes ago
   if (
     user.lastFailedAttempt &&
     differenceInMinutes(now, user.lastFailedAttempt) > RESET_DURATION
@@ -104,7 +102,6 @@ export const resetPassword = async (
   const passwordMatch = await bcrypt.compare(oldPassword, user.password);
 
   if (!passwordMatch) {
-    // Increment failed attempts
     const newFailedAttempts = user.failedAttempts + 1;
     let lockoutUntil = null;
 

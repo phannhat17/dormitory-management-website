@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useTransition } from "react";
+import React, { useState, useTransition, useEffect } from "react";
 import * as z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -25,7 +25,7 @@ import { Input } from "@/components/ui/input";
 import { FormError } from "@/components/form/form-error";
 import { FormSuccess } from "@/components/form/form-success";
 import { resetPassword } from "@/actions/reset";
-
+import { logout } from "@/actions/logout"; 
 const ChangePasswordForm = () => {
   const [error, setError] = useState<string | undefined>("");
   const [success, setSuccess] = useState<string | undefined>("");
@@ -51,6 +51,15 @@ const ChangePasswordForm = () => {
       });
     });
   };
+
+  useEffect(() => {
+    if (success) {
+      logout();
+    }
+  }, [success]);
+
+
+
 
   return (
     <Card x-chunk="dashboard-04-chunk-1">
