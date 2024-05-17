@@ -1,8 +1,8 @@
 "use server";
 
+import { auth } from "@/auth";
 import { getAllFeedback } from "@/data/feedback";
 import { getTotalUserCount, getUsers } from "@/data/user";
-import { auth } from "@/auth";
 
 export const getTotalUser = async () => {
   const numUser = await getTotalUserCount();

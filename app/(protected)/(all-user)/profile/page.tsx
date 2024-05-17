@@ -1,17 +1,17 @@
 "use client";
 
-import React, { useState } from "react";
-import ProfileCard from "@/components/profile/ProfileCard";
-import Link from "next/link";
-import { useCurrentUser } from "@/hooks/use-current-user";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
-import FeedbackForm from "@/components/feedback/FeedbackForm";
 import ChangePasswordForm from "@/components/auth/ChangePasswordForm";
+import FeedbackForm from "@/components/feedback/FeedbackForm";
+import ProfileCard from "@/components/profile/ProfileCard";
+import {
+    Card,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from "@/components/ui/card";
+import { useCurrentUser } from "@/hooks/use-current-user";
+import Link from "next/link";
+import { useState } from "react";
 
 export default function Profile() {
   const user = useCurrentUser();

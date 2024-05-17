@@ -1,15 +1,14 @@
 "use client"
 
-import React from "react";
+import { Badge } from "@/components/ui/badge";
 import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
 } from "@/components/ui/card";
 import { useCurrentUser } from "@/hooks/use-current-user";
-import { Badge } from "@/components/ui/badge";
 
 
 const ProfileCard = () => {

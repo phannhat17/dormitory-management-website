@@ -1,11 +1,11 @@
 "use server";
 
-import * as z from "zod";
 import { db } from "@/lib/db";
 import { CreateUserSchema } from "@/schemas";
-import escapeHtml from "escape-html";
-import { checkAdmin } from "./check-permission";
 import { Gender } from "@prisma/client";
+import escapeHtml from "escape-html";
+import * as z from "zod";
+import { checkAdmin } from "./check-permission";
 
 export const createUser = async (values: z.infer<typeof CreateUserSchema>) => {
   const isAdmin = await checkAdmin();

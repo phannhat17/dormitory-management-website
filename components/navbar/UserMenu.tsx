@@ -1,15 +1,15 @@
 // UserMenu.tsx
-import Link from "next/link";
-import { CircleUser } from "lucide-react";
-import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { CircleUser } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 // Define the props interface
 interface UserMenuProps {

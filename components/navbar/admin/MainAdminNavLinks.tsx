@@ -1,6 +1,6 @@
 // MainNavLinks.tsx
-import Link from "next/link";
 import { School } from "lucide-react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const MainAdminNavLinks = () => {
@@ -17,39 +17,35 @@ const MainAdminNavLinks = () => {
       </Link>
       <Link
         href="/admin"
-        className={`transition-colors hover:text-foreground ${
-          pathname === "/admin" ? "text-foreground" : "text-muted-foreground"
-        }`}
+        className={`transition-colors hover:text-foreground ${pathname === "/admin" ? "text-foreground" : "text-muted-foreground"
+          }`}
       >
         Dashboard
       </Link>
       <Link
         href="/admin/manage-user"
-        className={`transition-colors hover:text-foreground ${
-          pathname === "/admin/manage-user"
+        className={`transition-colors hover:text-foreground ${pathname === "/admin/manage-user"
             ? "text-foreground"
             : "text-muted-foreground"
-        }`}
+          }`}
       >
         Users
       </Link>
       <Link
         href="/admin/manage-room"
-        className={`transition-colors hover:text-foreground ${
-          pathname === "/admin/manage-room"
+        className={`transition-colors hover:text-foreground ${pathname === "/admin/manage-room"
             ? "text-foreground"
             : "text-muted-foreground"
-        }`}
+          }`}
       >
         Rooms
       </Link>
       <Link
         href="/admin/manage-feedback"
-        className={`transition-colors hover:text-foreground ${
-          pathname === "/admin/manage-feedback"
+        className={`transition-colors hover:text-foreground ${pathname === "/admin/manage-feedback"
             ? "text-foreground"
             : "text-muted-foreground"
-        }`}
+          }`}
       >
         Feedbacks
       </Link>

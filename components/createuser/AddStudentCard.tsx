@@ -1,22 +1,21 @@
-import React from 'react';
-import { useFormContext } from 'react-hook-form';
-import { z } from "zod";
-import { CreateUserSchema } from "@/schemas";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle
-} from "@/components/ui/card";
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { FormError } from "@/components/form/form-error";
 import { FormSuccess } from "@/components/form/form-success";
-import { useState } from 'react';
-import ExcelJS from 'exceljs';
+import { Button } from "@/components/ui/button";
+import {
+    Card,
+    CardContent,
+    CardHeader,
+    CardTitle
+} from "@/components/ui/card";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { CreateUserSchema } from "@/schemas";
 import { Gender } from '@prisma/client';
+import ExcelJS from 'exceljs';
+import React, { useState } from 'react';
+import { useFormContext } from 'react-hook-form';
+import { z } from "zod";
 
 interface StudentData {
   studentid: string;
@@ -78,7 +77,7 @@ const AddStudentCard: React.FC<AddStudentCardProps> = ({ isPending, error, succe
         <Form {...form}>
           
           <div className="flex w-full max-w-md items-center space-x-2 mb-4">
-            <Label htmlFor="excel" className="w-1/3">Import excel file</Label>
+            <Label htmlFor="excel" className="w-1/3">import excel file</Label>
             <Input type="file" accept=".xlsx" onChange={handleFileUpload}/>
           </div>
           <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">

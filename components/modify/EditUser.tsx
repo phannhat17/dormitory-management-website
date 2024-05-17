@@ -1,19 +1,17 @@
 "use client"
 
+import { getUserInfo } from "@/actions/user"
 import { Button } from "@/components/ui/button"
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { getUserInfo } from "@/actions/user"
-import React, { useEffect, useState } from "react";
 import {
     Select,
     SelectContent,
@@ -22,8 +20,9 @@ import {
     SelectLabel,
     SelectTrigger,
     SelectValue,
-  } from "@/components/ui/select"
-import { UserRole, UserStatus } from "@prisma/client";
+} from "@/components/ui/select"
+import { UserRole, UserStatus } from "@prisma/client"
+import React, { useEffect, useState } from "react"
 
 interface ReusableAlertDialogProps {
     isOpen: boolean;

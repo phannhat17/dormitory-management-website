@@ -1,11 +1,11 @@
-import Credentials from "next-auth/providers/credentials";
-import { AuthError, type NextAuthConfig } from "next-auth";
-import { LoginSchema } from "@/schemas";
 import { getUserByEmail, getUserById } from "@/data/user";
-import bcrypt from "bcryptjs";
-import { PrismaAdapter } from "@auth/prisma-adapter";
 import { db } from "@/lib/db";
-import { addMinutes, isBefore, differenceInMinutes } from "date-fns";
+import { LoginSchema } from "@/schemas";
+import { PrismaAdapter } from "@auth/prisma-adapter";
+import bcrypt from "bcryptjs";
+import { addMinutes, differenceInMinutes, isBefore } from "date-fns";
+import { AuthError, type NextAuthConfig } from "next-auth";
+import Credentials from "next-auth/providers/credentials";
 
 const MAX_FAILED_ATTEMPTS = 5;
 const LOCKOUT_DURATION = 10; // in minutes

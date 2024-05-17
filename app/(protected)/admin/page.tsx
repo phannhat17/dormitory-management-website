@@ -1,17 +1,17 @@
 "use client";
 
 import {
-  SquareX,
-  SquareCheck,
-  ShieldCheck,
-  GraduationCap,
-  Users,
-  Ban,
+    Ban,
+    GraduationCap,
+    ShieldCheck,
+    SquareCheck,
+    SquareX,
+    Users,
 } from "lucide-react";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import React, { useEffect, useState } from "react";
 import { getTotalUser } from "@/actions/db-action";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useEffect, useState } from "react";
 
 export default function AdminDashboard() {
   const [totalUser, setTotalUser] = useState<number | undefined>(undefined);

@@ -1,6 +1,6 @@
 // MobileNavLinks.tsx
-import Link from "next/link";
 import { School } from "lucide-react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const MobileAdminNavLinks = () => {
@@ -14,33 +14,29 @@ const MobileAdminNavLinks = () => {
       </Link>
       <Link
         href="/admin"
-        className={`hover:text-foreground ${
-          pathname === "/admin" ? "" : "text-muted-foreground"
-        }`}
+        className={`hover:text-foreground ${pathname === "/admin" ? "" : "text-muted-foreground"
+          }`}
       >
         Dashboard
       </Link>
       <Link
         href="/admin/manage-user"
-        className={`hover:text-foreground ${
-          pathname === "/admin/manage-user" ? "" : "text-muted-foreground"
-        }`}
+        className={`hover:text-foreground ${pathname === "/admin/manage-user" ? "" : "text-muted-foreground"
+          }`}
       >
         Users
       </Link>
       <Link
         href="/admin/manage-room"
-        className={`hover:text-foreground ${
-          pathname === "/admin/manage-room" ? "" : "text-muted-foreground"
-        }`}
+        className={`hover:text-foreground ${pathname === "/admin/manage-room" ? "" : "text-muted-foreground"
+          }`}
       >
         Rooms
       </Link>
       <Link
         href="/admin/manage-feedback"
-        className={`hover:text-foreground ${
-          pathname === "/admin/manage-feedback" ? "" : "text-muted-foreground"
-        }`}
+        className={`hover:text-foreground ${pathname === "/admin/manage-feedback" ? "" : "text-muted-foreground"
+          }`}
       >
         Feedbacks
       </Link>
