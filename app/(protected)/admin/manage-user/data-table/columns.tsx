@@ -29,26 +29,26 @@ export type Usertable = {
 };
 export const statuses = [
   {
-    label: "STAYING",
-    value: "STAYING",
+    label: "Stay",
+    value: UserStatus.STAYING,
   },
   {
-    label: "NOT_STAYING",
-    value: "NOT_STAYING",
+    label: "Not stay",
+    value: UserStatus.NOT_STAYING,
   },
   {
-    label: "BANNED",
-    value: "BANNED",
+    label: "Banned",
+    value: UserStatus.BANNED,
   },
 ];
 export const gender = [
   {
-    label: "MALE",
-    value: "MALE",
+    label: "Male",
+    value: Gender.MALE,
   },
   {
-    label: "FEMALE",
-    value: "FEMALE",
+    label: "Female",
+    value: Gender.FEMALE,
   },
 ];
 export const excelColumn = [
@@ -146,7 +146,7 @@ export const columns: ColumnDef<Usertable>[] = [
     enableSorting: true,
   },
   {
-    accessorKey: "gender",
+    accessorKey: "gender", 
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Gender" />
     ),

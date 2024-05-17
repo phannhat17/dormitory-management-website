@@ -4,14 +4,15 @@ import { RefreshButton } from "@/components/data-table/refresh-button";
 import { Button } from "@/components/ui/button";
 import { FileUp } from "lucide-react";
 import Link from "next/link";
-import { Usertable, columns, excelColumn } from "./data-table/columns";
+import { Roomstable, columns, excelColumn } from "./data-table/columns";
 import { DataTable } from "./data-table/data-table";
+import { getListRooms } from "@/actions/room";
 
-async function getData(): Promise<Usertable[]> {
-  const response = await getListUsers();
+async function getData(): Promise<Roomstable[]> {
+  const response = await getListRooms();
 
-  if (response.users && response.total) {
-    return response.users;
+  if (response.rooms) {
+    return response.rooms;
   } else {
     throw new Error("Invalid response from when get list users!");
   }
@@ -30,7 +31,7 @@ export default async function ManageUsers() {
           <div className="ml-auto flex items-center gap-2">
             <ExportButton data={users} columns={excelColumn} filename="all_users" />
             <Link
-              href="/admin/create-user"
+              href="/admin/create-room"
             >
               <Button
                 size="sm"
@@ -38,7 +39,7 @@ export default async function ManageUsers() {
                 className="h-7 gap-1 text-sm"
               >
                 <FileUp className="h-3.5 w-3.5" />
-                <span className="sr-only sm:not-sr-only">Add student</span>
+                <span className="sr-only sm:not-sr-only">Add room</span>
               </Button>
             </Link>
             <RefreshButton />
