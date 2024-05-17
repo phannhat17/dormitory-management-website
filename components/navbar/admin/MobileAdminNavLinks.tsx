@@ -29,22 +29,6 @@ const MobileAdminNavLinks = () => {
         Users
       </Link>
       <Link
-        href="/admin/manage-contract"
-        className={`hover:text-foreground ${
-          pathname === "/admin/manage-contract" ? "" : "text-muted-foreground"
-        }`}
-      >
-        Contracts
-      </Link>
-      <Link
-        href="/admin/manage-invoice"
-        className={`hover:text-foreground ${
-          pathname === "/admin/manage-invoice" ? "" : "text-muted-foreground"
-        }`}
-      >
-        Invoices
-      </Link>
-      <Link
         href="/admin/manage-room"
         className={`hover:text-foreground ${
           pathname === "/admin/manage-room" ? "" : "text-muted-foreground"

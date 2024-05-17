@@ -34,26 +34,6 @@ const MainAdminNavLinks = () => {
         Users
       </Link>
       <Link
-        href="/admin/manage-contract"
-        className={`transition-colors hover:text-foreground ${
-          pathname === "/admin/manage-contract"
-            ? "text-foreground"
-            : "text-muted-foreground"
-        }`}
-      >
-        Contracts
-      </Link>
-      <Link
-        href="/admin/manage-invoice"
-        className={`transition-colors hover:text-foreground ${
-          pathname === "/admin/manage-invoice"
-            ? "text-foreground"
-            : "text-muted-foreground"
-        }`}
-      >
-        Invoices
-      </Link>
-      <Link
         href="/admin/manage-room"
         className={`transition-colors hover:text-foreground ${
           pathname === "/admin/manage-room"

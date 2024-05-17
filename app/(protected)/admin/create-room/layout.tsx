@@ -1,7 +1,7 @@
 
 export const metadata = {
-    title: "Mange User",
-    description: "Mange User Page",
+    title: "Create Room",
+    description: "Create Room Page",
 };
 
 export default function CreateUserLayout({
