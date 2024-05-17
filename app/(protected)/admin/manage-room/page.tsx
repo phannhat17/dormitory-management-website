@@ -1,4 +1,4 @@
-import { getListUsers } from "@/actions/db-action";
+import { getListRooms } from "@/actions/room";
 import { ExportButton } from "@/components/data-table/export-button";
 import { RefreshButton } from "@/components/data-table/refresh-button";
 import { Button } from "@/components/ui/button";
@@ -6,7 +6,6 @@ import { FileUp } from "lucide-react";
 import Link from "next/link";
 import { Roomstable, columns, excelColumn } from "./data-table/columns";
 import { DataTable } from "./data-table/data-table";
-import { getListRooms } from "@/actions/room";
 
 async function getData(): Promise<Roomstable[]> {
   const response = await getListRooms();

@@ -128,14 +128,14 @@ export const columns: ColumnDef<Roomstable>[] = [
   {
     accessorKey: "gender",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Gender" />
+      <DataTableColumnHeader column={column} title="Room for" />
     ),
     cell: ({ row }) => {
-      const status = statuses.find(
-        (status) => status.value === row.getValue("status")
+      const gender = genders.find(
+        (gender) => gender.value === row.getValue("gender")
       );
 
-      if (!status) {
+      if (!gender) {
         return null;
       }
 
@@ -146,8 +146,8 @@ export const columns: ColumnDef<Roomstable>[] = [
               row.getValue("gender") === "MALE"
                 ? "border-transparent bg-emerald-500 text-primary-foreground shadow hover:bg-emerald-500/80"
                 : row.getValue("gender") === "FEMALE"
-                  ? "border-transparent bg-[#d7dbfa] text-[#543107]-foreground shadow hover:bg-[#d7dbfa]/80"
-                  : ""
+                ? "border-transparent bg-[#d7dbfa] text-[#543107]-foreground shadow hover:bg-[#d7dbfa]/80"
+                : ""
             }
           >
             {row.getValue("gender")}
@@ -165,11 +165,7 @@ export const columns: ColumnDef<Roomstable>[] = [
     accessorKey: "Number users",
     header: "Number users",
     cell: ({ row }) => {
-      return (
-        <div>
-          {row.getValue("current")}
-        </div>
-      );
+      return <div>{row.getValue("current")}</div>;
     },
     enableSorting: true,
     enableHiding: false,
@@ -191,13 +187,11 @@ export const columns: ColumnDef<Roomstable>[] = [
       return (
         <div>
           <Badge
-            variant={row.getValue("status") === "BANNED" ? "destructive" : null}
+            variant={row.getValue("status") === "FULL" ? "destructive" : null}
             className={
-              row.getValue("status") === "NOT_STAYING"
-                ? "border-transparent bg-[#fbcb14] text-[#543107]-foreground shadow hover:bg-[#fbcb14]/80"
-                : row.getValue("status") === "STAYING"
-                  ? "border-transparent bg-emerald-500 text-primary-foreground shadow hover:bg-emerald-500/80"
-                  : ""
+              row.getValue("status") === "AVAILABLE"
+                ? "border-transparent bg-emerald-500 text-primary-foreground shadow hover:bg-emerald-500/80"
+                : ""
             }
           >
             {row.getValue("status")}
@@ -208,10 +202,18 @@ export const columns: ColumnDef<Roomstable>[] = [
     filterFn: (row, id, value) => {
       return value.includes(row.getValue(id));
     },
+    enableSorting: true,
+    enableHiding: false,
   },
   {
-    id: "price",
-    cell: ActionsCell,
+    accessorKey: "price",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Price" />
+    ),
+    cell: ({ row }) => {
+      return <div className="w-[80px] font-medium">{row.getValue("price")} VND</div>;
+    },
+    enableSorting: true,
   },
   {
     id: "actions",
