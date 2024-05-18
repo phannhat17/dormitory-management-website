@@ -1,3 +1,4 @@
+import { Gender } from "@prisma/client";
 import * as z from "zod";
 
 const passwordPolicySchema = z
@@ -85,4 +86,19 @@ export const CreateContractSchema = z.object({
   term: z.string().min(1, { message: "Room ID is required" }),
   startDate: z.date(),
   endDate: z.date(),
+});
+
+export const updateRoomSchema = z.object({
+  originalId: z.string(),
+  newId: z.string(),
+  gender: z.nativeEnum(Gender),
+  price: z.number().positive(),
+  facilities: z.array(
+    z.object({
+      id: z.string().optional(),
+      status: z.string(),
+      price: z.number().positive(),
+    })
+  ),
+  users: z.array(z.string()),
 });

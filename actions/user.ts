@@ -78,6 +78,12 @@ export const deleteUser = async (id: string) => {
 };
 
 export const getUserInfo = async (id: string) => {
+  const isAdmin = await checkAdmin();
+
+  if (!isAdmin) {
+    return { error: "You must be an admin to do this action!" };
+  }
+
   const user = await db.user.findUnique({
     where: { id },
     select: {

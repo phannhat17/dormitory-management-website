@@ -1,8 +1,8 @@
 "use client";
 
-import { deleteUser } from "@/actions/user";
+import { deleteRoom } from "@/actions/room";
 import { DataTableColumnHeader } from "@/components/data-table/DataTableColumnHeader";
-import EditUserCard from "@/components/modify/EditUser";
+import EditRoomCard from "@/components/modify/EditRoom";
 import ReusableAlertDialog from "@/components/modify/ReusableAlertDialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -65,10 +65,10 @@ const ActionsCell: React.FC<ActionsCellProps> = ({ row }) => {
 
   const router = useRouter();
 
-  const user = row.original
+  const room = row.original
 
   const handleDelete = () => {
-    deleteUser(user.id)
+    deleteRoom(room.id)
       .then((data) => {
         if (data.success) {
           toast.success(data.success);
@@ -96,11 +96,11 @@ const ActionsCell: React.FC<ActionsCellProps> = ({ row }) => {
       </DropdownMenu>
 
 
-      <EditUserCard
+      <EditRoomCard
         isOpen={isEditDialogOpen}
         setIsOpen={isEditDialogOpen ?
           setIsEditDialogOpen : setIsDeleteDialogOpen}
-        userID={user.id}
+        roomID={room.id}
         onConfirm={() => { }}
       />
 
@@ -109,7 +109,7 @@ const ActionsCell: React.FC<ActionsCellProps> = ({ row }) => {
         setIsOpen={isDeleteDialogOpen ?
           setIsDeleteDialogOpen : setIsEditDialogOpen}
         title="Are you absolutely sure?"
-        description="This action cannot be undone. This will permanently delete your account and remove your data from our servers."
+        description="This action cannot be undone"
         confirmButtonText="Continue"
         cancelButtonText="Cancel"
         onConfirm={handleDelete}
