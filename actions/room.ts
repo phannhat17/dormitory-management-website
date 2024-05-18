@@ -1,12 +1,13 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { Gender, RoomStatus } from "@prisma/client";
+import { Gender, RoomStatus, UserStatus } from "@prisma/client";
 import escapeHtml from "escape-html";
 import * as z from "zod";
 import { checkAdmin } from "./check-permission";
 import { getRooms } from "@/data/room";
 import { updateRoomSchema } from "@/schemas";
+import { updateUserStatus } from "./user";
 
 export const getListRooms = async () => {
   const isAdmin = await checkAdmin();
@@ -66,15 +67,27 @@ export const deleteRoom = async (id: string) => {
   }
 
   try {
+    // Get users in the room
+    const usersInRoom = await db.user.findMany({
+      where: { currentRoomId: id },
+      select: { id: true },
+    });
+
+    // Update user status to NOT_STAYING
+    const updateUserStatusPromises = usersInRoom.map((user) =>
+      updateUserStatus(user.id, UserStatus.NOT_STAYING)
+    );
+    await Promise.all(updateUserStatusPromises);
+
+    // Disassociate users from the room
     await db.user.updateMany({
       where: { currentRoomId: id },
       data: { currentRoomId: null },
     });
 
+    // Delete the room
     await db.room.delete({
-      where: {
-        id: id,
-      },
+      where: { id: id },
     });
 
     return { success: "Room deleted successfully" };
@@ -187,24 +200,3 @@ export const updateRoom = async (data: z.infer<typeof updateRoomSchema>) => {
   }
 };
 
-export const getUsers = async () => {
-  const isAdmin = await checkAdmin();
-
-  if (!isAdmin) {
-    return { error: "You must be an admin to create user!" };
-  }
-
-  try {
-    const users = await db.user.findMany({
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        gender: true,
-      },
-    });
-    return { users };
-  } catch (error) {
-    return { error: "Failed to fetch users" };
-  }
-};

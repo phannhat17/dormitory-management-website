@@ -1,6 +1,7 @@
 "use client";
 
-import { getRoomInfo, updateRoom, getUsers } from "@/actions/room";
+import { getRoomInfo, updateRoom } from "@/actions/room";
+import { getUsers, updateUserStatus } from "@/actions/user";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -21,7 +22,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { Gender } from "@prisma/client";
+import { Gender, UserStatus } from "@prisma/client";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useRouter } from 'next/navigation';
@@ -108,7 +109,7 @@ const EditRoomCard: React.FC<EditRoomCardProps> = ({
             toast.error("Cannot save changes. The number of users exceeds the maximum room capacity.");
             return;
         }
-
+    
         const response = await updateRoom({
             originalId: originalRoomId,
             newId: newRoomId,
@@ -117,9 +118,18 @@ const EditRoomCard: React.FC<EditRoomCardProps> = ({
             facilities: facilities.map((facility) => facility.id),
             users: users.map((user) => user.id),
         });
-
+    
         if ("success" in response) {
-            toast.success(response.success);
+            const updateUserStatusPromises = users.map(user => updateUserStatus(user.id, UserStatus.STAYING));
+            const updateUserStatusResponses = await Promise.all(updateUserStatusPromises);
+    
+            const failedUpdates = updateUserStatusResponses.filter(res => res.error);
+            if (failedUpdates.length > 0) {
+                toast.error("Room saved, but some user statuses were not updated.");
+            } else {
+                toast.success(response.success);
+            }
+            
             onConfirm();
             router.refresh();
             setIsOpen(false);
