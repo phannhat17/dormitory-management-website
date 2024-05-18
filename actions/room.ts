@@ -67,13 +67,11 @@ export const deleteRoom = async (id: string) => {
   }
 
   try {
-    // Get users in the room
     const usersInRoom = await db.user.findMany({
       where: { currentRoomId: id },
       select: { id: true },
     });
 
-    // Update user status to NOT_STAYING
     const updateUserStatusPromises = usersInRoom.map((user) =>
       updateUserStatus(user.id, UserStatus.NOT_STAYING)
     );
