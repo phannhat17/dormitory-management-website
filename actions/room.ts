@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { Gender } from "@prisma/client";
+import { Gender, RoomStatus } from "@prisma/client";
 import escapeHtml from "escape-html";
 import * as z from "zod";
 import { checkAdmin } from "./check-permission";
@@ -159,12 +159,19 @@ export const updateRoom = async (data: z.infer<typeof updateRoomSchema>) => {
       };
     }
 
+    const roomStatus =
+      users.length === existingRoom.max
+        ? RoomStatus.FULL
+        : RoomStatus.AVAILABLE;
+
     const updatedRoom = await db.room.update({
       where: { id: originalId },
       data: {
         id: newId,
         gender,
         price,
+        status: roomStatus,
+        current: users.length,
         Facilities: {
           set: facilities.map((facilityId) => ({ id: Number(facilityId) })),
         },
@@ -193,7 +200,7 @@ export const getUsers = async () => {
         id: true,
         name: true,
         email: true,
-        gender: true, // Add gender here
+        gender: true,
       },
     });
     return { users };

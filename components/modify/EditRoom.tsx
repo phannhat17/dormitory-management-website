@@ -23,7 +23,8 @@ import {
 } from "@/components/ui/select";
 import { Gender } from "@prisma/client";
 import React, { useEffect, useState } from "react";
-import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
+import { useRouter } from 'next/navigation';
 
 
 interface EditRoomCardProps {
@@ -39,11 +40,13 @@ const EditRoomCard: React.FC<EditRoomCardProps> = ({
     setIsOpen,
     onConfirm,
 }) => {
+    const router = useRouter();
+
     const [originalRoomId, setOriginalRoomId] = useState<string>("");
     const [newRoomId, setNewRoomId] = useState<string>("");
     const [roomGender, setRoomGender] = useState<Gender>(Gender.FEMALE);
     const [roomPrice, setRoomPrice] = useState<string>("");
-    const [maxCapacity, setMaxCapacity] = useState<number>(0); // Added state for max capacity
+    const [maxCapacity, setMaxCapacity] = useState<number>(0);
     const [facilities, setFacilities] = useState<any[]>([]);
     const [users, setUsers] = useState<any[]>([]);
     const [allUsers, setAllUsers] = useState<any[]>([]);
@@ -113,10 +116,12 @@ const EditRoomCard: React.FC<EditRoomCardProps> = ({
         });
 
         if ("success" in response) {
+            toast.success(response.success);
             onConfirm();
+            router.refresh();
             setIsOpen(false);
         } else {
-            setError(response.error);
+            toast(response.error);
         }
     };
 
