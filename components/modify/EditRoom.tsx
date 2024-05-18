@@ -52,35 +52,38 @@ const EditRoomCard: React.FC<EditRoomCardProps> = ({
     const [allUsers, setAllUsers] = useState<any[]>([]);
     const [searchQuery, setSearchQuery] = useState<string>("");
     const [filteredUsers, setFilteredUsers] = useState<any[]>([]);
-    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        const fetchRoomInfo = async () => {
-            const response = await getRoomInfo(roomID);
-            if (response !== null && "error" in response) {
-                setError(response.error);
-            } else if (response !== null) {
-                setOriginalRoomId(response.id);
-                setNewRoomId(response.id);
-                setRoomGender(response.gender);
-                setRoomPrice(response.price.toString());
-                setMaxCapacity(response.max);
-                setFacilities(response.Facilities || []);
-                setUsers(response.Users || []);
-                setError(null);
-            }
-        };
-        const fetchUsers = async () => {
-            const response = await getUsers();
-            if (response !== null && "error" in response) {
-                setError(response.error || null);
-            } else if (response !== null) {
-                setAllUsers(response.users);
-            }
-        };
-        fetchRoomInfo();
-        fetchUsers();
-    }, [roomID]);
+        if (isOpen) {
+            const fetchRoomInfo = async () => {
+                const response = await getRoomInfo(roomID);
+                if (response !== null && "error" in response) {
+                    toast.error(response.error);
+                } else if (response !== null) {
+                    setOriginalRoomId(response.id);
+                    setNewRoomId(response.id);
+                    setRoomGender(response.gender);
+                    setRoomPrice(response.price.toString());
+                    setMaxCapacity(response.max);
+                    setFacilities(response.Facilities || []);
+                    setUsers(response.Users || []);
+                }
+            };
+            const fetchUsers = async () => {
+                const response = await getUsers();
+                if (response !== null && "error" in response) {
+                    toast.error(response.error || null);
+                } else if (response !== null) {
+                    setAllUsers(response.users);
+                }
+            };
+            fetchRoomInfo();
+            fetchUsers();
+        } else {
+            setSearchQuery("");
+            setFilteredUsers([]);
+        }
+    }, [isOpen, roomID]);
 
     useEffect(() => {
         if (searchQuery) {
@@ -88,21 +91,21 @@ const EditRoomCard: React.FC<EditRoomCardProps> = ({
                 allUsers.filter(
                     (user) =>
                         user.id.toLowerCase().includes(searchQuery.toLowerCase()) &&
-                        user.gender === roomGender
+                        user.gender === roomGender &&
+                        !users.some((u) => u.id === user.id)
                 )
             );
         } else {
             setFilteredUsers([]);
         }
-    }, [searchQuery, allUsers, roomGender]);
-
+    }, [searchQuery, allUsers, roomGender, users]);
     const handleGenderChange = (value: Gender) => {
         setRoomGender(value);
     };
 
     const handleSave = async () => {
         if (users.length > maxCapacity) {
-            setError("Cannot save changes. The number of users exceeds the maximum room capacity.");
+            toast.error("Cannot save changes. The number of users exceeds the maximum room capacity.");
             return;
         }
 
@@ -121,13 +124,13 @@ const EditRoomCard: React.FC<EditRoomCardProps> = ({
             router.refresh();
             setIsOpen(false);
         } else {
-            toast(response.error);
+            toast.error(response.error);
         }
     };
 
     const handleAddUser = (userId: string) => {
         if (users.length >= maxCapacity) {
-            setError("Cannot add more users. Room capacity reached.");
+            toast.error("Cannot add more users. Room capacity reached.");
             return;
         }
         const user = allUsers.find((user) => user.id === userId);
@@ -135,12 +138,10 @@ const EditRoomCard: React.FC<EditRoomCardProps> = ({
             setUsers([...users, user]);
         }
         setSearchQuery("");
-        setError(null);
     };
 
     const handleRemoveUser = (userId: string) => {
         setUsers(users.filter((user) => user.id !== userId));
-        setError(null);
     };
 
     return (
@@ -153,7 +154,6 @@ const EditRoomCard: React.FC<EditRoomCardProps> = ({
                         you're done.
                     </DialogDescription>
                 </DialogHeader>
-                {error && <div className="text-red-500">{error}</div>}
                 <div className="grid gap-4 py-4">
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label htmlFor="id" className="text-right">
