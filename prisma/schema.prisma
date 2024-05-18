@@ -18,6 +18,11 @@ enum UserStatus {
   BANNED
 }
 
+enum RoomStatus {
+  FULL
+  AVAILABLE
+}
+
 enum Gender {
   MALE
   FEMALE
@@ -28,7 +33,7 @@ model User {
   name              String?
   gender            Gender     @default(FEMALE)
   email             String?    @unique
-  password          String
+  password          String?
   role              UserRole   @default(STUDENT)
   status            UserStatus @default(NOT_STAYING)
   currentRoomId     String?
@@ -44,7 +49,7 @@ model User {
 
 model Room {
   id         String        @id
-  status     String
+  status     RoomStatus @default(AVAILABLE)
   gender     Gender     @default(FEMALE)
   current    Int
   max        Int

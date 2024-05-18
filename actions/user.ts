@@ -1,12 +1,11 @@
 "use server";
 
-import * as z from "zod";
-import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
 import { CreateUserSchema } from "@/schemas";
-import escapeHtml from "escape-html";
-import { checkAdmin } from "./check-permission";
 import { Gender } from "@prisma/client";
+import escapeHtml from "escape-html";
+import * as z from "zod";
+import { checkAdmin } from "./check-permission";
 
 export const createUser = async (values: z.infer<typeof CreateUserSchema>) => {
   const isAdmin = await checkAdmin();
@@ -30,14 +29,12 @@ export const createUser = async (values: z.infer<typeof CreateUserSchema>) => {
       const sanitizedStudentId = escapeHtml(studentid);
       const sanitizedName = escapeHtml(name);
       const sanitizedEmail = escapeHtml(email.toLowerCase());
-      const hashedPassword = await bcrypt.hash(studentid, 14); // Assuming student ID is used as password
       const sanitizedGender = escapeHtml(gender);
 
       return {
         id: sanitizedStudentId,
         name: sanitizedName,
         email: sanitizedEmail,
-        password: hashedPassword,
         gender: sanitizedGender as Gender,
       };
     })
@@ -81,6 +78,12 @@ export const deleteUser = async (id: string) => {
 };
 
 export const getUserInfo = async (id: string) => {
+  const isAdmin = await checkAdmin();
+
+  if (!isAdmin) {
+    return { error: "You must be an admin to do this action!" };
+  }
+
   const user = await db.user.findUnique({
     where: { id },
     select: {

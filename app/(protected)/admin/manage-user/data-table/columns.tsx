@@ -1,24 +1,24 @@
 "use client";
 
-import { ColumnDef } from "@tanstack/react-table";
-import { Gender, UserStatus } from "@prisma/client";
-import { DataTableColumnHeader } from "@/components/data-table/DataTableColumnHeader";
-import { Badge } from "@/components/ui/badge";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-  DropdownMenuItem,
-} from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import { MoreHorizontal } from "lucide-react";
 import { deleteUser } from "@/actions/user";
-import { toast } from "sonner"
+import { DataTableColumnHeader } from "@/components/data-table/DataTableColumnHeader";
+import EditUserCard from "@/components/modify/EditUser";
+import ReusableAlertDialog from "@/components/modify/ReusableAlertDialog";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Gender, UserStatus } from "@prisma/client";
+import { ColumnDef } from "@tanstack/react-table";
+import { MoreHorizontal } from "lucide-react";
 import { useRouter } from 'next/navigation';
 import { useState } from "react";
-import ReusableAlertDialog from "@/components/modify/ReusableAlertDialog";
-import EditUserCard from "@/components/modify/EditUser";
+import { toast } from "sonner";
 
 export type Usertable = {
   id: string;
@@ -29,26 +29,26 @@ export type Usertable = {
 };
 export const statuses = [
   {
-    label: "STAYING",
-    value: "STAYING",
+    label: "Stay",
+    value: UserStatus.STAYING,
   },
   {
-    label: "NOT_STAYING",
-    value: "NOT_STAYING",
+    label: "Not stay",
+    value: UserStatus.NOT_STAYING,
   },
   {
-    label: "BANNED",
-    value: "BANNED",
+    label: "Banned",
+    value: UserStatus.BANNED,
   },
 ];
 export const gender = [
   {
-    label: "MALE",
-    value: "MALE",
+    label: "Male",
+    value: Gender.MALE,
   },
   {
-    label: "FEMALE",
-    value: "FEMALE",
+    label: "Female",
+    value: Gender.FEMALE,
   },
 ];
 export const excelColumn = [
@@ -146,7 +146,7 @@ export const columns: ColumnDef<Usertable>[] = [
     enableSorting: true,
   },
   {
-    accessorKey: "gender",
+    accessorKey: "gender", 
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Gender" />
     ),

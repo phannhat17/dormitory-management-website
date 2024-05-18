@@ -1,17 +1,17 @@
 "use client";
 
-import React, { useState } from "react";
-import ProfileCard from "@/components/profile/ProfileCard";
-import Link from "next/link";
-import { useCurrentUser } from "@/hooks/use-current-user";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
-import FeedbackForm from "@/components/feedback/FeedbackForm";
 import ChangePasswordForm from "@/components/auth/ChangePasswordForm";
+import FeedbackForm from "@/components/feedback/FeedbackForm";
+import ProfileCard from "@/components/profile/ProfileCard";
+import {
+    Card,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from "@/components/ui/card";
+import { useCurrentUser } from "@/hooks/use-current-user";
+import Link from "next/link";
+import { useState } from "react";
 
 export default function Profile() {
   const user = useCurrentUser();
@@ -45,22 +45,26 @@ export default function Profile() {
           >
             Change password
           </Link>
-          <Link
-            href="#"
-            onClick={() => setOptionType("feedback")}
-            className={`font-semibold ${
-              optionType === "feedback" ? "text-primary" : ""
-            }`}
-          >
-            Feedback
-          </Link>
+          {user?.role === "STUDENT" && (
+            <Link
+              href="#"
+              onClick={() => setOptionType("feedback")}
+              className={`font-semibold ${
+                optionType === "feedback" ? "text-primary" : ""
+              }`}
+            >
+              Feedback
+            </Link>
+          )}
         </nav>
         <div className="grid gap-6">
           {optionType === "profile" ? (
             <ProfileCard />
-          ) : optionType === "changepassword"? (
+          ) : optionType === "changepassword" ? (
             <ChangePasswordForm />
-          ) : user?.role === "ADMIN" ? (
+          ) : user?.role === "STUDENT" ? (
+            <FeedbackForm />
+          ) : (
             <Card x-chunk="dashboard-04-chunk-1">
               <CardHeader>
                 <CardTitle className="text-2xl">Not available</CardTitle>
@@ -70,8 +74,6 @@ export default function Profile() {
                 </CardDescription>
               </CardHeader>
             </Card>
-          ) : (
-            <FeedbackForm />
           )}
         </div>
       </div>

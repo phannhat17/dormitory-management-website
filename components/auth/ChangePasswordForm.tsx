@@ -1,31 +1,31 @@
 "use client";
 
-import React, { useState, useTransition } from "react";
-import * as z from "zod";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { ResetPasswordLoggedIn } from "@/schemas";
-import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { logout } from "@/actions/logout";
+import { resetPassword } from "@/actions/reset";
 import { FormError } from "@/components/form/form-error";
 import { FormSuccess } from "@/components/form/form-success";
-import { resetPassword } from "@/actions/reset";
-
+import { Button } from "@/components/ui/button";
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from "@/components/ui/card";
+import {
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { ResetPasswordLoggedIn } from "@/schemas";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect, useState, useTransition } from "react";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
 const ChangePasswordForm = () => {
   const [error, setError] = useState<string | undefined>("");
   const [success, setSuccess] = useState<string | undefined>("");
@@ -51,6 +51,15 @@ const ChangePasswordForm = () => {
       });
     });
   };
+
+  useEffect(() => {
+    if (success) {
+      logout();
+    }
+  }, [success]);
+
+
+
 
   return (
     <Card x-chunk="dashboard-04-chunk-1">

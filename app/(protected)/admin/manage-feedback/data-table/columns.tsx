@@ -1,18 +1,18 @@
 "use client";
 
-import { ColumnDef } from "@tanstack/react-table";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-  DropdownMenuItem,
-} from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import { MoreHorizontal } from "lucide-react";
 import { deleteFeedback } from "@/actions/feedback";
-import { toast } from "sonner"
+import { Button } from "@/components/ui/button";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { ColumnDef } from "@tanstack/react-table";
+import { MoreHorizontal } from "lucide-react";
 import { useRouter } from 'next/navigation';
+import { toast } from "sonner";
 
 export type Feedbacktable = {
   id: number;
@@ -70,14 +70,14 @@ export const columns: ColumnDef<Feedbacktable>[] = [
     accessorKey: "userId",
     header: "User Id",
     cell: ({ row }) => (
-      <div className="w-[80px] font-medium">{row.getValue("userId")}</div>
+      <div>{row.getValue("userId")}</div>
     ),
   },
   {
     accessorKey: "userName",
     header: "User Name",
     cell: ({ row }) => (
-      <div className="w-[100px] font-medium">{row.getValue("userName")}</div>
+      <div>{row.getValue("userName")}</div>
     ),
   },
   {

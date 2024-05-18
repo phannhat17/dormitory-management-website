@@ -1,17 +1,18 @@
-import Credentials from "next-auth/providers/credentials";
-import { AuthError, type NextAuthConfig } from "next-auth";
-import { LoginSchema } from "@/schemas";
 import { getUserByEmail, getUserById } from "@/data/user";
-import bcrypt from "bcryptjs";
-import { PrismaAdapter } from "@auth/prisma-adapter";
 import { db } from "@/lib/db";
-import { addMinutes, isBefore, differenceInMinutes } from "date-fns";
+import { LoginSchema } from "@/schemas";
+import { PrismaAdapter } from "@auth/prisma-adapter";
+import bcrypt from "bcryptjs";
+import { addMinutes, differenceInMinutes, isBefore } from "date-fns";
+import { AuthError, type NextAuthConfig } from "next-auth";
+import Credentials from "next-auth/providers/credentials";
 
 const MAX_FAILED_ATTEMPTS = 5;
 const LOCKOUT_DURATION = 10; // in minutes
 const RESET_DURATION = 3; // in minutes
 
 export default {
+  trustHost: true,
   providers: [
     Credentials({
       async authorize(credentials) {
@@ -26,6 +27,8 @@ export default {
           const now = new Date();
 
           if (user.status === "BANNED") throw new AuthError("BannedUser");
+
+          if (user.password === null) throw new AuthError("FirstLogin");
 
           // Check if the user is locked out
           if (user.lockoutUntil && isBefore(now, user.lockoutUntil)) {

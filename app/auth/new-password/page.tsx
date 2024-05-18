@@ -1,35 +1,36 @@
 'use client';
 
-import * as z from "zod";
-import { useState, useTransition } from "react";
-import { ResetPassword } from "@/schemas";
-import { Button } from "@/components/ui/button";
-import { useForm } from "react-hook-form";
-import { useSearchParams } from "next/navigation";
-import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { forgotPassword } from "@/actions/reset";
 import { FormError } from "@/components/form/form-error";
 import { FormSuccess } from "@/components/form/form-success";
-import { forgotPassword } from "@/actions/reset";
+import { Button } from "@/components/ui/button";
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from "@/components/ui/card";
+import {
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { ResetPassword } from "@/schemas";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState, useTransition } from "react";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
 
 const ResetPage = () => {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
+  const router = useRouter();
 
   const [error, setError] = useState<string | undefined>("");
   const [success, setSuccess] = useState<string | undefined>("");
@@ -48,13 +49,24 @@ const ResetPage = () => {
     setSuccess("");
 
     startTransition(() => {
-      forgotPassword(values, token) 
+      forgotPassword(values, token)
         .then((data) => {
           setError(data?.error);
           setSuccess(data?.success);
         })
     });
   };
+
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => {
+        router.push('/auth/login');
+      }, 2000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [success, router]);
+
 
   return (
     <div className="flex min-h-screen items-center justify-center">

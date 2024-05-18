@@ -1,10 +1,9 @@
 "use client";
 
-import React from "react";
-import { Menu } from "lucide-react";
 import { logout } from "@/actions/logout";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Menu } from "lucide-react";
 
 import MainAdminNavLinks from "@/components/navbar/admin/MainAdminNavLinks";
 import MobileAdminNavLinks from "@/components/navbar/admin/MobileAdminNavLinks";

@@ -1,6 +1,6 @@
 // MobileNavLinks.tsx
-import Link from "next/link";
 import { School } from "lucide-react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const MobileUserNavLinks = () => {

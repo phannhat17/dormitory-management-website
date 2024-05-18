@@ -1,6 +1,6 @@
-import NextAuth, { type DefaultSession } from "next-auth";
-import {JWT} from "@auth/core/jwt";
-import { UserRole, UserStatus, Gender } from "@prisma/client";
+import "@auth/core/jwt";
+import { Gender, UserRole, UserStatus } from "@prisma/client";
+import { type DefaultSession } from "next-auth";
 
 export type ExtendedUser = DefaultSession["user"] & {
   role: UserRole;

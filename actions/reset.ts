@@ -1,25 +1,24 @@
 "use server";
 
-import * as z from "zod";
-import {
-  ResetPassword,
-  ResetFromSchema,
-  ResetPasswordLoggedIn,
-} from "@/schemas";
-import { db } from "@/lib/db";
-import bcrypt from "bcryptjs";
-import { auth } from "@/auth";
-import { sendPasswordResetEmail } from "@/lib/mail";
-import { generatePasswordResetToken } from "@/lib/token";
+import { auth, signOut } from "@/auth";
 import { getPasswordResetTokenByToken } from "@/data/password-reset-token";
 import { getUserByEmail, getUserById } from "@/data/user";
+import { db } from "@/lib/db";
+import { sendPasswordResetEmail } from "@/lib/mail";
+import { generatePasswordResetToken } from "@/lib/token";
+import {
+    ResetFromSchema,
+    ResetPassword,
+    ResetPasswordLoggedIn,
+} from "@/schemas";
+import bcrypt from "bcryptjs";
+import { addMinutes, differenceInMinutes, isBefore } from "date-fns";
 import escapeHtml from "escape-html";
-import { addMinutes, isBefore, differenceInMinutes } from "date-fns";
-import { signOut } from "@/auth";
+import * as z from "zod";
 
 const MAX_FAILED_ATTEMPTS = 5;
-const LOCKOUT_DURATION = 10; // in minutes
-const RESET_DURATION = 3; // in minutes
+const LOCKOUT_DURATION = 10;
+const RESET_DURATION = 3;
 
 export const forgotPassword = async (
   values: z.infer<typeof ResetPassword>,
@@ -75,15 +74,13 @@ export const resetPassword = async (
 
   const now = new Date();
 
-  // Check if the user is locked out
   if (user.lockoutUntil && isBefore(now, user.lockoutUntil)) {
     return {
       error:
         "Your account is temporarily locked due to multiple failed attempts.",
     };
-  }
+  }   
 
-  // Reset failed attempts if the last failed attempt was more than RESET_DURATION minutes ago
   if (
     user.lastFailedAttempt &&
     differenceInMinutes(now, user.lastFailedAttempt) > RESET_DURATION
@@ -101,10 +98,10 @@ export const resetPassword = async (
   }
 
   const { oldPassword, newPassword } = validatedFields.data;
-  const passwordMatch = await bcrypt.compare(oldPassword, user.password);
+  const passwordMatch =
+    user.password && (await bcrypt.compare(oldPassword, user.password));
 
   if (!passwordMatch) {
-    // Increment failed attempts
     const newFailedAttempts = user.failedAttempts + 1;
     let lockoutUntil = null;
 

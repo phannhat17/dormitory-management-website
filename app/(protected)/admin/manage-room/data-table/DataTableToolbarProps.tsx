@@ -6,8 +6,8 @@ import { Table } from "@tanstack/react-table"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 
-import { gender, statuses } from "./columns"
 import { DataTableFacetedFilter } from "@/components/data-table/DataTableFacetedFilterProps"
+import { statuses, genders } from "./columns"
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>
@@ -40,7 +40,7 @@ export function DataTableToolbar<TData>({
           <DataTableFacetedFilter
             column={table.getColumn("gender")}
             title="Gender"
-            options={gender}
+            options={genders}
           />
         )}
         {isFiltered && (
