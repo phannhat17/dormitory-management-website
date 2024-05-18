@@ -137,7 +137,6 @@ const EditRoomCard: React.FC<EditRoomCardProps> = ({
         if (user && !users.some((u) => u.id === user.id)) {
             setUsers([...users, user]);
         }
-        setSearchQuery("");
     };
 
     const handleRemoveUser = (userId: string) => {
