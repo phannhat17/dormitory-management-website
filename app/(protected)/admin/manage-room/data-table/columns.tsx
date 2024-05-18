@@ -24,7 +24,9 @@ export type Roomstable = {
   id: string;
   gender: Gender;
   status: RoomStatus;
+  max: number;
   price: number;
+  current: number;
 };
 export const statuses = [
   {
@@ -46,14 +48,14 @@ export const genders = [
     label: "Female",
     value: Gender.FEMALE,
   },
-]; export const excelColumn = [
+]; 
+export const excelColumn = [
   { header: "ID", key: "id", width: 10 },
   { header: "Name", key: "name", width: 32 },
   { header: "Email", key: "email", width: 32 },
   { header: "Gender", key: "gender", width: 32 },
   { header: "Status", key: "status", width: 32 },
 ]
-
 interface ActionsCellProps {
   row: any;
 }
@@ -162,10 +164,24 @@ export const columns: ColumnDef<Roomstable>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "Number users",
-    header: "Number users",
+    accessorKey: "current",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Current" />
+    ),
+
     cell: ({ row }) => {
       return <div>{row.getValue("current")}</div>;
+    },
+    enableSorting: true,
+    enableHiding: false,
+  },
+  {
+    accessorKey: "max",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Max" />
+    ),
+    cell: ({ row }) => {
+      return <div>{row.getValue("max")}</div>;
     },
     enableSorting: true,
     enableHiding: false,
@@ -211,7 +227,11 @@ export const columns: ColumnDef<Roomstable>[] = [
       <DataTableColumnHeader column={column} title="Price" />
     ),
     cell: ({ row }) => {
-      return <div className="w-[80px] font-medium">{row.getValue("price")} VND</div>;
+      const formattedPrice = new Intl.NumberFormat("vi-VN", {
+        style: "currency",
+        currency: "VND",
+      }).format(row.getValue("price"));
+      return <div className="w-[80px] font-medium">{formattedPrice}</div>;
     },
     enableSorting: true,
   },

@@ -45,22 +45,26 @@ export default function Profile() {
           >
             Change password
           </Link>
-          <Link
-            href="#"
-            onClick={() => setOptionType("feedback")}
-            className={`font-semibold ${
-              optionType === "feedback" ? "text-primary" : ""
-            }`}
-          >
-            Feedback
-          </Link>
+          {user?.role === "STUDENT" && (
+            <Link
+              href="#"
+              onClick={() => setOptionType("feedback")}
+              className={`font-semibold ${
+                optionType === "feedback" ? "text-primary" : ""
+              }`}
+            >
+              Feedback
+            </Link>
+          )}
         </nav>
         <div className="grid gap-6">
           {optionType === "profile" ? (
             <ProfileCard />
-          ) : optionType === "changepassword"? (
+          ) : optionType === "changepassword" ? (
             <ChangePasswordForm />
-          ) : user?.role === "ADMIN" ? (
+          ) : user?.role === "STUDENT" ? (
+            <FeedbackForm />
+          ) : (
             <Card x-chunk="dashboard-04-chunk-1">
               <CardHeader>
                 <CardTitle className="text-2xl">Not available</CardTitle>
@@ -70,8 +74,6 @@ export default function Profile() {
                 </CardDescription>
               </CardHeader>
             </Card>
-          ) : (
-            <FeedbackForm />
           )}
         </div>
       </div>

@@ -70,14 +70,14 @@ export const columns: ColumnDef<Feedbacktable>[] = [
     accessorKey: "userId",
     header: "User Id",
     cell: ({ row }) => (
-      <div className="w-[80px] font-medium">{row.getValue("userId")}</div>
+      <div>{row.getValue("userId")}</div>
     ),
   },
   {
     accessorKey: "userName",
     header: "User Name",
     cell: ({ row }) => (
-      <div className="w-[100px] font-medium">{row.getValue("userName")}</div>
+      <div>{row.getValue("userName")}</div>
     ),
   },
   {

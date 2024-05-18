@@ -13,12 +13,12 @@ async function getData(): Promise<Roomstable[]> {
   if (response.rooms) {
     return response.rooms;
   } else {
-    throw new Error("Invalid response from when get list users!");
+    throw new Error("Invalid response from when get list room!");
   }
 }
 
 export default async function ManageUsers() {
-  const users = await getData();
+  const rooms = await getData();
 
   return (
     <main className="flex min-h-[calc(100vh_-_theme(spacing.16))] flex-1 flex-col gap-4 bg-muted/40 p-4 md:gap-8 md:p-10">
@@ -28,7 +28,7 @@ export default async function ManageUsers() {
             <h1 className="text-2xl font-semibold">Manage Room</h1>
           </div>
           <div className="ml-auto flex items-center gap-2">
-            <ExportButton data={users} columns={excelColumn} filename="all_users" />
+            <ExportButton data={rooms} columns={excelColumn} filename="all_users" />
             <Link
               href="/admin/create-room"
             >
@@ -44,7 +44,7 @@ export default async function ManageUsers() {
             <RefreshButton />
           </div>
         </div>
-        <DataTable columns={columns} data={users} />
+        <DataTable columns={columns} data={rooms} />
       </div>
     </main>
   );
