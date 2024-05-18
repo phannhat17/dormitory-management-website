@@ -65,13 +65,22 @@ export const deleteRoom = async (id: string) => {
     return { error: "You must be an admin to delete room!" };
   }
 
-  await db.room.delete({
-    where: {
-      id: id,
-    },
-  });
+  try {
+    await db.user.updateMany({
+      where: { currentRoomId: id },
+      data: { currentRoomId: null },
+    });
 
-  return { success: "Room deleted successfully" };
+    await db.room.delete({
+      where: {
+        id: id,
+      },
+    });
+
+    return { success: "Room deleted successfully" };
+  } catch (error) {
+    return { error: "Failed to delete room" };
+  }
 };
 
 export const updateRoom = async (data: z.infer<typeof updateRoomSchema>) => {
