@@ -6,7 +6,7 @@ import bcrypt from "bcryptjs";
 import { addMinutes, differenceInMinutes, isBefore } from "date-fns";
 import { AuthError, type NextAuthConfig } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
-import { generateVerificationToken } from "./lib/token";
+import { getTwoFAConfirmById } from "@/data/two-fa-confirm";
 
 const MAX_FAILED_ATTEMPTS = 5;
 const LOCKOUT_DURATION = 10; // in minutes
@@ -89,11 +89,12 @@ export default {
       }
 
       const existingUser = await getUserById(user.id);
+
       if (!existingUser) return false;
-      if (!existingUser.emailVerified) return false;
       if (existingUser.status === "BANNED") {
         throw new AuthError("BannedUser via signin");
       }
+      if (!existingUser.emailVerified) return false;
 
       return true;
     },

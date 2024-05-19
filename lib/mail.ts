@@ -27,3 +27,13 @@ export const sendVerificationEmail = async (email: string, token: string) => {
     html: `<p>Click <a href="${resetLink}">here</a> to verify your email!</p>`,
   });
 };
+
+
+export const sendTwoFATokenEmail = async (email: string, token: string) => {
+  await resend.emails.send({
+    from: "dorm@phannhat.id.vn",
+    to: email,
+    subject: "Verification",
+    html: `Two FA Token: ${token}`,
+  });
+};
