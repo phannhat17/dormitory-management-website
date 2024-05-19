@@ -182,6 +182,7 @@ export const updateRoom = async (data: z.infer<typeof updateRoomSchema>) => {
         gender,
         price,
         status: roomStatus,
+        current: users.length,
         max,
         Facilities: {
           set: facilities.map((facilityId) => ({ id: Number(facilityId) })),

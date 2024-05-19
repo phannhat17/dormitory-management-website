@@ -94,13 +94,7 @@ export const updateRoomSchema = z.object({
   gender: z.nativeEnum(Gender),
   price: z.number().positive(),
   max: z.number(),
-  facilities: z.array(
-    z.object({
-      id: z.string().optional(),
-      status: z.string(),
-      price: z.number().positive(),
-    })
-  ),
+  facilities: z.array(z.string()),
   users: z.array(z.string()),
 });
 

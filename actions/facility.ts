@@ -97,3 +97,20 @@ export const updateFacility = async (
     return { error: "Failed to update facility" };
   }
 };
+
+export const deleteFacility = async (facilityId: number) => {
+  const isAdmin = await checkAdmin();
+
+  if (!isAdmin) {
+    return { error: "You must be an admin to do this action!" };
+  }
+
+  try {
+    await db.facility.delete({
+      where: { id: facilityId },
+    });
+    return { success: "Facility deleted successfully" };
+  } catch (error) {
+    return { error: "Failed to delete facility" };
+  }
+};

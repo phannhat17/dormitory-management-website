@@ -1,6 +1,7 @@
 "use client";
 
 import { getRoomInfo, updateRoom } from "@/actions/room";
+import { deleteFacility } from "@/actions/facility";
 import { getUsers, updateUserStatus } from "@/actions/user";
 import { Button } from "@/components/ui/button";
 import {
@@ -54,6 +55,8 @@ const EditRoomCard: React.FC<EditRoomCardProps> = ({
     const [allUsers, setAllUsers] = useState<any[]>([]);
     const [searchQuery, setSearchQuery] = useState<string>("");
     const [filteredUsers, setFilteredUsers] = useState<any[]>([]);
+
+    const [facilitiesToDelete, setFacilitiesToDelete] = useState<number[]>([]);
 
     const [showAddFacilityDialog, setShowAddFacilityDialog] = useState<boolean>(false);
     const [showEditFacilityDialog, setShowEditFacilityDialog] = useState<boolean>(false);
@@ -116,13 +119,17 @@ const EditRoomCard: React.FC<EditRoomCardProps> = ({
             return;
         }
 
+        for (const facilityId of facilitiesToDelete) {
+            await deleteFacility(facilityId);
+        }
+
         const response = await updateRoom({
             originalId: originalRoomId,
             newId: newRoomId,
             gender: roomGender,
             price: parseFloat(roomPrice),
-            facilities: facilities.map((facility) => facility.id),
-            users: users.map((user) => user.id),
+            facilities: facilities.map((facility) => facility.id.toString()),
+            users: users.map((user) => user.id.toString()),
             max: maxCapacity,
         });
 
@@ -176,6 +183,7 @@ const EditRoomCard: React.FC<EditRoomCardProps> = ({
 
     const handleRemoveFacility = (facilityId: number) => {
         setFacilities(facilities.filter(facility => facility.id !== facilityId));
+        setFacilitiesToDelete([...facilitiesToDelete, facilityId]);
     };
 
     return (
@@ -303,13 +311,16 @@ const EditRoomCard: React.FC<EditRoomCardProps> = ({
                     <div className="col">
                         {facilities.map((facility) => (
                             <li key={facility.id} className="flex items-center justify-between my-1">
-                                
+
                                 <Button
                                     variant="outline"
                                     className="hover:bg-transparent hover:text-inherit mr-1"
                                     onClick={() => handleEditFacility(facility)}
                                 >
-                                    {facility.name} x {facility.number}: {facility.status} - Price: {facility.price} VND
+                                    {facility.name} x {facility.number}: {facility.status} - Price: {new Intl.NumberFormat("vi-VN", {
+                                        style: "currency",
+                                        currency: "VND",
+                                    }).format(facility.price)}
                                 </Button>
                                 <Button variant="ghost" onClick={() => handleRemoveFacility(facility.id)} size="sm">
                                     Remove
