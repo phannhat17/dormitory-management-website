@@ -48,7 +48,7 @@ model User {
 }
 
 model Room {
-  id         String        @id
+  id         String     @id
   status     RoomStatus @default(AVAILABLE)
   gender     Gender     @default(FEMALE)
   current    Int
@@ -62,6 +62,8 @@ model Room {
 
 model Facility {
   id            Int    @id
+  name          String
+  number        Int
   currentRoomId String
   status        String
   price         Float
@@ -100,9 +102,9 @@ model Feedback {
 }
 
 model PasswordResetToken {
-  id String @id @default(cuid())
-  email String
-  token String @unique
+  id      String   @id @default(cuid())
+  email   String
+  token   String   @unique
   expires DateTime
 
   @@unique([email, token])

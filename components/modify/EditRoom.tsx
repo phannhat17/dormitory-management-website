@@ -156,7 +156,7 @@ const EditRoomCard: React.FC<EditRoomCardProps> = ({
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogContent className="sm:max-w-3xl">
+            <DialogContent className="sm:max-w-3xl overflow-y-scroll max-h-screen">
                 <DialogHeader>
                     <DialogTitle>Edit Room</DialogTitle>
                     <DialogDescription>
@@ -219,18 +219,6 @@ const EditRoomCard: React.FC<EditRoomCardProps> = ({
                             className="col-span-2"
                         />
                     </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="facilities" className="text-right">
-                            Facilities
-                        </Label>
-                        <ul className="col-span-2">
-                            {facilities.map((facility) => (
-                                <li key={facility.id}>
-                                    {facility.id}: {facility.status}, {facility.price}
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                     <Label htmlFor="users" className="text-right">
@@ -270,6 +258,24 @@ const EditRoomCard: React.FC<EditRoomCardProps> = ({
                             </Button>
                         </li>
                     ))}</div>
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="users" className="text-right">
+                        Facilities
+                    </Label>
+                    <div className="col-span-2 flex items-center gap-4">
+
+                    </div>
+                </div>
+                <div className="grid grid-cols-4 flex flex-col gap-2">
+                    <Label htmlFor="curentusers" className="text-right">
+                    </Label>
+                    <div className="col">
+                        {facilities.map((facility) => (
+                            <Button variant="outline" className="hover:bg-transparent hover:text-inherit hover cursor-text">{facility.name} x  {facility.number}: {facility.price}
+                            </Button>
+                        ))}
+                    </div>
                 </div>
                 <DialogFooter>
                     <Button type="submit" onClick={handleSave}>

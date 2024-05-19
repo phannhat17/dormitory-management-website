@@ -196,3 +196,24 @@ export const updateRoom = async (data: z.infer<typeof updateRoomSchema>) => {
   }
 };
 
+export const addFacilityToRoom = async (roomId: string, facilityId: number) => {
+  const isAdmin = await checkAdmin();
+
+  if (!isAdmin) {
+    return { error: "You must be an admin to add a facility to a room!" };
+  }
+
+  try {
+    const updatedFacility = await db.facility.update({
+      where: { id: facilityId },
+      data: { currentRoomId: roomId },
+    });
+
+    return {
+      success: "Facility added to room successfully",
+      facility: updatedFacility,
+    };
+  } catch (error) {
+    return { error: "Failed to add facility to room" };
+  }
+};
