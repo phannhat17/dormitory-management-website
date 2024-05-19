@@ -1,6 +1,6 @@
 "use client";
 
-import { getRoomInfo, updateRoom } from "@/actions/room";
+import { getRoomInfo, updateRoom, addFacilityToRoom, createFacility } from "@/actions/room";
 import { getUsers, updateUserStatus } from "@/actions/user";
 import { Button } from "@/components/ui/button";
 import {
@@ -26,7 +26,8 @@ import { Gender, UserStatus } from "@prisma/client";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useRouter } from 'next/navigation';
-
+import AddFacilityDialog from "./AddFacilityDialog";
+import EditFacilityDialog from "./EditFacilityDialog";
 
 interface EditRoomCardProps {
     isOpen: boolean;
@@ -53,6 +54,11 @@ const EditRoomCard: React.FC<EditRoomCardProps> = ({
     const [allUsers, setAllUsers] = useState<any[]>([]);
     const [searchQuery, setSearchQuery] = useState<string>("");
     const [filteredUsers, setFilteredUsers] = useState<any[]>([]);
+
+    const [showAddFacilityDialog, setShowAddFacilityDialog] = useState<boolean>(false);
+    const [showEditFacilityDialog, setShowEditFacilityDialog] = useState<boolean>(false);
+    const [facilityToEdit, setFacilityToEdit] = useState<any>(null);
+    ``
 
     useEffect(() => {
         if (isOpen) {
@@ -100,6 +106,7 @@ const EditRoomCard: React.FC<EditRoomCardProps> = ({
             setFilteredUsers([]);
         }
     }, [searchQuery, allUsers, roomGender, users]);
+
     const handleGenderChange = (value: Gender) => {
         setRoomGender(value);
     };
@@ -154,9 +161,27 @@ const EditRoomCard: React.FC<EditRoomCardProps> = ({
         setUsers(users.filter((user) => user.id !== userId));
     };
 
+    const handleAddFacility = (facility: any) => {
+        setFacilities([...facilities, facility]);
+    };
+
+    const handleEditFacility = (facility: any) => {
+        setFacilityToEdit(facility);
+        setShowEditFacilityDialog(true);
+    };
+
+    const handleUpdateFacility = (updatedFacility: any) => {
+        setFacilities(facilities.map(facility => facility.id === updatedFacility.id ? updatedFacility : facility));
+        setShowEditFacilityDialog(false);
+    };
+
+    const handleRemoveFacility = (facilityId: number) => {
+        setFacilities(facilities.filter(facility => facility.id !== facilityId));
+    };
+
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogContent className="sm:max-w-3xl overflow-y-scroll max-h-screen">
+            <DialogContent className="sm:max-w-3xl overflow-auto max-h-screen">
                 <DialogHeader>
                     <DialogTitle>Edit Room</DialogTitle>
                     <DialogDescription>
@@ -260,11 +285,13 @@ const EditRoomCard: React.FC<EditRoomCardProps> = ({
                     ))}</div>
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="users" className="text-right">
+                    <Label htmlFor="facilities" className="text-right">
                         Facilities
                     </Label>
                     <div className="col-span-2 flex items-center gap-4">
-
+                        <Button type="button" variant="outline" size="sm" onClick={() => setShowAddFacilityDialog(true)}>
+                            Add Facility
+                        </Button>
                     </div>
                 </div>
                 <div className="grid grid-cols-4 flex flex-col gap-2">
@@ -272,18 +299,27 @@ const EditRoomCard: React.FC<EditRoomCardProps> = ({
                     </Label>
                     <div className="col">
                         {facilities.map((facility) => (
-                            <Button variant="outline" className="hover:bg-transparent hover:text-inherit hover cursor-text">{facility.name} x  {facility.number}: {facility.price}
-                            </Button>
+                            <li key={facility.id} className="flex items-center justify-between">
+                                <Button variant="outline" className="hover:bg-transparent hover:text-inherit hover cursor-text" onClick={() => handleEditFacility(facility)}>{facility.name} x {facility.number}: {facility.status}  - Price: {facility.price} VND
+                                </Button>
+                                <Button variant="ghost" onClick={() => handleRemoveFacility(facility.id)} size="sm">Remove </Button>
+                            </li>
                         ))}
                     </div>
                 </div>
+                <AddFacilityDialog
+                    isOpen={showAddFacilityDialog}
+                    setIsOpen={setShowAddFacilityDialog}
+                    onAddFacility={handleAddFacility}
+                    currentRoomId={newRoomId}
+                />
                 <DialogFooter>
                     <Button type="submit" onClick={handleSave}>
                         Save changes
                     </Button>
                 </DialogFooter>
             </DialogContent>
-        </Dialog>
+        </Dialog >
     );
 };
 

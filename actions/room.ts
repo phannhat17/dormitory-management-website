@@ -9,6 +9,14 @@ import { getRooms } from "@/data/room";
 import { updateRoomSchema } from "@/schemas";
 import { updateUserStatus } from "./user";
 
+interface CreateFacilityInput {
+  name: string;
+  number: number;
+  status: string;
+  currentRoomId: string;
+  price: number;
+}
+
 export const getListRooms = async () => {
   const isAdmin = await checkAdmin();
 
@@ -38,6 +46,8 @@ export const getRoomInfo = async (id: string) => {
       Facilities: {
         select: {
           id: true,
+          name: true,
+          number: true,
           status: true,
           price: true,
         },
@@ -196,13 +206,26 @@ export const updateRoom = async (data: z.infer<typeof updateRoomSchema>) => {
   }
 };
 
-export const addFacilityToRoom = async (roomId: string, facilityId: number) => {
-  const isAdmin = await checkAdmin();
+export const createFacility = async (data: CreateFacilityInput) => {
+  try {
+    const facility = await db.facility.create({
+      data: {
+        name: data.name,
+        number: data.number,
+        status: data.status,
+        currentRoomId: data.currentRoomId,
+        price: data.price,
+      },
+    });
 
-  if (!isAdmin) {
-    return { error: "You must be an admin to add a facility to a room!" };
+    return { success: "Facility created successfully", facility };
+  } catch (error) {
+    console.log(error);
+    return { error: "Failed to create facility" };
   }
+};
 
+export const addFacilityToRoom = async (roomId: string, facilityId: number) => {
   try {
     const updatedFacility = await db.facility.update({
       where: { id: facilityId },

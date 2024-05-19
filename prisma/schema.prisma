@@ -61,7 +61,7 @@ model Room {
 }
 
 model Facility {
-  id            Int    @id
+  id            Int    @id @default(autoincrement())
   name          String
   number        Int
   currentRoomId String
