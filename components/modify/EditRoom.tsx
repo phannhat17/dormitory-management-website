@@ -1,6 +1,6 @@
 "use client";
 
-import { getRoomInfo, updateRoom, addFacilityToRoom, createFacility } from "@/actions/room";
+import { getRoomInfo, updateRoom } from "@/actions/room";
 import { getUsers, updateUserStatus } from "@/actions/user";
 import { Button } from "@/components/ui/button";
 import {
@@ -276,8 +276,8 @@ const EditRoomCard: React.FC<EditRoomCardProps> = ({
                     </Label>
                     <div className="col">
                         {users.map((user) => (
-                            <li key={user.id} className="flex items-center justify-between">
-                                <Button variant="outline" className="hover:bg-transparent hover:text-inherit hover cursor-text">
+                            <li key={user.id} className="flex items-center justify-between my-1">
+                                <Button variant="outline" className="hover:bg-transparent hover:text-inherit hover cursor-text mr-1">
                                     {user.id} - {user.name}
                                 </Button>
                                 <Button variant="ghost" onClick={() => handleRemoveUser(user.id)} size="sm">
@@ -292,7 +292,7 @@ const EditRoomCard: React.FC<EditRoomCardProps> = ({
                         Facilities
                     </Label>
                     <div className="col-span-2 flex items-center gap-4">
-                        <Button type="button" variant="outline" size="sm" onClick={() => setShowAddFacilityDialog(true)}>
+                        <Button type="button" size="sm" onClick={() => setShowAddFacilityDialog(true)}>
                             Add Facility
                         </Button>
                     </div>
@@ -302,10 +302,11 @@ const EditRoomCard: React.FC<EditRoomCardProps> = ({
                     </Label>
                     <div className="col">
                         {facilities.map((facility) => (
-                            <li key={facility.id} className="flex items-center justify-between">
+                            <li key={facility.id} className="flex items-center justify-between my-1">
+                                
                                 <Button
                                     variant="outline"
-                                    className="hover:bg-transparent hover:text-inherit hover cursor-text"
+                                    className="hover:bg-transparent hover:text-inherit mr-1"
                                     onClick={() => handleEditFacility(facility)}
                                 >
                                     {facility.name} x {facility.number}: {facility.status} - Price: {facility.price} VND

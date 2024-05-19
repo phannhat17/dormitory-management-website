@@ -103,3 +103,20 @@ export const updateRoomSchema = z.object({
   ),
   users: z.array(z.string()),
 });
+
+export const UpdateFacilitySchema = z.object({
+  id: z.number(),
+  name: z.string().min(1, "Facility name is required"),
+  number: z.number().positive("Number must be a positive integer"),
+  status: z.string().min(1, "Status is required"),
+  price: z.number().positive("Price must be a positive number"),
+});
+
+export const CreateFacilitySchema = z.object({
+  name: z.string().min(1, "Facility name is required"),
+  number: z.number().positive("Number must be a positive integer"),
+  status: z.string().min(1, "Status is required"),
+  currentRoomId: z.string().min(1, "Room ID is required"),
+  price: z.number().positive("Price must be a positive number"),
+});
+

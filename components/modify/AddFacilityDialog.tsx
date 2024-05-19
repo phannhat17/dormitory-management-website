@@ -1,6 +1,6 @@
 "use client";
 
-import { createFacility } from "@/actions/room"; // Adjust the import path accordingly
+import { createFacility } from "@/actions/facility"; // Adjust the import path accordingly
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -62,7 +62,7 @@ const AddFacilityDialog: React.FC<AddFacilityDialogProps> = ({
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogContent className="sm:max-w-3xl">
+            <DialogContent className="sm:max-w-2xl">
                 <DialogHeader>
                     <DialogTitle>Add Facility</DialogTitle>
                     <DialogDescription>

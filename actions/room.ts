@@ -1,21 +1,13 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { Gender, RoomStatus, UserStatus } from "@prisma/client";
+import { RoomStatus, UserStatus } from "@prisma/client";
 import escapeHtml from "escape-html";
 import * as z from "zod";
 import { checkAdmin } from "./check-permission";
 import { getRooms } from "@/data/room";
 import { updateRoomSchema } from "@/schemas";
 import { updateUserStatus } from "./user";
-
-interface CreateFacilityInput {
-  name: string;
-  number: number;
-  status: string;
-  currentRoomId: string;
-  price: number;
-}
 
 export const getListRooms = async () => {
   const isAdmin = await checkAdmin();
@@ -203,70 +195,5 @@ export const updateRoom = async (data: z.infer<typeof updateRoomSchema>) => {
     return { success: "Room updated successfully", room: updatedRoom };
   } catch (error) {
     return { error: "Failed to update room" };
-  }
-};
-
-export const createFacility = async (data: CreateFacilityInput) => {
-  try {
-    const facility = await db.facility.create({
-      data: {
-        name: data.name,
-        number: data.number,
-        status: data.status,
-        currentRoomId: data.currentRoomId,
-        price: data.price,
-      },
-    });
-
-    return { success: "Facility created successfully", facility };
-  } catch (error) {
-    console.log(error);
-    return { error: "Failed to create facility" };
-  }
-};
-
-export const addFacilityToRoom = async (roomId: string, facilityId: number) => {
-  try {
-    const updatedFacility = await db.facility.update({
-      where: { id: facilityId },
-      data: { currentRoomId: roomId },
-    });
-
-    return {
-      success: "Facility added to room successfully",
-      facility: updatedFacility,
-    };
-  } catch (error) {
-    return { error: "Failed to add facility to room" };
-  }
-};
-
-
-interface UpdateFacilityInput {
-  id: number;
-  name: string;
-  number: number;
-  status: string;
-  price: number;
-}
-
-export const updateFacility = async (data: UpdateFacilityInput) => {
-  try {
-    const updatedFacility = await db.facility.update({
-      where: { id: data.id },
-      data: {
-        name: data.name,
-        number: data.number,
-        status: data.status,
-        price: data.price,
-      },
-    });
-
-    return {
-      success: "Facility updated successfully",
-      facility: updatedFacility,
-    };
-  } catch (error) {
-    return { error: "Failed to update facility" };
   }
 };
