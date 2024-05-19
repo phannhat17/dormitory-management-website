@@ -6,7 +6,8 @@ import escapeHtml from "escape-html";
 import * as z from "zod";
 import { db } from "@/lib/db";
 import bcrypt from "bcryptjs";
-import { Gender } from "@prisma/client";
+import { generateVerificationToken } from "@/lib/token";
+import { sendVerificationEmail } from "@/lib/mail";
 
 export const register = async (values: z.infer<typeof RegisterSchema>) => {
   const validatedFields = RegisterSchema.safeParse(values);
@@ -38,7 +39,11 @@ export const register = async (values: z.infer<typeof RegisterSchema>) => {
         role: "STUDENT",
       },
     });
-    return { success: "User registered successfully!" };
+
+    const verificationToken = await generateVerificationToken(sanitizedEmail);
+    await sendVerificationEmail(sanitizedEmail, verificationToken.token);
+
+    return { success: "Confirm email sent!" };
   } catch (error) {
     return { error: "An error occurred during registration!" };
   }

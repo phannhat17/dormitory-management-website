@@ -42,6 +42,7 @@ model User {
   Room              Room?      @relation(fields: [currentRoomId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   Contracts         Contract[]
   Feedbacks         Feedback[]
+  emailVerified     DateTime?
   failedAttempts    Int        @default(0)
   lastFailedAttempt DateTime?
   lockoutUntil      DateTime?
@@ -102,6 +103,14 @@ model Feedback {
 }
 
 model PasswordResetToken {
+  id      String   @id @default(cuid())
+  email   String
+  token   String   @unique
+  expires DateTime
+
+  @@unique([email, token])
+}
+model VerificationToken {
   id      String   @id @default(cuid())
   email   String
   token   String   @unique

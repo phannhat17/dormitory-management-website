@@ -6,6 +6,9 @@ import { LoginSchema } from "@/schemas";
 import escapeHtml from "escape-html";
 import { AuthError } from "next-auth";
 import * as z from "zod";
+import { generateVerificationToken } from "@/lib/token";
+import { getUserByEmail } from "@/data/user";
+import { sendVerificationEmail } from "@/lib/mail";
 
 export const login = async (values: z.infer<typeof LoginSchema>) => {
   const validatedFields = LoginSchema.safeParse(values);
@@ -16,6 +19,25 @@ export const login = async (values: z.infer<typeof LoginSchema>) => {
 
   const { email, password } = validatedFields.data;
   const sanitizedEmail = escapeHtml(email.toLowerCase());
+
+  const existingUser = await getUserByEmail(sanitizedEmail);
+
+  if (!existingUser) {
+    return {
+      error:
+        "User not found! Please register an account or verify your email address",
+    };
+  }
+
+  if (!existingUser.emailVerified) {
+    const verificationToken = await generateVerificationToken(sanitizedEmail);
+    await sendVerificationEmail(sanitizedEmail, verificationToken.token);
+
+    return {
+      error:
+        "Email not verified! A new verification email has been sent to your email address.",
+    };
+  }
 
   try {
     await signIn("credentials", {
