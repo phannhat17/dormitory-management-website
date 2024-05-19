@@ -109,7 +109,7 @@ const EditRoomCard: React.FC<EditRoomCardProps> = ({
             toast.error("Cannot save changes. The number of users exceeds the maximum room capacity.");
             return;
         }
-    
+
         const response = await updateRoom({
             originalId: originalRoomId,
             newId: newRoomId,
@@ -117,19 +117,20 @@ const EditRoomCard: React.FC<EditRoomCardProps> = ({
             price: parseFloat(roomPrice),
             facilities: facilities.map((facility) => facility.id),
             users: users.map((user) => user.id),
+            max: maxCapacity,
         });
-    
+
         if ("success" in response) {
             const updateUserStatusPromises = users.map(user => updateUserStatus(user.id, UserStatus.STAYING));
             const updateUserStatusResponses = await Promise.all(updateUserStatusPromises);
-    
+
             const failedUpdates = updateUserStatusResponses.filter(res => res.error);
             if (failedUpdates.length > 0) {
                 toast.error("Room saved, but some user statuses were not updated.");
             } else {
                 toast.success(response.success);
             }
-            
+
             onConfirm();
             router.refresh();
             setIsOpen(false);
@@ -206,7 +207,18 @@ const EditRoomCard: React.FC<EditRoomCardProps> = ({
                             className="col-span-2"
                         />
                     </div>
-
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="maxCapacity" className="text-right">
+                            Max Capacity
+                        </Label>
+                        <Input
+                            id="maxCapacity"
+                            type="number"
+                            value={maxCapacity}
+                            onChange={(e) => setMaxCapacity(parseInt(e.target.value, 10))}
+                            className="col-span-2"
+                        />
+                    </div>
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label htmlFor="facilities" className="text-right">
                             Facilities

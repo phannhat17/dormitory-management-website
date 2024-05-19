@@ -93,6 +93,7 @@ export const updateRoomSchema = z.object({
   newId: z.string(),
   gender: z.nativeEnum(Gender),
   price: z.number().positive(),
+  max: z.number(),
   facilities: z.array(
     z.object({
       id: z.string().optional(),

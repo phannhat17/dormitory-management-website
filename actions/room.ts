@@ -106,7 +106,7 @@ export const updateRoom = async (data: z.infer<typeof updateRoomSchema>) => {
     return { error: "Invalid input data" };
   }
 
-  const { originalId, newId, gender, price, facilities, users } =
+  const { originalId, newId, gender, price, facilities, users, max } =
     validatedData.data;
 
   try {
@@ -124,7 +124,7 @@ export const updateRoom = async (data: z.infer<typeof updateRoomSchema>) => {
       }
     }
 
-    if (users.length > existingRoom.max) {
+    if (users.length > max) {
       return {
         error: "The number of users exceeds the maximum room capacity.",
       };
@@ -171,9 +171,7 @@ export const updateRoom = async (data: z.infer<typeof updateRoomSchema>) => {
     }
 
     const roomStatus =
-      users.length === existingRoom.max
-        ? RoomStatus.FULL
-        : RoomStatus.AVAILABLE;
+      users.length === max ? RoomStatus.FULL : RoomStatus.AVAILABLE;
 
     const updatedRoom = await db.room.update({
       where: { id: originalId },
@@ -182,7 +180,7 @@ export const updateRoom = async (data: z.infer<typeof updateRoomSchema>) => {
         gender,
         price,
         status: roomStatus,
-        current: users.length,
+        max,
         Facilities: {
           set: facilities.map((facilityId) => ({ id: Number(facilityId) })),
         },
