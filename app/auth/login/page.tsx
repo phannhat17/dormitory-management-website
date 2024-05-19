@@ -29,6 +29,7 @@ import * as z from "zod";
 
 const LoginPage = () => {
   const [error, setError] = useState<string | undefined>("");
+  const [showTwoFA, setShowTwoFA] = useState(false);
 
   const [isPending, startTransition] = useTransition();
 
@@ -47,8 +48,15 @@ const LoginPage = () => {
       login(values)
         .then((data) => {
           if (data) {
-            setError(data.error);
+            if (data.error) {
+              setError(data.error);
+            }
+            if (data.twoFA) {
+              setShowTwoFA(true);
+            }
           }
+        }).catch((error) => {
+          setError("Something went wrong. Please try again.");
         })
     });
   }
@@ -68,51 +76,75 @@ const LoginPage = () => {
               onSubmit={form.handleSubmit(onSubmit)}
               className="grid gap-4"
             >
+              {showTwoFA && (
               <div className="grid gap-2">
                 <FormField
                   control={form.control}
-                  name="email"
+                  name="code"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email</FormLabel>
+                      <FormLabel>Two FA code</FormLabel>
                       <FormControl>
                         <Input
                           {...field}
                           disabled={isPending}
-                          placeholder="email@example.com"
-                          type="email"
+                          placeholder="123456"
                         />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-              </div>
-              <div className="grid gap-2">
-                <FormField
-                  control={form.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <div className="flex items-center">
-                        <FormLabel>Password</FormLabel>
-                        <Link href="/auth/reset" className="ml-auto inline-block text-sm underline">
-                          Forgot your password?
-                        </Link>
-                      </div>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          disabled={isPending}
-                          placeholder="**********"
-                          type="password"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+              </div>)}
+              {!showTwoFA && (
+                <>
+                  <div className="grid gap-2">
+                    <FormField
+                      control={form.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Email</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              disabled={isPending}
+                              placeholder="email@example.com"
+                              type="email"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <FormField
+                      control={form.control}
+                      name="password"
+                      render={({ field }) => (
+                        <FormItem>
+                          <div className="flex items-center">
+                            <FormLabel>Password</FormLabel>
+                            <Link href="/auth/reset" className="ml-auto inline-block text-sm underline">
+                              Forgot your password?
+                            </Link>
+                          </div>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              disabled={isPending}
+                              placeholder="**********"
+                              type="password"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </>)}
+
               <FormError message={error} />
               <Button type="submit" disabled={isPending} className="w-full">
                 Login

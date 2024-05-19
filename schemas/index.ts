@@ -16,7 +16,11 @@ const passwordPolicySchema = z
     "Password must not contain three consecutive identical characters."
   );
 
-const allowedEmailDomains = ["sis.hust.edu.vn", "hust.edu.vn", "phannhat.id.vn"];
+const allowedEmailDomains = [
+  "sis.hust.edu.vn",
+  "hust.edu.vn",
+  "phannhat.id.vn",
+];
 
 const emailSchema = z
   .string()
@@ -52,6 +56,11 @@ export const LoginSchema = z.object({
   password: z.string().min(1, {
     message: "Password is required",
   }),
+  code: z.optional(
+    z.string().min(1, {
+      message: "Password is required",
+    })
+  ),
 });
 
 export const ResetFromSchema = z.object({

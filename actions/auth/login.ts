@@ -6,9 +6,12 @@ import { LoginSchema } from "@/schemas";
 import escapeHtml from "escape-html";
 import { AuthError } from "next-auth";
 import * as z from "zod";
-import { generateVerificationToken } from "@/lib/token";
+import bcrypt from "bcryptjs";
+import { generateTwoFAToken } from "@/lib/token";
 import { getUserByEmail } from "@/data/user";
-import { sendVerificationEmail } from "@/lib/mail";
+import { sendTwoFATokenEmail } from "@/lib/mail";
+import { getTwoFATokenByEmail } from "@/data/two-fa-token";
+import { db } from "@/lib/db";
 
 export const login = async (values: z.infer<typeof LoginSchema>) => {
   const validatedFields = LoginSchema.safeParse(values);
@@ -17,12 +20,12 @@ export const login = async (values: z.infer<typeof LoginSchema>) => {
     return { error: "Invalid fields!" };
   }
 
-  const { email, password } = validatedFields.data;
+  const { email, password, code } = validatedFields.data;
   const sanitizedEmail = escapeHtml(email.toLowerCase());
 
   const existingUser = await getUserByEmail(sanitizedEmail);
 
-  if (!existingUser) {
+  if (!existingUser?.email) {
     return {
       error:
         "User not found! Please register an account or verify your email address",
@@ -30,13 +33,45 @@ export const login = async (values: z.infer<typeof LoginSchema>) => {
   }
 
   if (!existingUser.emailVerified) {
-    const verificationToken = await generateVerificationToken(sanitizedEmail);
-    await sendVerificationEmail(sanitizedEmail, verificationToken.token);
-
     return {
-      error:
-        "Email not verified! A new verification email has been sent to your email address.",
+      error: "Email not verified! Please verify your email address.",
     };
+  }
+
+  // Check password
+  if (existingUser.password) {
+    const passwordMatch = await bcrypt.compare(password, existingUser.password);
+    if (!passwordMatch) {
+      return { error: "Invalid credentials!" };
+    }
+  } else {
+    return { error: "Invalid credentials!" };
+  }
+
+  if (existingUser.twoFA) {
+    if (code) {
+      const twoFAToken = await getTwoFATokenByEmail(existingUser.email);
+
+      if (!twoFAToken || twoFAToken.token !== code) {
+        return { error: "Invalid two-factor authentication token!" };
+      }
+
+      const hasExpired = new Date() > new Date(twoFAToken.expires);
+
+      if (hasExpired) {
+        return { error: "Token has expired!" };
+      }
+
+      await db.twoFAToken.delete({
+        where: { id: twoFAToken.id },
+      });
+    } else {
+      const twoFAToken = await generateTwoFAToken(existingUser.email);
+
+      await sendTwoFATokenEmail(twoFAToken.email, twoFAToken.token);
+
+      return { twoFA: true };
+    }
   }
 
   try {
