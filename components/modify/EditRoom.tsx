@@ -58,7 +58,6 @@ const EditRoomCard: React.FC<EditRoomCardProps> = ({
     const [showAddFacilityDialog, setShowAddFacilityDialog] = useState<boolean>(false);
     const [showEditFacilityDialog, setShowEditFacilityDialog] = useState<boolean>(false);
     const [facilityToEdit, setFacilityToEdit] = useState<any>(null);
-    ``
 
     useEffect(() => {
         if (isOpen) {
@@ -273,16 +272,20 @@ const EditRoomCard: React.FC<EditRoomCardProps> = ({
                     </div>
                 </div>
                 <div className="grid grid-cols-4 flex flex-col gap-2">
-                    <Label htmlFor="curentusers" className="text-right">
+                    <Label htmlFor="currentUsers" className="text-right">
                     </Label>
-                    <div className="col">{users.map((user) => (
-                        <li key={user.id} className="flex items-center justify-between">
-                            <Button variant="outline" className="hover:bg-transparent hover:text-inherit hover cursor-text">{user.id} - {user.name}</Button>
-                            <Button variant="ghost" onClick={() => handleRemoveUser(user.id)} size="sm">
-                                Remove
-                            </Button>
-                        </li>
-                    ))}</div>
+                    <div className="col">
+                        {users.map((user) => (
+                            <li key={user.id} className="flex items-center justify-between">
+                                <Button variant="outline" className="hover:bg-transparent hover:text-inherit hover cursor-text">
+                                    {user.id} - {user.name}
+                                </Button>
+                                <Button variant="ghost" onClick={() => handleRemoveUser(user.id)} size="sm">
+                                    Remove
+                                </Button>
+                            </li>
+                        ))}
+                    </div>
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                     <Label htmlFor="facilities" className="text-right">
@@ -295,14 +298,21 @@ const EditRoomCard: React.FC<EditRoomCardProps> = ({
                     </div>
                 </div>
                 <div className="grid grid-cols-4 flex flex-col gap-2">
-                    <Label htmlFor="curentusers" className="text-right">
+                    <Label htmlFor="currentFacilities" className="text-right">
                     </Label>
                     <div className="col">
                         {facilities.map((facility) => (
                             <li key={facility.id} className="flex items-center justify-between">
-                                <Button variant="outline" className="hover:bg-transparent hover:text-inherit hover cursor-text" onClick={() => handleEditFacility(facility)}>{facility.name} x {facility.number}: {facility.status}  - Price: {facility.price} VND
+                                <Button
+                                    variant="outline"
+                                    className="hover:bg-transparent hover:text-inherit hover cursor-text"
+                                    onClick={() => handleEditFacility(facility)}
+                                >
+                                    {facility.name} x {facility.number}: {facility.status} - Price: {facility.price} VND
                                 </Button>
-                                <Button variant="ghost" onClick={() => handleRemoveFacility(facility.id)} size="sm">Remove </Button>
+                                <Button variant="ghost" onClick={() => handleRemoveFacility(facility.id)} size="sm">
+                                    Remove
+                                </Button>
                             </li>
                         ))}
                     </div>
@@ -313,6 +323,14 @@ const EditRoomCard: React.FC<EditRoomCardProps> = ({
                     onAddFacility={handleAddFacility}
                     currentRoomId={newRoomId}
                 />
+                {facilityToEdit && (
+                    <EditFacilityDialog
+                        isOpen={showEditFacilityDialog}
+                        setIsOpen={setShowEditFacilityDialog}
+                        facility={facilityToEdit}
+                        onUpdateFacility={handleUpdateFacility}
+                    />
+                )}
                 <DialogFooter>
                     <Button type="submit" onClick={handleSave}>
                         Save changes

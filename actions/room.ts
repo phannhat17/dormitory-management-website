@@ -240,3 +240,33 @@ export const addFacilityToRoom = async (roomId: string, facilityId: number) => {
     return { error: "Failed to add facility to room" };
   }
 };
+
+
+interface UpdateFacilityInput {
+  id: number;
+  name: string;
+  number: number;
+  status: string;
+  price: number;
+}
+
+export const updateFacility = async (data: UpdateFacilityInput) => {
+  try {
+    const updatedFacility = await db.facility.update({
+      where: { id: data.id },
+      data: {
+        name: data.name,
+        number: data.number,
+        status: data.status,
+        price: data.price,
+      },
+    });
+
+    return {
+      success: "Facility updated successfully",
+      facility: updatedFacility,
+    };
+  } catch (error) {
+    return { error: "Failed to update facility" };
+  }
+};

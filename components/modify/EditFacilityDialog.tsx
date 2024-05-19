@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { updateFacility } from "@/actions/room";
 
 interface EditFacilityDialogProps {
     isOpen: boolean;
@@ -41,21 +42,28 @@ const EditFacilityDialog: React.FC<EditFacilityDialogProps> = ({
         }
     }, [facility]);
 
-    const handleSave = () => {
+    const handleSave = async () => {
         if (!facilityName || facilityNumber <= 0 || !facilityStatus || facilityPrice <= 0) {
             toast.error("Please fill in all fields to update the facility.");
             return;
         }
 
         const updatedFacility = {
-            ...facility,
+            id: facility.id,
             name: facilityName,
             number: facilityNumber,
             status: facilityStatus,
             price: facilityPrice,
         };
 
-        onUpdateFacility(updatedFacility);
+        const response = await updateFacility(updatedFacility);
+
+        if ("success" in response) {
+            toast.success(response.success);
+            onUpdateFacility(updatedFacility);
+        } else {
+            toast.error(response.error);
+        }
     };
 
     return (
