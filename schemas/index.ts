@@ -151,3 +151,23 @@ export const CreateFacilitySchema = z.object({
   currentRoomId: z.string().min(1, "Room ID is required"),
   price: z.number().positive("Price must be a positive number"),
 });
+
+
+export const createRoomWithFacilitiesSchema = z.object({
+  rooms: z.array(
+    z.object({
+      roomId: z.string().min(1, { message: "Room ID is required" }),
+      gender: z.enum(["MALE", "FEMALE"], { errorMap: () => ({ message: "Invalid gender" }) }),
+      price: z.number().positive(),
+      max: z.number().positive(),
+      facilities: z.array(
+        z.object({
+          name: z.string().min(1, { message: "Facility Name is required" }),
+          number: z.number().positive(),
+          status: z.string().min(1, { message: "Facility Status is required" }),
+          price: z.number().positive(),
+        })
+      ),
+    })
+  ),
+});

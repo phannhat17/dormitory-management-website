@@ -1,17 +1,19 @@
 "use client";
 
 import {
-    Ban,
-    GraduationCap,
-    ShieldCheck,
-    SquareCheck,
-    SquareX,
-    Users,
+  Activity,
+  Ban,
+  GraduationCap,
+  ShieldCheck,
+  SquareCheck,
+  SquareX,
+  Users,
 } from "lucide-react";
 
 import { getTotalUser } from "@/actions/db-action";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useEffect, useState } from "react";
+import { getRoomStatistics } from "@/actions/room";
 
 export default function AdminDashboard() {
   const [totalUser, setTotalUser] = useState<number | undefined>(undefined);
@@ -23,15 +25,30 @@ export default function AdminDashboard() {
   );
   const [numBanned, setNumBanned] = useState<number | undefined>(undefined);
 
+  const [totalRooms, setTotalRooms] = useState(0);
+  const [maleRooms, setMaleRooms] = useState(0);
+  const [femaleRooms, setFemaleRooms] = useState(0);
+  const [fullRooms, setFullRooms] = useState(0);
+  const [availableRooms, setAvailableRooms] = useState(0);
+
+
   useEffect(() => {
     const fetchNumUsers = async () => {
-      const response = await getTotalUser();
-      setTotalUser(response.totalUsers);
-      setNumStudent(response.studentCount);
-      setNumAdmin(response.adminCount);
-      setNumStaying(response.stayingCount);
-      setNumNotStaying(response.notStayingCount);
-      setNumBanned(response.bannedCount);
+      const responseUser = await getTotalUser();
+      const roomStats = await getRoomStatistics();
+      setTotalUser(responseUser.totalUsers);
+      setNumStudent(responseUser.studentCount);
+      setNumAdmin(responseUser.adminCount);
+      setNumStaying(responseUser.stayingCount);
+      setNumNotStaying(responseUser.notStayingCount);
+      setNumBanned(responseUser.bannedCount);
+
+      setTotalRooms(roomStats.totalRooms);
+      setMaleRooms(roomStats.maleRooms);
+      setFemaleRooms(roomStats.femaleRooms);
+      setFullRooms(roomStats.fullRooms);
+      setAvailableRooms(roomStats.availableRooms);
+
     };
 
     fetchNumUsers();
@@ -101,6 +118,51 @@ export default function AdminDashboard() {
             <CardContent>
               <div className="text-2xl font-bold">{numBanned}</div>
               <p className="text-xs text-muted-foreground">Students</p>
+            </CardContent>
+          </Card>
+          <Card x-chunk="dashboard-01-chunk-0">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Rooms</CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{totalRooms}</div>
+            </CardContent>
+          </Card>
+          <Card x-chunk="dashboard-01-chunk-1">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Male Rooms</CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{maleRooms}</div>
+            </CardContent>
+          </Card>
+          <Card x-chunk="dashboard-01-chunk-2">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Female Rooms</CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{femaleRooms}</div>
+            </CardContent>
+          </Card>
+          <Card x-chunk="dashboard-01-chunk-3">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Full Rooms</CardTitle>
+              <Activity className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{fullRooms}</div>
+            </CardContent>
+          </Card>
+          <Card x-chunk="dashboard-01-chunk-3">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Available Rooms</CardTitle>
+              <Activity className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{availableRooms}</div>
             </CardContent>
           </Card>
         </div>

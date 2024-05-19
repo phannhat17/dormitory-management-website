@@ -44,9 +44,7 @@ export const login = async (values: z.infer<typeof LoginSchema>) => {
     if (!passwordMatch) {
       return { error: "Invalid credentials!" };
     }
-  } else {
-    return { error: "Invalid credentials!" };
-  }
+  } 
 
   if (existingUser.twoFA) {
     if (code) {
