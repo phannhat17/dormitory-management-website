@@ -252,7 +252,7 @@ const EditRoomCard: React.FC<EditRoomCardProps> = ({
                     </Label>
                     <div className="col">{users.map((user) => (
                         <li key={user.id} className="flex items-center justify-between">
-                            <Button variant="outline" className="hover:bg-transparent hover:text-inherit hover cursor-text">{user.id} {user.name}</Button>
+                            <Button variant="outline" className="hover:bg-transparent hover:text-inherit hover cursor-text">{user.id} - {user.name}</Button>
                             <Button variant="ghost" onClick={() => handleRemoveUser(user.id)} size="sm">
                                 Remove
                             </Button>
