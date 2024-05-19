@@ -28,7 +28,7 @@ export default async function ManageUsers() {
             <h1 className="text-2xl font-semibold">Manage Room</h1>
           </div>
           <div className="ml-auto flex items-center gap-2">
-            <ExportButton data={rooms} columns={excelColumn} filename="all_users" />
+            <ExportButton data={rooms} columns={excelColumn} filename="all_rooms" />
             <Link
               href="/admin/create-room"
             >

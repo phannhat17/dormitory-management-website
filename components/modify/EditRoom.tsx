@@ -1,6 +1,8 @@
 "use client";
 
-import { getRoomInfo, updateRoom, getUsers } from "@/actions/room";
+import { getRoomInfo, updateRoom } from "@/actions/room";
+import { deleteFacility } from "@/actions/facility";
+import { getUsers, updateUserStatus } from "@/actions/user";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -21,11 +23,12 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { Gender } from "@prisma/client";
+import { Gender, UserStatus } from "@prisma/client";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useRouter } from 'next/navigation';
-
+import AddFacilityDialog from "./AddFacilityDialog";
+import EditFacilityDialog from "./EditFacilityDialog";
 
 interface EditRoomCardProps {
     isOpen: boolean;
@@ -52,6 +55,12 @@ const EditRoomCard: React.FC<EditRoomCardProps> = ({
     const [allUsers, setAllUsers] = useState<any[]>([]);
     const [searchQuery, setSearchQuery] = useState<string>("");
     const [filteredUsers, setFilteredUsers] = useState<any[]>([]);
+
+    const [facilitiesToDelete, setFacilitiesToDelete] = useState<number[]>([]);
+
+    const [showAddFacilityDialog, setShowAddFacilityDialog] = useState<boolean>(false);
+    const [showEditFacilityDialog, setShowEditFacilityDialog] = useState<boolean>(false);
+    const [facilityToEdit, setFacilityToEdit] = useState<any>(null);
 
     useEffect(() => {
         if (isOpen) {
@@ -99,6 +108,7 @@ const EditRoomCard: React.FC<EditRoomCardProps> = ({
             setFilteredUsers([]);
         }
     }, [searchQuery, allUsers, roomGender, users]);
+
     const handleGenderChange = (value: Gender) => {
         setRoomGender(value);
     };
@@ -109,17 +119,31 @@ const EditRoomCard: React.FC<EditRoomCardProps> = ({
             return;
         }
 
+        for (const facilityId of facilitiesToDelete) {
+            await deleteFacility(facilityId);
+        }
+
         const response = await updateRoom({
             originalId: originalRoomId,
             newId: newRoomId,
             gender: roomGender,
             price: parseFloat(roomPrice),
-            facilities: facilities.map((facility) => facility.id),
-            users: users.map((user) => user.id),
+            facilities: facilities.map((facility) => facility.id.toString()),
+            users: users.map((user) => user.id.toString()),
+            max: maxCapacity,
         });
 
         if ("success" in response) {
-            toast.success(response.success);
+            const updateUserStatusPromises = users.map(user => updateUserStatus(user.id, UserStatus.STAYING));
+            const updateUserStatusResponses = await Promise.all(updateUserStatusPromises);
+
+            const failedUpdates = updateUserStatusResponses.filter(res => res.error);
+            if (failedUpdates.length > 0) {
+                toast.error("Room saved, but some user statuses were not updated.");
+            } else {
+                toast.success(response.success);
+            }
+
             onConfirm();
             router.refresh();
             setIsOpen(false);
@@ -143,9 +167,28 @@ const EditRoomCard: React.FC<EditRoomCardProps> = ({
         setUsers(users.filter((user) => user.id !== userId));
     };
 
+    const handleAddFacility = (facility: any) => {
+        setFacilities([...facilities, facility]);
+    };
+
+    const handleEditFacility = (facility: any) => {
+        setFacilityToEdit(facility);
+        setShowEditFacilityDialog(true);
+    };
+
+    const handleUpdateFacility = (updatedFacility: any) => {
+        setFacilities(facilities.map(facility => facility.id === updatedFacility.id ? updatedFacility : facility));
+        setShowEditFacilityDialog(false);
+    };
+
+    const handleRemoveFacility = (facilityId: number) => {
+        setFacilities(facilities.filter(facility => facility.id !== facilityId));
+        setFacilitiesToDelete([...facilitiesToDelete, facilityId]);
+    };
+
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogContent className="sm:max-w-3xl">
+            <DialogContent className="sm:max-w-3xl overflow-auto max-h-screen">
                 <DialogHeader>
                     <DialogTitle>Edit Room</DialogTitle>
                     <DialogDescription>
@@ -196,18 +239,17 @@ const EditRoomCard: React.FC<EditRoomCardProps> = ({
                             className="col-span-2"
                         />
                     </div>
-
                     <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="facilities" className="text-right">
-                            Facilities
+                        <Label htmlFor="maxCapacity" className="text-right">
+                            Max Capacity
                         </Label>
-                        <ul className="col-span-2">
-                            {facilities.map((facility) => (
-                                <li key={facility.id}>
-                                    {facility.id}: {facility.status}, {facility.price}
-                                </li>
-                            ))}
-                        </ul>
+                        <Input
+                            id="maxCapacity"
+                            type="number"
+                            value={maxCapacity}
+                            onChange={(e) => setMaxCapacity(parseInt(e.target.value, 10))}
+                            className="col-span-2"
+                        />
                     </div>
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
@@ -238,24 +280,76 @@ const EditRoomCard: React.FC<EditRoomCardProps> = ({
                     </div>
                 </div>
                 <div className="grid grid-cols-4 flex flex-col gap-2">
-                    <Label htmlFor="curentusers" className="text-right">
+                    <Label htmlFor="currentUsers" className="text-right">
                     </Label>
-                    <div className="col">{users.map((user) => (
-                        <li key={user.id} className="flex items-center justify-between">
-                            <Button variant="outline" className="hover:bg-transparent hover:text-inherit hover cursor-text">{user.id} {user.name}</Button>
-                            <Button variant="ghost" onClick={() => handleRemoveUser(user.id)} size="sm">
-                                Remove
-                            </Button>
-                        </li>
-                    ))}</div>
+                    <div className="col">
+                        {users.map((user) => (
+                            <li key={user.id} className="flex items-center justify-between my-1">
+                                <Button variant="outline" className="hover:bg-transparent hover:text-inherit hover cursor-text mr-1">
+                                    {user.id} - {user.name}
+                                </Button>
+                                <Button variant="ghost" onClick={() => handleRemoveUser(user.id)} size="sm">
+                                    Remove
+                                </Button>
+                            </li>
+                        ))}
+                    </div>
                 </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="facilities" className="text-right">
+                        Facilities
+                    </Label>
+                    <div className="col-span-2 flex items-center gap-4">
+                        <Button type="button" size="sm" onClick={() => setShowAddFacilityDialog(true)}>
+                            Add Facility
+                        </Button>
+                    </div>
+                </div>
+                <div className="grid grid-cols-4 flex flex-col gap-2">
+                    <Label htmlFor="currentFacilities" className="text-right">
+                    </Label>
+                    <div className="col">
+                        {facilities.map((facility) => (
+                            <li key={facility.id} className="flex items-center justify-between my-1">
+
+                                <Button
+                                    variant="outline"
+                                    className="hover:bg-transparent hover:text-inherit mr-1"
+                                    onClick={() => handleEditFacility(facility)}
+                                >
+                                    {facility.name} x {facility.number}: {facility.status} - Price: {new Intl.NumberFormat("vi-VN", {
+                                        style: "currency",
+                                        currency: "VND",
+                                    }).format(facility.price)}
+                                </Button>
+                                <Button variant="ghost" onClick={() => handleRemoveFacility(facility.id)} size="sm">
+                                    Remove
+                                </Button>
+                            </li>
+                        ))}
+                    </div>
+                </div>
+                <AddFacilityDialog
+                    isOpen={showAddFacilityDialog}
+                    setIsOpen={setShowAddFacilityDialog}
+                    onAddFacility={handleAddFacility}
+                    currentRoomId={newRoomId}
+                />
+                {facilityToEdit && (
+                    <EditFacilityDialog
+                        isOpen={showEditFacilityDialog}
+                        setIsOpen={setShowEditFacilityDialog}
+                        facility={facilityToEdit}
+                        onUpdateFacility={handleUpdateFacility}
+                    />
+                )}
                 <DialogFooter>
                     <Button type="submit" onClick={handleSave}>
                         Save changes
                     </Button>
                 </DialogFooter>
             </DialogContent>
-        </Dialog>
+        </Dialog >
     );
 };
 

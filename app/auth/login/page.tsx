@@ -1,22 +1,22 @@
 'use client';
 
-import { login } from "@/actions/login";
+import { login } from "@/actions/auth/login";
 import { FormError } from "@/components/form/form-error";
 import { Button } from "@/components/ui/button";
 import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
 } from "@/components/ui/card";
 import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { LoginSchema } from "@/schemas";
@@ -119,6 +119,12 @@ const LoginPage = () => {
               </Button>
             </form>
           </Form>
+          <div className="mt-4 text-center text-sm">
+            Don&apos;t have an account?{" "}
+            <Link href="/auth/register" className="underline">
+              Register
+            </Link>
+          </div>
         </CardContent>
       </Card>
     </div>

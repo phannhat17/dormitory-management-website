@@ -51,10 +51,11 @@ export const genders = [
 ]; 
 export const excelColumn = [
   { header: "ID", key: "id", width: 10 },
-  { header: "Name", key: "name", width: 32 },
-  { header: "Email", key: "email", width: 32 },
-  { header: "Gender", key: "gender", width: 32 },
-  { header: "Status", key: "status", width: 32 },
+  { header: "Gender", key: "gender", width: 10 },
+  { header: "Current", key: "current", width: 10 },
+  { header: "Max", key: "max", width: 10 },
+  { header: "Status", key: "status", width: 10 },
+  { header: "Price (VND)", key: "price", width: 20 },
 ]
 interface ActionsCellProps {
   row: any;

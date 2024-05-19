@@ -2,7 +2,7 @@
 
 import { db } from "@/lib/db";
 import { CreateUserSchema } from "@/schemas";
-import { Gender } from "@prisma/client";
+import { Gender, UserStatus } from "@prisma/client";
 import escapeHtml from "escape-html";
 import * as z from "zod";
 import { checkAdmin } from "./check-permission";
@@ -105,4 +105,38 @@ export const getUserInfo = async (id: string) => {
   }
 
   return null;
+};
+
+export const getUsers = async () => {
+  const isAdmin = await checkAdmin();
+
+  if (!isAdmin) {
+    return { error: "You must be an admin to create user!" };
+  }
+
+  try {
+    const users = await db.user.findMany({
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        gender: true,
+      },
+    });
+    return { users };
+  } catch (error) {
+    return { error: "Failed to fetch users" };
+  }
+};
+
+export const updateUserStatus = async (userId: string, status: UserStatus) => {
+    try {
+        await db.user.update({
+            where: { id: userId },
+            data: { status },
+        });
+        return { success: "User status updated successfully" };
+    } catch (error) {
+        return { error: "Failed to update user status" };
+    }
 };

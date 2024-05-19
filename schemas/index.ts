@@ -16,6 +16,35 @@ const passwordPolicySchema = z
     "Password must not contain three consecutive identical characters."
   );
 
+const allowedEmailDomains = ["sis.hust.edu.vn", "hust.edu.vn", "phannhat.id.vn"];
+
+const emailSchema = z
+  .string()
+  .email({ message: "Invalid email format" })
+  .refine(
+    (email) => {
+      const domain = email.split("@")[1];
+      return allowedEmailDomains.includes(domain);
+    },
+    { message: "Email domain is not allowed" }
+  );
+
+export const RegisterSchema = z
+  .object({
+    id: z.string().min(1, { message: "ID is required" }),
+    name: z.string().min(1, { message: "Full Name is required" }),
+    gender: z.nativeEnum(Gender, {
+      errorMap: () => ({ message: "Invalid gender" }),
+    }),
+    email: emailSchema,
+    password: passwordPolicySchema,
+    confirmPassword: passwordPolicySchema,
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords must match",
+    path: ["confirmPassword"],
+  });
+
 export const LoginSchema = z.object({
   email: z.string().email().min(1, {
     message: "Email is required",
@@ -93,12 +122,23 @@ export const updateRoomSchema = z.object({
   newId: z.string(),
   gender: z.nativeEnum(Gender),
   price: z.number().positive(),
-  facilities: z.array(
-    z.object({
-      id: z.string().optional(),
-      status: z.string(),
-      price: z.number().positive(),
-    })
-  ),
+  max: z.number(),
+  facilities: z.array(z.string()),
   users: z.array(z.string()),
+});
+
+export const UpdateFacilitySchema = z.object({
+  id: z.number(),
+  name: z.string().min(1, "Facility name is required"),
+  number: z.number().positive("Number must be a positive integer"),
+  status: z.string().min(1, "Status is required"),
+  price: z.number().positive("Price must be a positive number"),
+});
+
+export const CreateFacilitySchema = z.object({
+  name: z.string().min(1, "Facility name is required"),
+  number: z.number().positive("Number must be a positive integer"),
+  status: z.string().min(1, "Status is required"),
+  currentRoomId: z.string().min(1, "Room ID is required"),
+  price: z.number().positive("Price must be a positive number"),
 });

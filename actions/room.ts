@@ -1,12 +1,13 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { Gender, RoomStatus } from "@prisma/client";
+import { RoomStatus, UserStatus } from "@prisma/client";
 import escapeHtml from "escape-html";
 import * as z from "zod";
 import { checkAdmin } from "./check-permission";
 import { getRooms } from "@/data/room";
 import { updateRoomSchema } from "@/schemas";
+import { updateUserStatus } from "./user";
 
 export const getListRooms = async () => {
   const isAdmin = await checkAdmin();
@@ -37,6 +38,8 @@ export const getRoomInfo = async (id: string) => {
       Facilities: {
         select: {
           id: true,
+          name: true,
+          number: true,
           status: true,
           price: true,
         },
@@ -66,15 +69,25 @@ export const deleteRoom = async (id: string) => {
   }
 
   try {
+    const usersInRoom = await db.user.findMany({
+      where: { currentRoomId: id },
+      select: { id: true },
+    });
+
+    const updateUserStatusPromises = usersInRoom.map((user) =>
+      updateUserStatus(user.id, UserStatus.NOT_STAYING)
+    );
+    await Promise.all(updateUserStatusPromises);
+
+    // Disassociate users from the room
     await db.user.updateMany({
       where: { currentRoomId: id },
       data: { currentRoomId: null },
     });
 
+    // Delete the room
     await db.room.delete({
-      where: {
-        id: id,
-      },
+      where: { id: id },
     });
 
     return { success: "Room deleted successfully" };
@@ -95,7 +108,7 @@ export const updateRoom = async (data: z.infer<typeof updateRoomSchema>) => {
     return { error: "Invalid input data" };
   }
 
-  const { originalId, newId, gender, price, facilities, users } =
+  const { originalId, newId, gender, price, facilities, users, max } =
     validatedData.data;
 
   try {
@@ -113,7 +126,7 @@ export const updateRoom = async (data: z.infer<typeof updateRoomSchema>) => {
       }
     }
 
-    if (users.length > existingRoom.max) {
+    if (users.length > max) {
       return {
         error: "The number of users exceeds the maximum room capacity.",
       };
@@ -160,9 +173,7 @@ export const updateRoom = async (data: z.infer<typeof updateRoomSchema>) => {
     }
 
     const roomStatus =
-      users.length === existingRoom.max
-        ? RoomStatus.FULL
-        : RoomStatus.AVAILABLE;
+      users.length === max ? RoomStatus.FULL : RoomStatus.AVAILABLE;
 
     const updatedRoom = await db.room.update({
       where: { id: originalId },
@@ -172,6 +183,7 @@ export const updateRoom = async (data: z.infer<typeof updateRoomSchema>) => {
         price,
         status: roomStatus,
         current: users.length,
+        max,
         Facilities: {
           set: facilities.map((facilityId) => ({ id: Number(facilityId) })),
         },
@@ -184,27 +196,5 @@ export const updateRoom = async (data: z.infer<typeof updateRoomSchema>) => {
     return { success: "Room updated successfully", room: updatedRoom };
   } catch (error) {
     return { error: "Failed to update room" };
-  }
-};
-
-export const getUsers = async () => {
-  const isAdmin = await checkAdmin();
-
-  if (!isAdmin) {
-    return { error: "You must be an admin to create user!" };
-  }
-
-  try {
-    const users = await db.user.findMany({
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        gender: true,
-      },
-    });
-    return { users };
-  } catch (error) {
-    return { error: "Failed to fetch users" };
   }
 };
