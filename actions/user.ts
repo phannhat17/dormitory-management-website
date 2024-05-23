@@ -2,7 +2,7 @@
 
 import { db } from "@/lib/db";
 import { CreateUserSchema } from "@/schemas";
-import { Gender, UserStatus } from "@prisma/client";
+import { Gender, RoomStatus, UserRole, UserStatus } from "@prisma/client";
 import escapeHtml from "escape-html";
 import * as z from "zod";
 import { checkAdmin } from "./check-permission";
@@ -140,3 +140,90 @@ export const updateUserStatus = async (userId: string, status: UserStatus) => {
         return { error: "Failed to update user status" };
     }
 };
+
+export const updateUser = async (data: {
+  id: string;
+  newId: string;
+  name: string;
+  email: string;
+  role: UserRole;
+  currentRoomId: string | null;
+  amountPaid: number;
+  amountDue: number;
+}) => {
+  const isAdmin = await checkAdmin();
+
+  if (!isAdmin) {
+    return { error: "You must be an admin to update user information!" };
+  }
+
+  try {
+    if (data.currentRoomId) {
+      const room = await db.room.findUnique({
+        where: { id: data.currentRoomId },
+        select: { gender: true, current: true, max: true },
+      });
+
+      if (!room) {
+        return { error: "Room not found!" };
+      }
+
+      if (room.current >= room.max) {
+        return { error: "Room is full!" };
+      }
+
+      const user = await db.user.findUnique({
+        where: { id: data.id },
+        select: { gender: true },
+      });
+
+      if (!user) {
+        return { error: "User not found!" };
+      }
+
+      if (room.gender !== user.gender) {
+        return { error: "User's gender does not match the room's gender." };
+      }
+    }
+
+    const updatedUser = await db.user.update({
+      where: { id: data.id },
+      data: {
+        id: data.newId,
+        name: data.name,
+        email: data.email,
+        role: data.role,
+        currentRoomId: data.currentRoomId,
+        amountPaid: data.amountPaid,
+        amountDue: data.amountDue,
+      },
+    });
+
+    // Update room's current user count and status
+    if (data.currentRoomId) {
+      const room = await db.room.findUnique({
+        where: { id: data.currentRoomId },
+      });
+
+      if (room) {
+        const currentCount = await db.user.count({
+          where: { currentRoomId: data.currentRoomId },
+        });
+
+        await db.room.update({
+          where: { id: data.currentRoomId },
+          data: {
+            current: currentCount,
+            status: currentCount >= room.max ? RoomStatus.FULL : RoomStatus.AVAILABLE,
+          },
+        });
+      }
+    }
+
+    return { success: "User updated successfully", user: updatedUser };
+  } catch (error) {
+    return { error: "Failed to update user" };
+  }
+};
+
+

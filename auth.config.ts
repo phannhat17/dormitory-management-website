@@ -6,11 +6,10 @@ import bcrypt from "bcryptjs";
 import { addMinutes, differenceInMinutes, isBefore } from "date-fns";
 import { AuthError, type NextAuthConfig } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
-import { getTwoFAConfirmById } from "@/data/two-fa-confirm";
 
 const MAX_FAILED_ATTEMPTS = 5;
-const LOCKOUT_DURATION = 10; // in minutes
-const RESET_DURATION = 3; // in minutes
+const LOCKOUT_DURATION = 10;
+const RESET_DURATION = 3;
 
 export default {
   trustHost: true,
@@ -31,12 +30,10 @@ export default {
 
           if (user.password === null) throw new AuthError("FirstLogin");
 
-          // Check if the user is locked out
           if (user.lockoutUntil && isBefore(now, user.lockoutUntil)) {
             throw new AuthError("TemporarilyLocked");
           }
 
-          // Reset failed attempts if the last failed attempt was more than RESET_DURATION minutes ago
           if (
             user.lastFailedAttempt &&
             differenceInMinutes(now, user.lastFailedAttempt) > RESET_DURATION
@@ -49,14 +46,12 @@ export default {
 
           const passwordMatch = await bcrypt.compare(password, user.password);
           if (passwordMatch) {
-            // Reset failed attempts on successful login
             await db.user.update({
               where: { id: user.id },
               data: { failedAttempts: 0, lockoutUntil: null },
             });
             return user;
           } else {
-            // Increment failed attempts
             const newFailedAttempts = user.failedAttempts + 1;
 
             let lockoutUntil = null;

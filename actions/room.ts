@@ -99,10 +99,12 @@ export const deleteRoom = async (id: string) => {
 export const updateRoom = async (data: z.infer<typeof updateRoomSchema>) => {
   const isAdmin = await checkAdmin();
 
+  // Check Admin 
   if (!isAdmin) {
     return { error: "You must be an admin to update a room!" };
   }
 
+  // Validata input data
   const validatedData = updateRoomSchema.safeParse(data);
   if (!validatedData.success) {
     return { error: "Invalid input data" };
@@ -240,7 +242,6 @@ export const createRoomWithFacilities = async (
     return { error: "An error occurred during room creation!" };
   }
 };
-
 
 export const getRoomStatistics = async () => {
   const totalRooms = await db.room.count();
