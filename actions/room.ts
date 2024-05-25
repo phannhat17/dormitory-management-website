@@ -99,12 +99,10 @@ export const deleteRoom = async (id: string) => {
 export const updateRoom = async (data: z.infer<typeof updateRoomSchema>) => {
   const isAdmin = await checkAdmin();
 
-  // Check Admin 
   if (!isAdmin) {
     return { error: "You must be an admin to update a room!" };
   }
 
-  // Validata input data
   const validatedData = updateRoomSchema.safeParse(data);
   if (!validatedData.success) {
     return { error: "Invalid input data" };
@@ -145,6 +143,14 @@ export const updateRoom = async (data: z.infer<typeof updateRoomSchema>) => {
       return { error: "Some users' gender does not match the room's gender." };
     }
 
+    const currentUsersInRoom = await db.user.findMany({
+      where: { currentRoomId: originalId },
+      select: { id: true },
+    });
+
+    const currentUserIdsInRoom = currentUsersInRoom.map(user => user.id);
+    const usersToRemove = currentUserIdsInRoom.filter(id => !users.includes(id));
+
     const userTransfers = await Promise.all(
       users.map(async (userId) => {
         const user = await db.user.findUnique({
@@ -177,29 +183,52 @@ export const updateRoom = async (data: z.infer<typeof updateRoomSchema>) => {
     const roomStatus =
       users.length === max ? RoomStatus.FULL : RoomStatus.AVAILABLE;
 
-    const updatedRoom = await db.room.update({
-      where: { id: originalId },
-      data: {
-        id: newId,
-        gender,
-        price,
-        status: roomStatus,
-        current: users.length,
-        max,
-        Facilities: {
-          set: facilities.map((facilityId) => ({ id: Number(facilityId) })),
+    await db.$transaction(async (prisma) => {
+      for (const userId of usersToRemove) {
+        await prisma.user.update({
+          where: { id: userId },
+          data: {
+            currentRoomId: null,
+            status: UserStatus.NOT_STAYING,
+          },
+        });
+      }
+
+      await prisma.room.update({
+        where: { id: originalId },
+        data: {
+          id: newId,
+          gender,
+          price,
+          status: roomStatus,
+          current: users.length,
+          max,
+          Facilities: {
+            set: facilities.map((facilityId) => ({ id: Number(facilityId) })),
+          },
+          Users: {
+            set: users.map((userId) => ({ id: userId })),
+          },
         },
-        Users: {
-          set: users.map((userId) => ({ id: userId })),
-        },
-      },
+      });
+
+      for (const userId of users) {
+        await prisma.user.update({
+          where: { id: userId },
+          data: {
+            currentRoomId: newId,
+            status: UserStatus.STAYING,
+          },
+        });
+      }
     });
 
-    return { success: "Room updated successfully", room: updatedRoom };
+    return { success: "Room updated successfully" };
   } catch (error) {
     return { error: "Failed to update room" };
   }
 };
+
 
 export const createRoomWithFacilities = async (
   values: z.infer<typeof createRoomWithFacilitiesSchema>

@@ -1,7 +1,7 @@
 "use client";
 
 import { getUserInfo, updateUser } from "@/actions/user";
-import { getListRooms } from "@/actions/room"; // Import getListRooms action
+import { getListRooms } from "@/actions/room";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -22,7 +22,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { UserRole, Gender } from "@prisma/client";
+import { UserRole, Gender, UserStatus } from "@prisma/client";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useRouter } from 'next/navigation';
@@ -91,6 +91,7 @@ const EditUserCard: React.FC<ReusableAlertDialogProps> = ({ isOpen, userID, setI
             name: userName,
             email: userEmail,
             role: userRole as UserRole,
+            status: userRoomId ? UserStatus.STAYING : UserStatus.NOT_STAYING,
             currentRoomId: userRoomId,
             amountPaid: parseFloat(userAmountPaid),
             amountDue: parseFloat(userAmountDue),
@@ -108,7 +109,9 @@ const EditUserCard: React.FC<ReusableAlertDialogProps> = ({ isOpen, userID, setI
         }
     };
 
-    const filteredRooms = rooms.filter(room => room.gender === userGender && room.current < room.max);
+    const filteredRooms = rooms.filter(room => 
+        (room.gender === userGender && room.current < room.max) || room.id === userRoomId
+    );
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>

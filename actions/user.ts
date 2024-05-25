@@ -158,9 +158,21 @@ export const updateUser = async (data: {
   }
 
   try {
-    if (data.currentRoomId) {
+    const user = await db.user.findUnique({
+      where: { id: data.id },
+      select: { currentRoomId: true, gender: true },
+    });
+
+    if (!user) {
+      return { error: "User not found!" };
+    }
+
+    const previousRoomId = user.currentRoomId;
+    const newRoomId = data.currentRoomId;
+
+    if (newRoomId) {
       const room = await db.room.findUnique({
-        where: { id: data.currentRoomId },
+        where: { id: newRoomId },
         select: { gender: true, current: true, max: true },
       });
 
@@ -170,15 +182,6 @@ export const updateUser = async (data: {
 
       if (room.current >= room.max) {
         return { error: "Room is full!" };
-      }
-
-      const user = await db.user.findUnique({
-        where: { id: data.id },
-        select: { gender: true },
-      });
-
-      if (!user) {
-        return { error: "User not found!" };
       }
 
       if (room.gender !== user.gender) {
@@ -193,28 +196,50 @@ export const updateUser = async (data: {
         name: data.name,
         email: data.email,
         role: data.role,
-        currentRoomId: data.currentRoomId,
+        currentRoomId: newRoomId,
         amountPaid: data.amountPaid,
         amountDue: data.amountDue,
+        status: newRoomId ? UserStatus.STAYING : UserStatus.NOT_STAYING,
       },
     });
 
-    // Update room's current user count and status
-    if (data.currentRoomId) {
-      const room = await db.room.findUnique({
-        where: { id: data.currentRoomId },
+    // Update the previous room's current count and status if the user is leaving that room
+    if (previousRoomId && previousRoomId !== newRoomId) {
+      const previousRoom = await db.room.findUnique({
+        where: { id: previousRoomId },
       });
 
-      if (room) {
-        const currentCount = await db.user.count({
-          where: { currentRoomId: data.currentRoomId },
+      if (previousRoom) {
+        const previousRoomCurrentCount = await db.user.count({
+          where: { currentRoomId: previousRoomId },
         });
 
         await db.room.update({
-          where: { id: data.currentRoomId },
+          where: { id: previousRoomId },
           data: {
-            current: currentCount,
-            status: currentCount >= room.max ? RoomStatus.FULL : RoomStatus.AVAILABLE,
+            current: previousRoomCurrentCount,
+            status: previousRoomCurrentCount === previousRoom.max ? RoomStatus.FULL : RoomStatus.AVAILABLE,
+          },
+        });
+      }
+    }
+
+    // Update the new room's current count and status if the user is moving to a new room
+    if (newRoomId) {
+      const newRoom = await db.room.findUnique({
+        where: { id: newRoomId },
+      });
+
+      if (newRoom) {
+        const newRoomCurrentCount = await db.user.count({
+          where: { currentRoomId: newRoomId },
+        });
+
+        await db.room.update({
+          where: { id: newRoomId },
+          data: {
+            current: newRoomCurrentCount,
+            status: newRoomCurrentCount === newRoom.max ? RoomStatus.FULL : RoomStatus.AVAILABLE,
           },
         });
       }
@@ -225,5 +250,6 @@ export const updateUser = async (data: {
     return { error: "Failed to update user" };
   }
 };
+
 
 
