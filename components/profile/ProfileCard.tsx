@@ -49,23 +49,25 @@ const ProfileCard = () => {
             </Badge>
           </p>
         </div>
-        <div className="flex flex-row items-center justify-between my-4">
-          <p className="font-medium mx-5">Status</p>
-          <p className="font-medium mx-5">
-            <Badge
-              variant={user?.status === "BANNED" ? "destructive" : null}
-              className={
-                user?.status === "NOT_STAYING"
-                  ? "border-transparent bg-[#fbcb14] text-[#543107]-foreground shadow hover:bg-[#fbcb14]/80"
-                  : user?.status === "STAYING"
-                  ? "border-transparent bg-emerald-500 text-primary-foreground shadow hover:bg-emerald-500/80"
-                  : ""
-              }
-            >
-              {user?.status}
-            </Badge>
-          </p>
-        </div>
+        {user?.role === "STUDENT" && (
+          <div className="flex flex-row items-center justify-between my-4">
+            <p className="font-medium mx-5">Status</p>
+            <p className="font-medium mx-5">
+              <Badge
+                variant={user?.status === "BANNED" ? "destructive" : null}
+                className={
+                  user?.status === "NOT_STAYING"
+                    ? "border-transparent bg-[#fbcb14] text-[#543107]-foreground shadow hover:bg-[#fbcb14]/80"
+                    : user?.status === "STAYING"
+                    ? "border-transparent bg-emerald-500 text-primary-foreground shadow hover:bg-emerald-500/80"
+                    : ""
+                }
+              >
+                {user?.status}
+              </Badge>
+            </p>
+          </div>
+        )}
         {user?.role === "ADMIN" && (
           <div className="flex flex-row items-center justify-between my-4">
             <p className="font-medium mx-5">Role</p>

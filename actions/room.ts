@@ -6,7 +6,7 @@ import escapeHtml from "escape-html";
 import * as z from "zod";
 import { checkAdmin } from "./check-permission";
 import { getRooms } from "@/data/room";
-import { updateRoomSchema } from "@/schemas";
+import { updateRoomSchema, createRoomWithFacilitiesSchema } from "@/schemas";
 import { updateUserStatus } from "./user";
 
 export const getListRooms = async () => {
@@ -143,6 +143,14 @@ export const updateRoom = async (data: z.infer<typeof updateRoomSchema>) => {
       return { error: "Some users' gender does not match the room's gender." };
     }
 
+    const currentUsersInRoom = await db.user.findMany({
+      where: { currentRoomId: originalId },
+      select: { id: true },
+    });
+
+    const currentUserIdsInRoom = currentUsersInRoom.map(user => user.id);
+    const usersToRemove = currentUserIdsInRoom.filter(id => !users.includes(id));
+
     const userTransfers = await Promise.all(
       users.map(async (userId) => {
         const user = await db.user.findUnique({
@@ -175,26 +183,116 @@ export const updateRoom = async (data: z.infer<typeof updateRoomSchema>) => {
     const roomStatus =
       users.length === max ? RoomStatus.FULL : RoomStatus.AVAILABLE;
 
-    const updatedRoom = await db.room.update({
-      where: { id: originalId },
-      data: {
-        id: newId,
-        gender,
-        price,
-        status: roomStatus,
-        current: users.length,
-        max,
-        Facilities: {
-          set: facilities.map((facilityId) => ({ id: Number(facilityId) })),
+    await db.$transaction(async (prisma) => {
+      for (const userId of usersToRemove) {
+        await db.user.update({
+          where: { id: userId },
+          data: {
+            currentRoomId: null,
+            status: UserStatus.NOT_STAYING,
+          },
+        });
+      }
+
+      await db.room.update({
+        where: { id: originalId },
+        data: {
+          id: newId,
+          gender,
+          price,
+          status: roomStatus,
+          current: users.length,
+          max,
+          Facilities: {
+            set: facilities.map((facilityId) => ({ id: Number(facilityId) })),
+          },
+          Users: {
+            set: users.map((userId) => ({ id: userId })),
+          },
         },
-        Users: {
-          set: users.map((userId) => ({ id: userId })),
-        },
-      },
+      });
+
+      for (const userId of users) {
+        await db.user.update({
+          where: { id: userId },
+          data: {
+            currentRoomId: newId,
+            status: UserStatus.STAYING,
+          },
+        });
+      }
     });
 
-    return { success: "Room updated successfully", room: updatedRoom };
+    return { success: "Room updated successfully" };
   } catch (error) {
     return { error: "Failed to update room" };
   }
+};
+
+export const createRoomWithFacilities = async (
+  values: z.infer<typeof createRoomWithFacilitiesSchema>
+) => {
+  const validatedFields = createRoomWithFacilitiesSchema.safeParse(values);
+
+  if (!validatedFields.success) {
+    const errorDetails = validatedFields.error.format();
+    console.log(JSON.stringify(errorDetails, null, 2));
+    return { error: "Invalid fields!", details: errorDetails };
+  }
+
+  const rooms = validatedFields.data.rooms;
+
+  try {
+    for (const room of rooms) {
+      const { roomId, gender, price, max, facilities } = room;
+      const sanitizedRoomId = escapeHtml(roomId);
+      const sanitizedFacilities = facilities.map((facility) => ({
+        ...facility,
+        name: escapeHtml(facility.name),
+        status: escapeHtml(facility.status),
+      }));
+
+      const createdRoom = await db.room.create({
+        data: {
+          id: sanitizedRoomId,
+          gender,
+          price,
+          max,
+          current: 0,
+          Facilities: {
+            create: sanitizedFacilities,
+          },
+        },
+      });
+    }
+    return { success: "Rooms with facilities created successfully!" };
+  } catch (error) {
+    return { error: "An error occurred during room creation!" };
+  }
+};
+
+export const getRoomStatistics = async () => {
+  const totalRooms = await db.room.count();
+
+  const maleRooms = await db.room.count({
+    where: { gender: "MALE" },
+  });
+
+  const femaleRooms = await db.room.count({
+    where: { gender: "FEMALE" },
+  });
+
+  const fullRooms = await db.room.count({
+    where: { status: "FULL" },
+  });
+
+  const availableRooms = totalRooms - fullRooms;
+
+  return {
+    totalRooms: totalRooms,
+    maleRooms: maleRooms,
+    femaleRooms: femaleRooms,
+    fullRooms: fullRooms,
+    availableRooms: availableRooms,
+  };
 };

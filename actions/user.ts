@@ -2,7 +2,7 @@
 
 import { db } from "@/lib/db";
 import { CreateUserSchema } from "@/schemas";
-import { Gender, UserStatus } from "@prisma/client";
+import { Gender, RoomStatus, UserRole, UserStatus } from "@prisma/client";
 import escapeHtml from "escape-html";
 import * as z from "zod";
 import { checkAdmin } from "./check-permission";
@@ -140,3 +140,116 @@ export const updateUserStatus = async (userId: string, status: UserStatus) => {
         return { error: "Failed to update user status" };
     }
 };
+
+export const updateUser = async (data: {
+  id: string;
+  newId: string;
+  name: string;
+  email: string;
+  role: UserRole;
+  currentRoomId: string | null;
+  amountPaid: number;
+  amountDue: number;
+}) => {
+  const isAdmin = await checkAdmin();
+
+  if (!isAdmin) {
+    return { error: "You must be an admin to update user information!" };
+  }
+
+  try {
+    const user = await db.user.findUnique({
+      where: { id: data.id },
+      select: { currentRoomId: true, gender: true },
+    });
+
+    if (!user) {
+      return { error: "User not found!" };
+    }
+
+    const previousRoomId = user.currentRoomId;
+    const newRoomId = data.currentRoomId;
+
+    if (newRoomId) {
+      const room = await db.room.findUnique({
+        where: { id: newRoomId },
+        select: { gender: true, current: true, max: true },
+      });
+
+      if (!room) {
+        return { error: "Room not found!" };
+      }
+
+      if (room.current >= room.max) {
+        return { error: "Room is full!" };
+      }
+
+      if (room.gender !== user.gender) {
+        return { error: "User's gender does not match the room's gender." };
+      }
+    }
+
+    const updatedUser = await db.user.update({
+      where: { id: data.id },
+      data: {
+        id: data.newId,
+        name: data.name,
+        email: data.email,
+        role: data.role,
+        currentRoomId: newRoomId,
+        amountPaid: data.amountPaid,
+        amountDue: data.amountDue,
+        status: newRoomId ? UserStatus.STAYING : UserStatus.NOT_STAYING,
+      },
+    });
+
+    // Update the previous room's current count and status if the user is leaving that room
+    if (previousRoomId && previousRoomId !== newRoomId) {
+      const previousRoom = await db.room.findUnique({
+        where: { id: previousRoomId },
+      });
+
+      if (previousRoom) {
+        const previousRoomCurrentCount = await db.user.count({
+          where: { currentRoomId: previousRoomId },
+        });
+
+        await db.room.update({
+          where: { id: previousRoomId },
+          data: {
+            current: previousRoomCurrentCount,
+            status: previousRoomCurrentCount === previousRoom.max ? RoomStatus.FULL : RoomStatus.AVAILABLE,
+          },
+        });
+      }
+    }
+
+    // Update the new room's current count and status if the user is moving to a new room
+    if (newRoomId) {
+      const newRoom = await db.room.findUnique({
+        where: { id: newRoomId },
+      });
+
+      if (newRoom) {
+        const newRoomCurrentCount = await db.user.count({
+          where: { currentRoomId: newRoomId },
+        });
+
+        await db.room.update({
+          where: { id: newRoomId },
+          data: {
+            current: newRoomCurrentCount,
+            status: newRoomCurrentCount === newRoom.max ? RoomStatus.FULL : RoomStatus.AVAILABLE,
+          },
+        });
+      }
+    }
+
+    return { success: "User updated successfully", user: updatedUser };
+  } catch (error) {
+    return { error: "Failed to update user" };
+  }
+};
+
+
+

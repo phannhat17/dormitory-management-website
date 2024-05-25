@@ -48,3 +48,22 @@ export const deleteFeedback = async (id: number) => {
 
   return { success: "Feedback deleted successfully" };
 };
+
+export const getFbInfo = async (id: string) => {
+  const isAdmin = await checkAdmin();
+
+  if (!isAdmin) {
+    return { error: "You must be an admin to do this action!" };
+  }
+
+  const feedback = await db.feedback.findUnique({
+    where: { id: parseInt(id) },
+    include: { User: true },
+  });
+
+  if (feedback) {
+    return feedback;
+  }
+
+  return { error: "Feedback not found!" };
+};
