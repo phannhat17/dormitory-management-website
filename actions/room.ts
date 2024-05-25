@@ -185,7 +185,7 @@ export const updateRoom = async (data: z.infer<typeof updateRoomSchema>) => {
 
     await db.$transaction(async (prisma) => {
       for (const userId of usersToRemove) {
-        await prisma.user.update({
+        await db.user.update({
           where: { id: userId },
           data: {
             currentRoomId: null,
@@ -194,7 +194,7 @@ export const updateRoom = async (data: z.infer<typeof updateRoomSchema>) => {
         });
       }
 
-      await prisma.room.update({
+      await db.room.update({
         where: { id: originalId },
         data: {
           id: newId,
@@ -213,7 +213,7 @@ export const updateRoom = async (data: z.infer<typeof updateRoomSchema>) => {
       });
 
       for (const userId of users) {
-        await prisma.user.update({
+        await db.user.update({
           where: { id: userId },
           data: {
             currentRoomId: newId,
