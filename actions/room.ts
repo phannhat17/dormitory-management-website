@@ -229,7 +229,6 @@ export const updateRoom = async (data: z.infer<typeof updateRoomSchema>) => {
   }
 };
 
-
 export const createRoomWithFacilities = async (
   values: z.infer<typeof createRoomWithFacilitiesSchema>
 ) => {
