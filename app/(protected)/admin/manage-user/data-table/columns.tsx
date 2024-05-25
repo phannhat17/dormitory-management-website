@@ -7,11 +7,11 @@ import ReusableAlertDialog from "@/components/modify/ReusableAlertDialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Gender, UserStatus } from "@prisma/client";
 import { ColumnDef } from "@tanstack/react-table";
@@ -64,61 +64,61 @@ interface ActionsCellProps {
 }
 const ActionsCell: React.FC<ActionsCellProps> = ({ row }) => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
-      const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
 
-      const router = useRouter();
+  const router = useRouter();
 
-      const user = row.original
+  const user = row.original
 
-      const handleDelete = () => {
-        deleteUser(user.id)
-          .then((data) => {
-            if (data.success) {
-              toast.success(data.success);
-              router.refresh();
-            } else if (data.error) {
-              toast.error(data.error);
-            }
-          });
-      };
+  const handleDelete = () => {
+    deleteUser(user.id)
+      .then((data) => {
+        if (data.success) {
+          toast.success(data.success);
+          router.refresh();
+        } else if (data.error) {
+          toast.error(data.error);
+        }
+      });
+  };
 
-      return (
-        <>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button aria-haspopup="true" size="icon" variant="ghost">
-                <MoreHorizontal className="h-4 w-4" />
-                <span className="sr-only">Toggle menu</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuItem onClick={() => setIsEditDialogOpen(true)}>View/Edit</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setIsDeleteDialogOpen(true)}>Delete</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+  return (
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button aria-haspopup="true" size="icon" variant="ghost">
+            <MoreHorizontal className="h-4 w-4" />
+            <span className="sr-only">Toggle menu</span>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+          <DropdownMenuItem onClick={() => setIsEditDialogOpen(true)}>View/Edit</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setIsDeleteDialogOpen(true)}>Delete</DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
 
-      
-          <EditUserCard
-            isOpen={isEditDialogOpen}
-            setIsOpen={isEditDialogOpen ?
-              setIsEditDialogOpen : setIsDeleteDialogOpen}
-            userID = {user.id}
-            onConfirm={() => {}}
-          />
 
-          <ReusableAlertDialog
-            isOpen={isDeleteDialogOpen}
-            setIsOpen={isDeleteDialogOpen ?
-              setIsDeleteDialogOpen : setIsEditDialogOpen}
-            title="Are you absolutely sure?"
-            description="This action cannot be undone. This will permanently delete your account and remove your data from our servers."
-            confirmButtonText="Continue"
-            cancelButtonText="Cancel"
-            onConfirm={handleDelete}
-          />
-        </>
-      );
+      <EditUserCard
+        isOpen={isEditDialogOpen}
+        setIsOpen={isEditDialogOpen ?
+          setIsEditDialogOpen : setIsDeleteDialogOpen}
+        userID={user.id}
+        onConfirm={() => { }}
+      />
+
+      <ReusableAlertDialog
+        isOpen={isDeleteDialogOpen}
+        setIsOpen={isDeleteDialogOpen ?
+          setIsDeleteDialogOpen : setIsEditDialogOpen}
+        title="Are you absolutely sure?"
+        description="This action cannot be undone. This will permanently delete your account and remove your data from our servers."
+        confirmButtonText="Continue"
+        cancelButtonText="Cancel"
+        onConfirm={handleDelete}
+      />
+    </>
+  );
 };
 
 export const columns: ColumnDef<Usertable>[] = [
@@ -146,7 +146,7 @@ export const columns: ColumnDef<Usertable>[] = [
     enableSorting: true,
   },
   {
-    accessorKey: "gender", 
+    accessorKey: "gender",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Gender" />
     ),
