@@ -17,7 +17,9 @@ export const createUser = async (values: z.infer<typeof CreateUserSchema>) => {
   const validatedFields = CreateUserSchema.safeParse(values);
 
   if (!validatedFields.success) {
-    return { error: "Invalid fields!" };
+    const errorDetails = validatedFields.error.format();
+    console.log(JSON.stringify(errorDetails, null, 2));
+    return { error: "Invalid fields!", details: errorDetails };
   }
 
   const { students } = validatedFields.data;

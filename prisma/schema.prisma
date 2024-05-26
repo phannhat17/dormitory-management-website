@@ -28,6 +28,12 @@ enum Gender {
   FEMALE
 }
 
+enum RequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 model User {
   id                String              @id
   name              String?
@@ -47,19 +53,42 @@ model User {
   lastFailedAttempt DateTime?
   lockoutUntil      DateTime?
   twoFA             Boolean             @default(true)
+  RoomChangeRequests RoomChangeRequest[] @relation("UserRoomChangeRequests")
+
+  @@index([currentRoomId])
 }
 
 model Room {
-  id         String     @id
-  status     RoomStatus @default(AVAILABLE)
-  gender     Gender     @default(FEMALE)
-  current    Int
-  max        Int
-  price      Float
-  Facilities Facility[]
-  Users      User[]
-  Contracts  Contract[]
-  Invoices   Invoice[]
+  id                     String              @id
+  status                 RoomStatus          @default(AVAILABLE)
+  gender                 Gender              @default(FEMALE)
+  current                Int
+  max                    Int
+  price                  Float
+  Facilities             Facility[]
+  Users                  User[]
+  Contracts              Contract[]
+  Invoices               Invoice[]
+  FromRoomChangeRequests RoomChangeRequest[] @relation("RoomChangeRequestFromRoom")
+  ToRoomChangeRequests   RoomChangeRequest[] @relation("RoomChangeRequestToRoom")
+}
+
+model RoomChangeRequest {
+  id         String        @id @default(cuid())
+  userId     String
+  fromRoomId String?
+  toRoomId   String
+  status     RequestStatus @default(PENDING)
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+
+  User       User          @relation("UserRoomChangeRequests", fields: [userId], references: [id])
+  FromRoom   Room?         @relation("RoomChangeRequestFromRoom", fields: [fromRoomId], references: [id])
+  ToRoom     Room          @relation("RoomChangeRequestToRoom", fields: [toRoomId], references: [id])
+
+  @@index([userId])
+  @@index([fromRoomId])
+  @@index([toRoomId])
 }
 
 model Facility {
