@@ -3,58 +3,37 @@
 import { db } from "@/lib/db";
 import { RequestStatus, RoomStatus, UserStatus } from "@prisma/client";
 import { checkAdmin } from "./check-permission";
+import { currentUser } from "@/lib/auth";
 
-// Function to approve a room change request
 export const approveRoomChangeRequest = async (requestId: string) => {
-  const isAdmin = await checkAdmin();
+  const session = await currentUser();
+  if (!session?.email) {
+    return { error: "User not authenticated" };
+  }
 
-  if (!isAdmin) {
-    return { error: "You must be an admin to approve room change requests!" };
+  const adminUser = await db.user.findUnique({
+    where: { email: session.email },
+    select: { role: true },
+  });
+
+  if (!adminUser || adminUser.role !== "ADMIN") {
+    return { error: "Permission denied" };
   }
 
   const request = await db.roomChangeRequest.findUnique({
     where: { id: requestId },
-    include: { ToRoom: true, FromRoom: true, User: true },
+    include: { User: true, ToRoom: true, FromRoom: true },
   });
 
   if (!request) {
     return { error: "Request not found" };
   }
 
-  if (request.status !== RequestStatus.PENDING) {
-    return { error: "Only pending requests can be approved" };
-  }
-
-  if (!request.ToRoom) {
-    return { error: "Destination room not found" };
-  }
-
   if (request.ToRoom.current >= request.ToRoom.max) {
     return { error: "The room is already full" };
   }
 
-  const transaction = await db.$transaction(async (prisma) => {
-    const updatedToRoom = await prisma.room.update({
-      where: { id: request.toRoomId },
-      data: {
-        current: { increment: 1 },
-        status:
-          request.ToRoom.current + 1 >= request.ToRoom.max
-            ? RoomStatus.FULL
-            : RoomStatus.AVAILABLE,
-      },
-    });
-
-    if (request.fromRoomId) {
-      await prisma.room.update({
-        where: { id: request.fromRoomId },
-        data: {
-          current: { decrement: 1 },
-          status: RoomStatus.AVAILABLE,
-        },
-      });
-    }
-
+  await db.$transaction(async (prisma) => {
     await prisma.user.update({
       where: { id: request.userId },
       data: {
@@ -63,15 +42,45 @@ export const approveRoomChangeRequest = async (requestId: string) => {
       },
     });
 
-    await prisma.roomChangeRequest.update({
-      where: { id: requestId },
-      data: { status: RequestStatus.APPROVED },
+    await prisma.room.update({
+      where: { id: request.toRoomId },
+      data: { current: { increment: 1 } },
     });
 
-    return updatedToRoom;
+    if (request.fromRoomId) {
+      await prisma.room.update({
+        where: { id: request.fromRoomId },
+        data: { current: { decrement: 1 } },
+      });
+    }
+
+    const newContract = await prisma.contract.create({
+      data: {
+        contractType: "ROOM",
+        userId: request.userId,
+        roomId: request.toRoomId,
+        term: "MONTHLY",
+        startDate: new Date(),
+        endDate: new Date(new Date().setMonth(new Date().getMonth() + 1)),
+      },
+    });
+
+    await prisma.invoice.create({
+      data: {
+        roomId: request.toRoomId,
+        contractId: newContract.id,
+        amountPaid: 0,
+        amountDue: request.ToRoom.price,
+      },
+    });
+
+    await prisma.roomChangeRequest.update({
+      where: { id: request.id },
+      data: { status: RequestStatus.APPROVED },
+    });
   });
 
-  return { success: "Request approved successfully", transaction };
+  return { success: "Room change request approved" };
 };
 
 // Function to reject a room change request

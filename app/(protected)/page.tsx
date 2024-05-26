@@ -1,15 +1,14 @@
 "use client";
-
 import React, { useEffect, useState } from "react";
-import { Users, DollarSign, Home } from "lucide-react";
+import { BeatLoader } from "react-spinners";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { getUserInfo, getAvailableRooms, requestRoomChange } from "@/actions/student/user";
 import { getRoomChangeRequests, deleteRoomChangeRequest } from "@/actions/student/request";
-import { User, Room, Gender, RequestStatus } from "@prisma/client";
-import { BeatLoader } from "react-spinners"
+import { User, Room, Gender, RoomStatus, UserStatus, RequestStatus } from "@prisma/client";
+import { DollarSign, Home, Users } from "lucide-react";
 
 interface Facility {
   id: number;
@@ -25,6 +24,16 @@ interface UserWithRelations extends User {
     Facilities: Facility[];
     Users: User[];
   }) | null;
+  Contracts: {
+    id: number;
+    startDate: Date;
+    endDate: Date;
+    Invoices: {
+      id: number;
+      amountPaid: number;
+      amountDue: number;
+    }[];
+  }[];
 }
 
 interface RoomChangeRequest {
@@ -45,31 +54,19 @@ const Dashboard = () => {
   useEffect(() => {
     async function fetchData() {
       try {
-        const [userInfo, rooms, requests] = await Promise.all([
-          getUserInfo(),
-          getAvailableRooms(),
-          getRoomChangeRequests()
-        ]);
-
+        const userInfo = await getUserInfo();
         if (userInfo.error) {
           toast.error(userInfo.error);
         } else {
           setUser(userInfo.user ?? null);
+          const requests = await getRoomChangeRequests();
+          setPendingRequests(requests.requests?.filter(request => request.status === "PENDING") ?? []);
         }
 
-        if (rooms.error) {
-          toast.error(rooms.error);
-        } else {
-          setAvailableRooms(rooms.availableRooms ?? []);
-        }
-
-        if (requests.error) {
-          toast.error(requests.error);
-        } else {
-          setPendingRequests(requests.requests ?? []);
-        }
+        const rooms = await getAvailableRooms();
+        setAvailableRooms(rooms.availableRooms ?? []);
       } catch (error) {
-        toast.error("Failed to fetch data.");
+        toast.error("Failed to load data");
       } finally {
         setIsLoading(false);
       }
@@ -79,36 +76,29 @@ const Dashboard = () => {
   }, []);
 
   const handleRoomChange = async (toRoomId: string) => {
-    if (isRequesting || !user) return;
+    if (isRequesting || !user || user.currentRoomId === toRoomId) return;
 
     setIsRequesting(true);
-    try {
-      const response = await requestRoomChange(toRoomId);
+    const response = await requestRoomChange(toRoomId);
+    setIsRequesting(false);
 
-      if (response.error) {
-        toast.error(response.error);
-      } else {
-        toast.success(response.success);
-        const updatedRequests = await getRoomChangeRequests();
-        setPendingRequests(updatedRequests.requests ?? []);
-      }
-    } finally {
-      setIsRequesting(false);
+    if (response.error) {
+      toast.error(response.error);
+    } else {
+      toast.success(response.success);
+      const updatedRequests = await getRoomChangeRequests();
+      setPendingRequests(updatedRequests.requests?.filter(request => request.status === "PENDING") ?? []);
     }
   };
 
   const handleDeleteRequest = async (requestId: string) => {
-    try {
-      const response = await deleteRoomChangeRequest(requestId);
-      if (response.error) {
-        toast.error(response.error);
-      } else {
-        toast.success(response.success);
-        const updatedRequests = await getRoomChangeRequests();
-        setPendingRequests(updatedRequests.requests ?? []);
-      }
-    } catch (error) {
-      toast.error("Failed to delete the request.");
+    const response = await deleteRoomChangeRequest(requestId);
+    if (response.error) {
+      toast.error(response.error);
+    } else {
+      toast.success(response.success);
+      const updatedRequests = await getRoomChangeRequests();
+      setPendingRequests(updatedRequests.requests?.filter(request => request.status === "PENDING") ?? []);
     }
   };
 
@@ -116,13 +106,12 @@ const Dashboard = () => {
     return pendingRequests.some(request => request.toRoomId === roomId && request.status === "PENDING");
   };
 
-  const hasPendingRequest = pendingRequests.some(request => request.status === "PENDING");
-
-
   if (isLoading) {
-    return <div className="flex items-center justify-center min-h-screen">
-    <BeatLoader />
-  </div>;
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <BeatLoader />
+      </div>
+    );
   }
 
   return (
@@ -182,10 +171,23 @@ const Dashboard = () => {
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-xl font-bold">${user?.amountPaid ?? 0}</div>
-              <p className="text-xs text-muted-foreground">
-                Amount Due: ${user?.amountDue ?? 0}
-              </p>
+              {user?.Contracts.map((contract) => (
+                <div key={contract.id} className="mb-4">
+                  <div className="text-lg font-bold">
+                    Contract Start Date: {new Date(contract.startDate).toLocaleDateString()}
+                  </div>
+                  <div className="text-lg font-bold">
+                    Contract End Date: {new Date(contract.endDate).toLocaleDateString()}
+                  </div>
+                  <div className="mt-2">
+                    {contract.Invoices.map((invoice) => (
+                      <div key={invoice.id} className="text-sm text-muted-foreground">
+                        Amount Due: {invoice.amountDue}, Amount Paid: {invoice.amountPaid}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
             </CardContent>
           </Card>
         </div>
@@ -201,10 +203,7 @@ const Dashboard = () => {
                 <CardContent>
                   <div className="text-xl font-bold">{room.gender}</div>
                   <p className="text-xs text-muted-foreground">
-                    Price: {new Intl.NumberFormat("vi-VN", {
-                      style: "currency",
-                      currency: "VND",
-                    }).format(room.price)}
+                    Price: {room.price} million dong
                   </p>
                   <p className="text-xs text-muted-foreground">
                     Current Occupants: {room.current}/{room.max}
@@ -212,7 +211,7 @@ const Dashboard = () => {
                   <Button
                     className="mt-2"
                     onClick={() => handleRoomChange(room.id)}
-                    disabled={isRequesting || hasPendingRequest}
+                    disabled={isRequesting || hasPendingRequestForRoom(room.id) || user?.currentRoomId === room.id || pendingRequests.length > 0}
                   >
                     {hasPendingRequestForRoom(room.id) ? "Request Pending" : "Request Room Change"}
                   </Button>

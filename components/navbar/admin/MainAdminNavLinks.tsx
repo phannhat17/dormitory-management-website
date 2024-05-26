@@ -41,6 +41,15 @@ const MainAdminNavLinks = () => {
         Rooms
       </Link>
       <Link
+        href="/admin/manage-request"
+        className={`transition-colors hover:text-foreground ${pathname === "/admin/manage-request"
+            ? "text-foreground"
+            : "text-muted-foreground"
+          }`}
+      >
+        Requests
+      </Link>
+      <Link
         href="/admin/manage-feedback"
         className={`transition-colors hover:text-foreground ${pathname === "/admin/manage-feedback"
             ? "text-foreground"

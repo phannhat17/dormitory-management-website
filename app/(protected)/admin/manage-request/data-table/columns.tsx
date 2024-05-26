@@ -53,8 +53,8 @@ const ActionsCell: React.FC<ActionsCellProps> = ({ row }) => {
     if (response.error) {
       toast.error(response.error);
     } else {
-      toast.success(response.success);
       router.refresh();
+      toast.success(response.success);
     }
   };
 
@@ -66,8 +66,8 @@ const ActionsCell: React.FC<ActionsCellProps> = ({ row }) => {
     if (response.error) {
       toast.error(response.error);
     } else {
-      toast.success(response.success);
       router.refresh();
+      toast.success(response.success);
     }
   };
 

@@ -4,7 +4,6 @@ import { db } from "@/lib/db";
 import { currentUser } from "@/lib/auth";
 import { RoomStatus, Gender } from "@prisma/client";
 
-// Fetch current user info based on session
 export const getUserInfo = async () => {
   const session = await currentUser();
   if (!session?.email) {
@@ -19,6 +18,15 @@ export const getUserInfo = async () => {
           Facilities: true,
           Users: true,
         },
+      },
+      Contracts: {
+        include: {
+          Invoices: true,
+        },
+        orderBy: {
+          endDate: "desc",
+        },
+        take: 1,
       },
     },
   });
@@ -75,6 +83,11 @@ export const requestRoomChange = async (toRoomId: string) => {
     return { error: "User not found" };
   }
 
+  // Check if the new room is different from the current room
+  if (user.currentRoomId === toRoomId) {
+    return { error: "You cannot request to move to your current room" };
+  }
+
   const existingRequest = await db.roomChangeRequest.findFirst({
     where: {
       userId: user.id,
@@ -96,3 +109,4 @@ export const requestRoomChange = async (toRoomId: string) => {
 
   return { success: "Room change request submitted", roomChangeRequest };
 };
+

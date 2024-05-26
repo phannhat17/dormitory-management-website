@@ -102,7 +102,7 @@ model Facility {
 }
 
 model Contract {
-  id           Int       @id
+  id         Int      @id @default(autoincrement())
   contractType String
   userId       String
   roomId       String
@@ -115,10 +115,11 @@ model Contract {
 }
 
 model Invoice {
-  id         Int      @id
+  id         Int      @id @default(autoincrement())
   roomId     String
   contractId Int
   amountPaid Float
+  amountDue  Float
   Room       Room     @relation(fields: [roomId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   Contract   Contract @relation(fields: [contractId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }

@@ -34,6 +34,13 @@ const MobileAdminNavLinks = () => {
         Rooms
       </Link>
       <Link
+        href="/admin/manage-request"
+        className={`hover:text-foreground ${pathname === "/admin/manage-request" ? "" : "text-muted-foreground"
+          }`}
+      >
+        Requests
+      </Link>
+      <Link
         href="/admin/manage-feedback"
         className={`hover:text-foreground ${pathname === "/admin/manage-feedback" ? "" : "text-muted-foreground"
           }`}
