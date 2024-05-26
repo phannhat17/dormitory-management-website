@@ -1,6 +1,6 @@
 'use client';
 
-import { forgotPassword } from "@/actions/admin/auth/reset";
+import { forgotPassword } from "@/actions/auth/reset";
 import { FormError } from "@/components/form/form-error";
 import { FormSuccess } from "@/components/form/form-success";
 import { Button } from "@/components/ui/button";

@@ -11,7 +11,7 @@ import Link from "next/link";
 import { useEffect, useCallback, useState } from "react";
 import { BeatLoader } from "react-spinners"
 import { useSearchParams } from "next/navigation";
-import { newVerificationToken } from "@/actions/admin/auth/verification";
+import { newVerificationToken } from "@/actions/auth/verification";
 import { FormSuccess } from "@/components/form/form-success";
 import { FormError } from "@/components/form/form-error";
 

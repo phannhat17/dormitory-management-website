@@ -1,6 +1,6 @@
 "use client";
 
-import { logout } from "@/actions/admin/auth/logout";
+import { logout } from "@/actions/auth/logout";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu } from "lucide-react";
