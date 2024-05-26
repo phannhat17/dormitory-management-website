@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { getUserInfo, getAvailableRooms, requestRoomChange } from "@/actions/student/user";
+import { getRoomChangeRequests, deleteRoomChangeRequest } from "@/actions/student/request";
 import { User, Room, Gender, RoomStatus, UserStatus } from "@prisma/client";
 
 interface Facility {
@@ -25,9 +26,18 @@ interface UserWithRelations extends User {
   }) | null;
 }
 
+interface RoomChangeRequest {
+  id: string;
+  userId: string;
+  fromRoomId: string | null;
+  toRoomId: string;
+  status: string;
+}
+
 const Dashboard = () => {
   const [user, setUser] = useState<UserWithRelations | null>(null);
   const [availableRooms, setAvailableRooms] = useState<Room[]>([]);
+  const [pendingRequests, setPendingRequests] = useState<RoomChangeRequest[]>([]);
   const [isRequesting, setIsRequesting] = useState(false);
 
   useEffect(() => {
@@ -37,6 +47,8 @@ const Dashboard = () => {
         toast.error(userInfo.error);
       } else {
         setUser(userInfo.user ?? null);
+        const pendingRequests = await getRoomChangeRequests();
+        setPendingRequests(pendingRequests.requests ?? []);
       }
 
       const rooms = await getAvailableRooms();
@@ -50,15 +62,31 @@ const Dashboard = () => {
     if (isRequesting || !user) return;
 
     setIsRequesting(true);
-    const response = await requestRoomChange(user.id, toRoomId);
+    const response = await requestRoomChange(toRoomId);
     setIsRequesting(false);
 
     if (response.error) {
       toast.error(response.error);
     } else {
       toast.success(response.success);
+      const pendingRequests = await getRoomChangeRequests();
+      setPendingRequests(pendingRequests.requests ?? []);
     }
   };
+
+  const handleCancelRequest = async (requestId: string) => {
+    const response = await deleteRoomChangeRequest(requestId);
+
+    if (response.error) {
+      toast.error(response.error);
+    } else {
+      toast.success(response.success);
+      const pendingRequests = await getRoomChangeRequests();
+      setPendingRequests(pendingRequests.requests ?? []);
+    }
+  };
+
+  const filteredRooms = availableRooms.filter(room => room.gender === user?.gender && !pendingRequests.some(request => request.toRoomId === room.id));
 
   return (
     <div className="flex min-h-screen w-full flex-col">
@@ -96,7 +124,7 @@ const Dashboard = () => {
                 <p className="text-sm font-medium">Roommates:</p>
                 {user?.Room?.Users.map((roommate) => (
                   <div key={roommate.id} className="text-xs">
-                    {roommate.name}
+                    {roommate.name} - {roommate.id}
                   </div>
                 ))}
               </div>
@@ -126,7 +154,7 @@ const Dashboard = () => {
         <div className="mt-8">
           <h2 className="text-2xl font-semibold">Available Rooms</h2>
           <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-3 mt-4">
-            {availableRooms.map((room) => (
+            {filteredRooms.map((room) => (
               <Card key={room.id}>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Room {room.id}</CardTitle>
@@ -147,6 +175,32 @@ const Dashboard = () => {
                     disabled={isRequesting}
                   >
                     Request Room Change
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+        <div className="mt-8">
+          <h2 className="text-2xl font-semibold">My Room Change Requests</h2>
+          <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-3 mt-4">
+            {pendingRequests.map((request) => (
+              <Card key={request.id}>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Request to Room {request.toRoomId}</CardTitle>
+                  <Home className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <p className="text-xs text-muted-foreground">
+                    Status: {request.status}
+                  </p>
+                  <Button
+                    variant="outline"
+                    className="mt-2"
+                    onClick={() => handleCancelRequest(request.id)}
+                    disabled={isRequesting}
+                  >
+                    Cancel Request
                   </Button>
                 </CardContent>
               </Card>

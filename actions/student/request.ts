@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { currentUser } from "@/lib/auth";
 import { RequestStatus } from "@prisma/client";
 
+// Fetch room change requests for the current user
 export const getRoomChangeRequests = async () => {
   const session = await currentUser();
   if (!session?.email) {
@@ -26,7 +27,7 @@ export const getRoomChangeRequests = async () => {
   return { requests };
 };
 
-// Delete room change request
+// Delete a room change request if it is pending
 export const deleteRoomChangeRequest = async (requestId: string) => {
   const request = await db.roomChangeRequest.findUnique({
     where: { id: requestId },
