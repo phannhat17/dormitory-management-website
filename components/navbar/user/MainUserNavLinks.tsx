@@ -22,16 +22,10 @@ const MainUserNavLinks = () => {
         Dashboard
       </Link>
       <Link
-        href="/contract"
-        className={`transition-colors hover:text-foreground ${pathname === "/contract" ? "text-foreground" : "text-muted-foreground"}`}
+        href="/request"
+        className={`transition-colors hover:text-foreground ${pathname === "/request" ? "text-foreground" : "text-muted-foreground"}`}
       >
-        Contract
-      </Link>
-      <Link
-        href="/invoice"
-        className={`transition-colors hover:text-foreground ${pathname === "/invoice" ? "text-foreground" : "text-muted-foreground"}`}
-      >
-        Invoice
+        Request
       </Link>
     </nav>
   );
