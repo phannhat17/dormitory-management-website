@@ -1,23 +1,16 @@
 "use client";
 
-import { deleteRoomChangeRequest } from "@/actions/student/request";
-import { DataTableColumnHeader } from "@/components/data-table/DataTableColumnHeader";
-import ReusableAlertDialog from "@/components/modify/ReusableAlertDialog";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { RequestStatus } from "@prisma/client";
 import { ColumnDef } from "@tanstack/react-table";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal } from "lucide-react";
-import { useRouter } from 'next/navigation';
 import { useState } from "react";
 import { toast } from "sonner";
+import { approveRoomChangeRequest, rejectRoomChangeRequest } from "@/actions/admin/request";
+import { useRouter } from 'next/navigation';
+import { DataTableColumnHeader } from "@/components/data-table/DataTableColumnHeader";
 
 export type RoomChangeRequestTable = {
   id: string;
@@ -28,7 +21,6 @@ export type RoomChangeRequestTable = {
   createdAt: Date;
   updatedAt: Date;
 };
-
 export const statuses = [
   {
     label: "Pending",
@@ -47,50 +39,56 @@ export const statuses = [
 interface ActionsCellProps {
   row: any;
 }
+
 const ActionsCell: React.FC<ActionsCellProps> = ({ row }) => {
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-
   const request = row.original;
 
-  const handleDelete = () => {
-    deleteRoomChangeRequest(request.id)
-      .then((data) => {
-        if (data.success) {
-          toast.success(data.success);
-          router.refresh();
-        } else if (data.error) {
-          toast.error(data.error);
-        }
-      });
+  const handleApprove = async () => {
+    setIsLoading(true);
+    const response = await approveRoomChangeRequest(request.id);
+    setIsLoading(false);
+
+    if (response.error) {
+      toast.error(response.error);
+    } else {
+      toast.success(response.success);
+      router.refresh();
+    }
+  };
+
+  const handleReject = async () => {
+    setIsLoading(true);
+    const response = await rejectRoomChangeRequest(request.id);
+    setIsLoading(false);
+
+    if (response.error) {
+      toast.error(response.error);
+    } else {
+      toast.success(response.success);
+      router.refresh();
+    }
   };
 
   return (
-    <>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button aria-haspopup="true" size="icon" variant="ghost">
-            <MoreHorizontal className="h-4 w-4" />
-            <span className="sr-only">Toggle menu</span>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-          <DropdownMenuItem onClick={() => setIsDeleteDialogOpen(true)} disabled={request.status !== RequestStatus.PENDING}>Delete</DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      <ReusableAlertDialog
-        isOpen={isDeleteDialogOpen}
-        setIsOpen={setIsDeleteDialogOpen}
-        title="Are you absolutely sure?"
-        description="This action cannot be undone."
-        confirmButtonText="Continue"
-        cancelButtonText="Cancel"
-        onConfirm={handleDelete}
-      />
-    </>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button aria-haspopup="true" size="icon" variant="ghost">
+          <MoreHorizontal className="h-4 w-4" />
+          <span className="sr-only">Toggle menu</span>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+        <DropdownMenuItem onClick={handleApprove} disabled={isLoading || request.status !== RequestStatus.PENDING}>
+          Approve
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={handleReject} disabled={isLoading || request.status !== RequestStatus.PENDING}>
+          Reject
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };
 
