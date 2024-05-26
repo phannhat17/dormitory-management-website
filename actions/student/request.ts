@@ -27,14 +27,32 @@ export const getRoomChangeRequests = async () => {
   return { requests };
 };
 
-// Delete a room change request if it is pending
+// Delete a room change request
 export const deleteRoomChangeRequest = async (requestId: string) => {
+  const session = await currentUser();
+  if (!session?.email) {
+    return { error: "User not authenticated" };
+  }
+
+  const user = await db.user.findUnique({
+    where: { email: session.email },
+    select: { id: true, role: true },
+  });
+
+  if (!user) {
+    return { error: "User not found" };
+  }
+
   const request = await db.roomChangeRequest.findUnique({
     where: { id: requestId },
   });
 
   if (!request) {
     return { error: "Request not found" };
+  }
+
+  if (request.userId !== user.id && user.role !== "ADMIN") {
+    return { error: "You do not have permission to delete this request" };
   }
 
   if (request.status !== RequestStatus.PENDING) {
