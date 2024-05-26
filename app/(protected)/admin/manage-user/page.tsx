@@ -1,4 +1,4 @@
-import { getListUsers } from "@/actions/db-action";
+import { getListUsers } from "@/actions/admin/db-action";
 import { ExportButton } from "@/components/data-table/export-button";
 import { RefreshButton } from "@/components/data-table/refresh-button";
 import { Button } from "@/components/ui/button";

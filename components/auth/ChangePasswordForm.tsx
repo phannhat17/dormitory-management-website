@@ -1,7 +1,7 @@
 "use client";
 
-import { logout } from "@/actions/auth/logout";
-import { resetPassword } from "@/actions/auth/reset";
+import { logout } from "@/actions/admin/auth/logout";
+import { resetPassword } from "@/actions/admin/auth/reset";
 import { FormError } from "@/components/form/form-error";
 import { FormSuccess } from "@/components/form/form-success";
 import { Button } from "@/components/ui/button";

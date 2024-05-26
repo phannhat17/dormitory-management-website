@@ -1,6 +1,6 @@
 "use client";
 
-import { getFbInfo } from "@/actions/feedback";
+import { getFbInfo } from "@/actions/admin/feedback";
 import {
   Dialog,
   DialogContent,

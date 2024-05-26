@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 
-import { feedback } from "@/actions/feedback";
+import { feedback } from "@/actions/admin/feedback";
 import { Button } from "@/components/ui/button";
 import {
     Card,

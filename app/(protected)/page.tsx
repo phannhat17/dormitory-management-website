@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { Users, DollarSign, Home } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { getUserInfo } from "@/actions/user";
+import { getUserInfo } from "@/actions/admin/user";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { Gender, UserRole, UserStatus } from "@prisma/client";
 

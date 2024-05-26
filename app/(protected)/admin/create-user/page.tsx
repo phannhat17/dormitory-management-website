@@ -1,6 +1,6 @@
 "use client";
 
-import { createUser } from "@/actions/user";
+import { createUser } from "@/actions/admin/user";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState, useTransition } from "react";
 import { FormProvider, useForm } from "react-hook-form";

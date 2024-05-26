@@ -1,6 +1,6 @@
 "use client";
 
-import { deleteFeedback } from "@/actions/feedback";
+import { deleteFeedback } from "@/actions/admin/feedback";
 import FeedBackDetails from "@/components/feedback/DeailsCard";
 import ReusableAlertDialog from "@/components/modify/ReusableAlertDialog";
 import { Button } from "@/components/ui/button";

@@ -10,10 +10,10 @@ import {
   Users,
 } from "lucide-react";
 
-import { getTotalUser } from "@/actions/db-action";
+import { getTotalUser } from "@/actions/admin/db-action";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useEffect, useState } from "react";
-import { getRoomStatistics } from "@/actions/room";
+import { getRoomStatistics } from "@/actions/admin/room";
 import { Separator } from "@/components/ui/separator"
 
 export default function AdminDashboard() {

@@ -1,6 +1,6 @@
 'use client';
 
-import { login } from "@/actions/auth/login";
+import { login } from "@/actions/admin/auth/login";
 import { FormError } from "@/components/form/form-error";
 import { Button } from "@/components/ui/button";
 import {

@@ -1,6 +1,6 @@
 "use client";
 
-import { createRoomWithFacilities } from "@/actions/room";
+import { createRoomWithFacilities } from "@/actions/admin/room";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState, useTransition } from "react";
 import { FormProvider, useForm } from "react-hook-form";
