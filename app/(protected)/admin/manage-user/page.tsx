@@ -10,7 +10,7 @@ import { DataTable } from "./data-table/data-table";
 async function getData(): Promise<Usertable[]> {
   const response = await getListUsers();
 
-  if (response.users && response.total) {
+  if (response && response.users && response.total) {
     return response.users;
   } else {
     throw new Error("Invalid response from when get list users!");

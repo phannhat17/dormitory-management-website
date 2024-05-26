@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 
 import { DataTableFacetedFilter } from "@/components/data-table/DataTableFacetedFilterProps"
-import { gender, statuses } from "./columns"
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>
@@ -29,20 +28,6 @@ export function DataTableToolbar<TData>({
           }
           className="h-8 w-[150px] lg:w-[250px]"
         />
-        {table.getColumn("status") && (
-          <DataTableFacetedFilter
-            column={table.getColumn("status")}
-            title="Status"
-            options={statuses}
-          />
-        )}
-        {table.getColumn("gender") && (
-          <DataTableFacetedFilter
-            column={table.getColumn("gender")}
-            title="Gender"
-            options={gender}
-          />
-        )}
         {isFiltered && (
           <Button
             variant="ghost"

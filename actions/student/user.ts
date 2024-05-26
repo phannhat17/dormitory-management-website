@@ -1,4 +1,4 @@
-"use server"
+"use server";
 
 import { db } from "@/lib/db";
 import { currentUser } from "@/lib/auth";
@@ -46,9 +46,14 @@ export const getAvailableRooms = async () => {
 };
 
 // Request room change
-export const requestRoomChange = async (userId: string, toRoomId: string) => {
+export const requestRoomChange = async (toRoomId: string) => {
+  const session = await currentUser();
+  if (!session?.email) {
+    return { error: "User not authenticated" };
+  }
+
   const user = await db.user.findUnique({
-    where: { id: userId },
+    where: { email: session.email },
   });
 
   if (!user) {
@@ -57,7 +62,7 @@ export const requestRoomChange = async (userId: string, toRoomId: string) => {
 
   const roomChangeRequest = await db.roomChangeRequest.create({
     data: {
-      userId: userId,
+      userId: user.id,
       fromRoomId: user.currentRoomId,
       toRoomId: toRoomId,
     },
