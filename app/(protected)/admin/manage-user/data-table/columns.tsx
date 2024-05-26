@@ -1,6 +1,6 @@
 "use client";
 
-import { deleteUser } from "@/actions/user";
+import { deleteUser } from "@/actions/admin/user";
 import { DataTableColumnHeader } from "@/components/data-table/DataTableColumnHeader";
 import EditUserCard from "@/components/modify/EditUser";
 import ReusableAlertDialog from "@/components/modify/ReusableAlertDialog";

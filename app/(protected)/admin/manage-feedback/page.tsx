@@ -1,4 +1,4 @@
-import { getListFB } from "@/actions/db-action";
+import { getListFB } from "@/actions/admin/db-action";
 import { ExportButton } from "@/components/data-table/export-button";
 import { RefreshButton } from "@/components/data-table/refresh-button";
 import { Feedbacktable, columns, excelColumn } from "./data-table/columns";

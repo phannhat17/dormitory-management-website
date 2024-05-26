@@ -1,6 +1,6 @@
 "use client";
 
-import { deleteRoom } from "@/actions/room";
+import { deleteRoom } from "@/actions/admin/room";
 import { DataTableColumnHeader } from "@/components/data-table/DataTableColumnHeader";
 import EditRoomCard from "@/components/modify/EditRoom";
 import ReusableAlertDialog from "@/components/modify/ReusableAlertDialog";

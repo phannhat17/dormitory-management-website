@@ -1,6 +1,6 @@
 "use client";
 
-import { createFacility } from "@/actions/facility"; // Adjust the import path accordingly
+import { createFacility } from "@/actions/admin/facility"; // Adjust the import path accordingly
 import { Button } from "@/components/ui/button";
 import {
     Dialog,

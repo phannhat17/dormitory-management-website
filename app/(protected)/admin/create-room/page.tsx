@@ -1,6 +1,6 @@
 "use client";
 
-import { createRoomWithFacilities } from "@/actions/room";
+import { createRoomWithFacilities } from "@/actions/admin/room";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState, useTransition } from "react";
 import { FormProvider, useForm } from "react-hook-form";
@@ -8,6 +8,7 @@ import { z } from "zod";
 import ExcelJS from "exceljs";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 type Gender = "MALE" | "FEMALE";
 
@@ -27,8 +28,6 @@ interface Room {
 }
 
 const CreateRoomPage = () => {
-  const [error, setError] = useState<string | undefined>("");
-  const [success, setSuccess] = useState<string | undefined>("");
   const [isPending, startTransition] = useTransition();
   const [file, setFile] = useState<File | null>(null);
 
@@ -37,11 +36,9 @@ const CreateRoomPage = () => {
   });
 
   const onSubmit = async () => {
-    setError("");
-    setSuccess("");
 
     if (!file) {
-      setError("Please upload a file.");
+      toast.error("Please upload a file.");
       return;
     }
 
@@ -52,7 +49,7 @@ const CreateRoomPage = () => {
         const worksheet = workbook.worksheets[0];
 
         const roomsMap: Record<string, Room> = {};
-        
+
         worksheet.eachRow((row, rowNumber) => {
           if (rowNumber === 1) return; // Skip header row
 
@@ -67,7 +64,7 @@ const CreateRoomPage = () => {
           const facilityPrice = parseFloat(row.getCell(8).value?.toString() || "0");
 
           if (!facilityStatus || facilityPrice <= 0) {
-            console.log(`Invalid facility data in row ${rowNumber}`);
+            toast.error(`Invalid gender value in row ${rowNumber}. Skipping this row!`);
             return;
           }
 
@@ -102,11 +99,15 @@ const CreateRoomPage = () => {
           console.log(JSON.stringify(response.details, null, 2));
         }
 
-        setError(response.error);
-        setSuccess(response.success);
+        if (response.error) {
+          toast.error(response.error);
+        } else if (response.success) {
+          toast.success(response.success);
+        }
+
       } catch (err) {
         console.error(err);
-        setError("Failed to parse the file.");
+        toast.error("Failed to parse the file.");
       }
     });
   };
@@ -125,12 +126,10 @@ const CreateRoomPage = () => {
         <FormProvider {...formMethods}>
           <form onSubmit={formMethods.handleSubmit(onSubmit)}>
             <Input type="file" accept=".xlsx" onChange={handleFileChange} />
-            <Button type="submit" disabled={isPending}>
+            <Button type="submit" disabled={isPending} className="mt-3">
               Upload and Create
             </Button>
           </form>
-          {error && <p className="text-red-500">{error}</p>}
-          {success && <p className="text-green-500">{success}</p>}
         </FormProvider>
       </div>
     </main>

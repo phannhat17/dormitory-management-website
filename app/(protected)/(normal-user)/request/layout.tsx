@@ -1,10 +1,10 @@
 
 export const metadata = {
-    title: "Feedback",
-    description: "Feedback Page",
+    title: "Mange User",
+    description: "Mange User Page",
 };
 
-export default function ProfileLayout({
+export default function CreateUserLayout({
     children,
 }: {
     children: React.ReactNode;

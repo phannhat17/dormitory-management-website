@@ -1,7 +1,7 @@
 "use client";
 
-import { getUserInfo, updateUser } from "@/actions/user";
-import { getListRooms } from "@/actions/room";
+import { getUserInfo, updateUser } from "@/actions/admin/user";
+import { getListRooms } from "@/actions/admin/room";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,

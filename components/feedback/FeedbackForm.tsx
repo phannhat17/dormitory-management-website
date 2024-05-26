@@ -1,6 +1,6 @@
 "use client";
 
-import { feedback } from "@/actions/feedback";
+import { feedback } from "@/actions/admin/feedback";
 import FeedbackCard from "@/components/feedback/FeedbackCard";
 import { FeedbackSchema } from "@/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";

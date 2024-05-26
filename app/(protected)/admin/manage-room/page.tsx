@@ -1,4 +1,4 @@
-import { getListRooms } from "@/actions/room";
+import { getListRooms } from "@/actions/admin/room";
 import { ExportButton } from "@/components/data-table/export-button";
 import { RefreshButton } from "@/components/data-table/refresh-button";
 import { Button } from "@/components/ui/button";

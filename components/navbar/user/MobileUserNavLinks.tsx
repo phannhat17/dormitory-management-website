@@ -19,16 +19,10 @@ const MobileUserNavLinks = () => {
         Dashboard
       </Link>
       <Link
-        href="/contract"
-        className={`hover:text-foreground ${pathname === "/contract" ? "" : "text-muted-foreground"}`}
+        href="/request"
+        className={`hover:text-foreground ${pathname === "/request" ? "" : "text-muted-foreground"}`}
       >
-        Contract
-      </Link>
-      <Link
-        href="/invoice"
-        className={`hover:text-foreground ${pathname === "/invoice" ? "" : "text-muted-foreground"}`}
-      >
-        Invoice
+        Request
       </Link>
     </nav>
   );
