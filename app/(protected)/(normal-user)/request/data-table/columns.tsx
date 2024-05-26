@@ -1,8 +1,7 @@
 "use client";
 
-import { deleteUser } from "@/actions/admin/user";
+import { deleteRoomChangeRequest } from "@/actions/student/request";
 import { DataTableColumnHeader } from "@/components/data-table/DataTableColumnHeader";
-import EditUserCard from "@/components/modify/EditUser";
 import ReusableAlertDialog from "@/components/modify/ReusableAlertDialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,65 +12,50 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Gender, UserStatus } from "@prisma/client";
+import { RequestStatus } from "@prisma/client";
 import { ColumnDef } from "@tanstack/react-table";
 import { MoreHorizontal } from "lucide-react";
 import { useRouter } from 'next/navigation';
 import { useState } from "react";
 import { toast } from "sonner";
 
-export type Usertable = {
+export type RoomChangeRequestTable = {
   id: string;
-  name: string | null;
-  email: string | null;
-  gender: Gender;
-  status: UserStatus;
+  userId: string;
+  fromRoomId: string | null;
+  toRoomId: string;
+  status: RequestStatus;
+  createdAt: Date;
+  updatedAt: Date;
 };
+
 export const statuses = [
   {
-    label: "Stay",
-    value: UserStatus.STAYING,
+    label: "Pending",
+    value: RequestStatus.PENDING,
   },
   {
-    label: "Not stay",
-    value: UserStatus.NOT_STAYING,
+    label: "Approved",
+    value: RequestStatus.APPROVED,
   },
   {
-    label: "Banned",
-    value: UserStatus.BANNED,
+    label: "Rejected",
+    value: RequestStatus.REJECTED,
   },
 ];
-export const gender = [
-  {
-    label: "Male",
-    value: Gender.MALE,
-  },
-  {
-    label: "Female",
-    value: Gender.FEMALE,
-  },
-];
-export const excelColumn = [
-  { header: "ID", key: "id", width: 10 },
-  { header: "Name", key: "name", width: 32 },
-  { header: "Email", key: "email", width: 32 },
-  { header: "Gender", key: "gender", width: 32 },
-  { header: "Status", key: "status", width: 32 },
-]
 
 interface ActionsCellProps {
   row: any;
 }
 const ActionsCell: React.FC<ActionsCellProps> = ({ row }) => {
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const router = useRouter();
 
-  const user = row.original
+  const request = row.original;
 
   const handleDelete = () => {
-    deleteUser(user.id)
+    deleteRoomChangeRequest(request.id)
       .then((data) => {
         if (data.success) {
           toast.success(data.success);
@@ -93,26 +77,15 @@ const ActionsCell: React.FC<ActionsCellProps> = ({ row }) => {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
-          <DropdownMenuItem onClick={() => setIsEditDialogOpen(true)}>View/Edit</DropdownMenuItem>
           <DropdownMenuItem onClick={() => setIsDeleteDialogOpen(true)}>Delete</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
 
-
-      <EditUserCard
-        isOpen={isEditDialogOpen}
-        setIsOpen={isEditDialogOpen ?
-          setIsEditDialogOpen : setIsDeleteDialogOpen}
-        userID={user.id}
-        onConfirm={() => { }}
-      />
-
       <ReusableAlertDialog
         isOpen={isDeleteDialogOpen}
-        setIsOpen={isDeleteDialogOpen ?
-          setIsDeleteDialogOpen : setIsEditDialogOpen}
+        setIsOpen={setIsDeleteDialogOpen}
         title="Are you absolutely sure?"
-        description="This action cannot be undone. This will permanently delete your account and remove your data from our servers."
+        description="This action cannot be undone."
         confirmButtonText="Continue"
         cancelButtonText="Cancel"
         onConfirm={handleDelete}
@@ -121,65 +94,43 @@ const ActionsCell: React.FC<ActionsCellProps> = ({ row }) => {
   );
 };
 
-export const columns: ColumnDef<Usertable>[] = [
+export const columns: ColumnDef<RoomChangeRequestTable>[] = [
   {
     accessorKey: "id",
     header: "ID",
     cell: ({ row }) => (
-      <div className="w-[80px] font-medium">{row.getValue("id")}</div>
+      <div style={{
+        width: '100px',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap'
+      }}>{row.getValue("id")}</div>
     ),
     enableSorting: true,
   },
   {
-    accessorKey: "name",
+    accessorKey: "userId",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Name" />
+      <DataTableColumnHeader column={column} title="User ID" />
+    ),
+    enableSorting: true,
+  },
+  {
+    accessorKey: "fromRoomId",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="From Room ID" />
     ),
     cell: ({ row }) => (
-      <div className="w-[150px] font-medium">{row.getValue("name")}</div>
+      <div className="w-[150px] font-medium">{row.getValue("fromRoomId") || "N/A"}</div>
     ),
     enableSorting: true,
   },
   {
-    accessorKey: "email",
-    header: "Email",
-    enableSorting: true,
-  },
-  {
-    accessorKey: "gender",
+    accessorKey: "toRoomId",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Gender" />
+      <DataTableColumnHeader column={column} title="To Room ID" />
     ),
-    cell: ({ row }) => {
-      const status = statuses.find(
-        (status) => status.value === row.getValue("status")
-      );
-
-      if (!status) {
-        return null;
-      }
-
-      return (
-        <div>
-          <Badge
-            className={
-              row.getValue("gender") === "MALE"
-                ? "border-transparent bg-emerald-500 text-primary-foreground shadow hover:bg-emerald-500/80"
-                : row.getValue("gender") === "FEMALE"
-                  ? "border-transparent bg-[#d7dbfa] text-[#543107]-foreground shadow hover:bg-[#d7dbfa]/80"
-                  : ""
-            }
-          >
-            {row.getValue("gender")}
-          </Badge>
-        </div>
-      );
-    },
-    filterFn: (row, id, value) => {
-      return value.includes(row.getValue(id));
-    },
     enableSorting: true,
-    enableHiding: false,
   },
   {
     accessorKey: "status",
@@ -198,12 +149,12 @@ export const columns: ColumnDef<Usertable>[] = [
       return (
         <div>
           <Badge
-            variant={row.getValue("status") === "BANNED" ? "destructive" : null}
+            variant={row.getValue("status") === "REJECTED" ? "destructive" : null}
             className={
-              row.getValue("status") === "NOT_STAYING"
-                ? "border-transparent bg-[#fbcb14] text-[#543107]-foreground shadow hover:bg-[#fbcb14]/80"
-                : row.getValue("status") === "STAYING"
-                  ? "border-transparent bg-emerald-500 text-primary-foreground shadow hover:bg-emerald-500/80"
+              row.getValue("status") === "APPROVED"
+                ? "border-transparent bg-emerald-500 text-primary-foreground shadow hover:bg-emerald-500/80"
+                : row.getValue("status") === "PENDING"
+                  ? "border-transparent bg-yellow-500 text-primary-foreground shadow hover:bg-yellow-500/80"
                   : ""
             }
           >
@@ -215,6 +166,20 @@ export const columns: ColumnDef<Usertable>[] = [
     filterFn: (row, id, value) => {
       return value.includes(row.getValue(id));
     },
+    enableSorting: true,
+    enableHiding: false,
+  },
+  {
+    accessorKey: "createdAt",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Created At" />
+    ),
+    cell: ({ row }: { row: { getValue: (key: string) => unknown } }) => (
+      <div>
+        {(row.getValue("createdAt") as Date).toLocaleString()}
+      </div>
+    ),
+    enableSorting: true,
   },
   {
     id: "actions",
