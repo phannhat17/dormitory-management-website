@@ -37,12 +37,19 @@ export default function AdminDashboard() {
     const fetchNumUsers = async () => {
       const responseUser = await getTotalUser();
       const roomStats = await getRoomStatistics();
-      setTotalUser(responseUser.totalUsers);
-      setNumStudent(responseUser.studentCount);
-      setNumAdmin(responseUser.adminCount);
-      setNumStaying(responseUser.stayingCount);
-      setNumNotStaying(responseUser.notStayingCount);
-      setNumBanned(responseUser.bannedCount);
+      if ('error' in responseUser) {
+        // Handle error
+        console.error(responseUser.error);
+      } else {
+        // Set the state variables
+        setTotalUser(responseUser.totalUsers);
+        setNumStudent(responseUser.studentCount);
+        setNumAdmin(responseUser.adminCount);
+        setNumStaying(responseUser.stayingCount);
+        setNumNotStaying(responseUser.notStayingCount);
+        setNumBanned(responseUser.bannedCount);
+      }
+
 
       setTotalRooms(roomStats.totalRooms);
       setMaleRooms(roomStats.maleRooms);

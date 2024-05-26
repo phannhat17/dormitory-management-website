@@ -50,8 +50,7 @@ const LoginPage = () => {
           if (data) {
             if (data.error) {
               setError(data.error);
-            }
-            if (data.twoFA) {
+            } else if (data.twoFA) {
               setShowTwoFA(true);
             }
           }
