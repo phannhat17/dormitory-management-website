@@ -193,7 +193,7 @@ const EditRoomCard: React.FC<EditRoomCardProps> = ({
                     <DialogTitle>Edit Room</DialogTitle>
                     <DialogDescription>
                         View or make changes to the room profile here. Click save when
-                        you're done.
+                        you&apos;re done.
                     </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
