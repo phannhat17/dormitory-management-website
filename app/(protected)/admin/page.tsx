@@ -50,12 +50,18 @@ export default function AdminDashboard() {
         setNumBanned(responseUser.bannedCount);
       }
 
+      if ('error' in roomStats) {
+        // Handle error
+        console.error(roomStats.error);
+      } else {
+        // Set the state variables
+        setTotalRooms(roomStats.totalRooms);
+        setMaleRooms(roomStats.maleRooms);
+        setFemaleRooms(roomStats.femaleRooms);
+        setFullRooms(roomStats.fullRooms);
+        setAvailableRooms(roomStats.availableRooms);
+      }
 
-      setTotalRooms(roomStats.totalRooms);
-      setMaleRooms(roomStats.maleRooms);
-      setFemaleRooms(roomStats.femaleRooms);
-      setFullRooms(roomStats.fullRooms);
-      setAvailableRooms(roomStats.availableRooms);
 
     };
 
