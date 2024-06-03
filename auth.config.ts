@@ -2,14 +2,8 @@ import { getUserByEmail, getUserById } from "@/data/user";
 import { db } from "@/lib/db";
 import { LoginSchema } from "@/schemas";
 import { PrismaAdapter } from "@auth/prisma-adapter";
-import bcrypt from "bcryptjs";
-import { addMinutes, differenceInMinutes, isBefore } from "date-fns";
 import { AuthError, type NextAuthConfig } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
-
-const MAX_FAILED_ATTEMPTS = 5;
-const LOCKOUT_DURATION = 10;
-const RESET_DURATION = 3;
 
 export default {
   trustHost: true,
@@ -19,57 +13,10 @@ export default {
         const validatedFields = LoginSchema.safeParse(credentials);
 
         if (validatedFields.success) {
-          const { email, password } = validatedFields.data;
+          const { email } = validatedFields.data;
 
           const user = await getUserByEmail(email);
-          if (!user) return null;
-
-          const now = new Date();
-
-          if (user.status === "BANNED") throw new AuthError("BannedUser");
-
-          if (user.password === null) throw new AuthError("FirstLogin");
-
-          if (user.lockoutUntil && isBefore(now, user.lockoutUntil)) {
-            throw new AuthError("TemporarilyLocked");
-          }
-
-          if (
-            user.lastFailedAttempt &&
-            differenceInMinutes(now, user.lastFailedAttempt) > RESET_DURATION
-          ) {
-            await db.user.update({
-              where: { id: user.id },
-              data: { failedAttempts: 0 },
-            });
-          }
-
-          const passwordMatch = await bcrypt.compare(password, user.password);
-          if (passwordMatch) {
-            await db.user.update({
-              where: { id: user.id },
-              data: { failedAttempts: 0, lockoutUntil: null },
-            });
-            return user;
-          } else {
-            const newFailedAttempts = user.failedAttempts + 1;
-
-            let lockoutUntil = null;
-            if (newFailedAttempts >= MAX_FAILED_ATTEMPTS) {
-              lockoutUntil = addMinutes(now, LOCKOUT_DURATION);
-            }
-
-            await db.user.update({
-              where: { id: user.id },
-              data: { failedAttempts: newFailedAttempts, lockoutUntil },
-            });
-
-            if (newFailedAttempts >= MAX_FAILED_ATTEMPTS) {
-              throw new AuthError("TemporarilyLocked");
-            }
-
-            return null;
-          }
+          return user;
         }
 
         return null;
@@ -86,6 +33,7 @@ export default {
       const existingUser = await getUserById(user.id);
 
       if (!existingUser) return false;
+      
       if (existingUser.status === "BANNED") {
         throw new AuthError("BannedUser via signin");
       }

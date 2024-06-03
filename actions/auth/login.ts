@@ -12,6 +12,12 @@ import { getUserByEmail } from "@/data/user";
 import { sendTwoFATokenEmail } from "@/lib/mail";
 import { getTwoFATokenByEmail } from "@/data/two-fa-token";
 import { db } from "@/lib/db";
+import { addMinutes, differenceInMinutes, isBefore } from "date-fns";
+
+// minutes
+const MAX_FAILED_ATTEMPTS = 5;
+const LOCKOUT_DURATION = 10;
+const RESET_DURATION = 3;
 
 export const login = async (values: z.infer<typeof LoginSchema>) => {
   const validatedFields = LoginSchema.safeParse(values);
@@ -32,18 +38,80 @@ export const login = async (values: z.infer<typeof LoginSchema>) => {
     };
   }
 
+  if (existingUser.password === null) {
+    return {
+      error:
+        "This is your first login attempt. Click forgot password to reset your password",
+    };
+  }
+
   if (!existingUser.emailVerified) {
     return {
       error: "Email not verified! Please verify your email address.",
     };
   }
 
+  const now = new Date();
+
+  if (existingUser.status === "BANNED") {
+    return { error: "You have been banned!" };
+  }
+
+  if (existingUser.lockoutUntil && isBefore(now, existingUser.lockoutUntil)) {
+    return {
+      error:
+        "Account is temporarily locked due to multiple failed login attempts!",
+    };
+  }
+
+  if (
+    existingUser.lastFailedAttempt &&
+    differenceInMinutes(now, existingUser.lastFailedAttempt) > RESET_DURATION
+  ) {
+    await db.user.update({
+      where: { id: existingUser.id },
+      data: { failedAttempts: 0 },
+    });
+  }
+
   if (existingUser.password) {
     const passwordMatch = await bcrypt.compare(password, existingUser.password);
     if (!passwordMatch) {
+      const newFailedAttempts = existingUser.failedAttempts + 1;
+      let lockoutUntil = null;
+
+      if (newFailedAttempts >= MAX_FAILED_ATTEMPTS) {
+        lockoutUntil = addMinutes(now, LOCKOUT_DURATION);
+      }
+
+      await db.user.update({
+        where: { id: existingUser.id },
+        data: {
+          failedAttempts: newFailedAttempts,
+          lockoutUntil,
+          lastFailedAttempt: now,
+        },
+      });
+
+      if (newFailedAttempts >= MAX_FAILED_ATTEMPTS) {
+        return {
+          error:
+            "Account is temporarily locked due to multiple failed login attempts!",
+        };
+      }
+
       return { error: "Invalid credentials!" };
+    } else {
+      await db.user.update({
+        where: { id: existingUser.id },
+        data: {
+          failedAttempts: 0,
+          lockoutUntil: null,
+          lastFailedAttempt: null,
+        },
+      });
     }
-  } 
+  }
 
   if (existingUser.twoFA) {
     if (code) {
@@ -82,18 +150,6 @@ export const login = async (values: z.infer<typeof LoginSchema>) => {
       if (error.message.includes("BannedUser")) {
         return {
           error: "You have been banned!",
-        };
-      }
-      if (error.message.includes("TemporarilyLocked")) {
-        return {
-          error:
-            "Account is temporarily locked due to multiple failed login attempts!",
-        };
-      }
-      if (error.message.includes("FirstLogin")) {
-        return {
-          error:
-            "This is your first login attempt. Click forgot password to reset your password!",
         };
       }
       switch (error.type) {
