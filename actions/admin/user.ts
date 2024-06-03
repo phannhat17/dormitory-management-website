@@ -263,3 +263,87 @@ export const updateUser = async (data: {
     return { error: "Failed to update user" };
   }
 };
+
+export const banUser = async (userId: string) => {
+  const isAdmin = await checkAdmin();
+
+  if (!isAdmin) {
+    return { error: "You must be an admin to ban user!" };
+  }
+
+  try {
+    const user = await db.user.findUnique({
+      where: { id: userId },
+      select: { currentRoomId: true },
+    });
+
+    if (!user) {
+      return { error: "User not found!" };
+    }
+
+    const currentRoomId = user.currentRoomId;
+
+    await db.$transaction(async (prisma) => {
+      if (currentRoomId) {
+        await prisma.room.update({
+          where: { id: currentRoomId },
+          data: { current: { decrement: 1 } },
+        });
+
+        const updatedRoom = await prisma.room.findUnique({
+          where: { id: currentRoomId },
+          select: { current: true, max: true },
+        });
+
+        if (updatedRoom && updatedRoom.current < updatedRoom.max) {
+          await prisma.room.update({
+            where: { id: currentRoomId },
+            data: { status: RoomStatus.AVAILABLE },
+          });
+        }
+
+        const contracts = await prisma.contract.findMany({
+          where: { userId },
+        });
+
+        const contractIds = contracts.map((contract) => contract.id);
+
+        await prisma.invoice.deleteMany({
+          where: { contractId: { in: contractIds } },
+        });
+
+        await prisma.contract.deleteMany({
+          where: { id: { in: contractIds } },
+        });
+      }
+
+      await prisma.user.update({
+        where: { id: userId },
+        data: { status: UserStatus.BANNED },
+      });
+    });
+
+    return { success: "User banned successfully" };
+  } catch (error) {
+    return { error: "Failed to ban user" };
+  }
+};
+
+export const unbanUser = async (userId: string) => {
+  const isAdmin = await checkAdmin();
+
+  if (!isAdmin) {
+    return { error: "You must be an admin to unban user!" };
+  }
+
+  try {
+    await db.user.update({
+      where: { id: userId },
+      data: { status: UserStatus.NOT_STAYING },
+    });
+
+    return { success: "User unbanned successfully" };
+  } catch (error) {
+    return { error: "Failed to unban user" };
+  }
+};

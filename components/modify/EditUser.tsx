@@ -1,6 +1,6 @@
 "use client";
 
-import { getUserInfo, updateUser } from "@/actions/admin/user";
+import { getUserInfo, updateUser, banUser, unbanUser } from "@/actions/admin/user";
 import { getListRooms } from "@/actions/admin/room";
 import { Button } from "@/components/ui/button";
 import {
@@ -46,6 +46,7 @@ const EditUserCard: React.FC<ReusableAlertDialogProps> = ({ isOpen, userID, setI
     const [userRoomId, setUserRoomId] = useState<string | null>(null);
     const [userAmountPaid, setUserAmountPaid] = useState<string>("");
     const [userAmountDue, setUserAmountDue] = useState<string>("");
+    const [userStatus, setUserStatus] = useState<UserStatus | "">("");
     const [rooms, setRooms] = useState<{ id: string; gender: Gender; current: number; max: number }[]>([]);
 
     useEffect(() => {
@@ -64,6 +65,7 @@ const EditUserCard: React.FC<ReusableAlertDialogProps> = ({ isOpen, userID, setI
                 setUserAmountPaid(amountPaid.toString());
                 const amountDue = response.amountDue ?? 0;
                 setUserAmountDue(amountDue.toString());
+                setUserStatus(response.status);
             } else {
                 toast.error("Failed to fetch user information");
             }
@@ -109,7 +111,31 @@ const EditUserCard: React.FC<ReusableAlertDialogProps> = ({ isOpen, userID, setI
         }
     };
 
-    const filteredRooms = rooms.filter(room => 
+    const handleBanUser = async () => {
+        const response = await banUser(originalUserId);
+        if (response && response.success) {
+            toast.success("User banned successfully");
+            onConfirm();
+            router.refresh();
+            setIsOpen(false);
+        } else {
+            toast.error(response.error || "Failed to ban user");
+        }
+    };
+
+    const handleUnbanUser = async () => {
+        const response = await unbanUser(originalUserId);
+        if (response && response.success) {
+            toast.success("User unbanned successfully");
+            onConfirm();
+            router.refresh();
+            setIsOpen(false);
+        } else {
+            toast.error(response.error || "Failed to unban user");
+        }
+    };
+
+    const filteredRooms = rooms.filter(room =>
         (room.gender === userGender && room.current < room.max) || room.id === userRoomId
     );
 
@@ -196,7 +222,12 @@ const EditUserCard: React.FC<ReusableAlertDialogProps> = ({ isOpen, userID, setI
                     </div>
                 </div>
                 <DialogFooter>
-                    <Button type="submit" onClick={handleSaveChanges}>Save changes</Button>
+                    <Button type="submit" onClick={handleSaveChanges} className="bg-blue-500 text-white hover:bg-blue-500">Save changes</Button>
+                    {userStatus === UserStatus.BANNED ? (
+                        <Button variant="destructive" onClick={handleUnbanUser} className="bg-green-500 text-white">Unban User</Button>
+                    ) : (
+                        <Button variant="destructive" onClick={handleBanUser} className="bg-red-500 text-white">Ban User</Button>
+                    )}
                 </DialogFooter>
             </DialogContent>
         </Dialog>
