@@ -34,6 +34,17 @@ export const approveRoomChangeRequest = async (requestId: string) => {
   }
 
   await db.$transaction(async (prisma) => {
+    // Delete old contract and invoice
+    if (request.userId && request.fromRoomId) {
+      await prisma.contract.deleteMany({
+        where: { userId: request.userId, roomId: request.fromRoomId },
+      });
+
+      await prisma.invoice.deleteMany({
+        where: { roomId: request.fromRoomId },
+      });
+    }
+    // Update user room
     await prisma.user.update({
       where: { id: request.userId },
       data: {
@@ -42,11 +53,13 @@ export const approveRoomChangeRequest = async (requestId: string) => {
       },
     });
 
+    // Update new room occupancy
     await prisma.room.update({
       where: { id: request.toRoomId },
       data: { current: { increment: 1 } },
     });
 
+    // Update old room occupancy
     if (request.fromRoomId) {
       await prisma.room.update({
         where: { id: request.fromRoomId },
@@ -54,6 +67,7 @@ export const approveRoomChangeRequest = async (requestId: string) => {
       });
     }
 
+    // Create new contract and invoice
     const newContract = await prisma.contract.create({
       data: {
         contractType: "ROOM",
@@ -74,10 +88,24 @@ export const approveRoomChangeRequest = async (requestId: string) => {
       },
     });
 
+    // Approve the room change request
     await prisma.roomChangeRequest.update({
       where: { id: request.id },
       data: { status: RequestStatus.APPROVED },
     });
+
+    // Update room status to "full" if current occupants reach max capacity
+    const updatedRoom = await prisma.room.findUnique({
+      where: { id: request.toRoomId },
+      select: { current: true, max: true },
+    });
+
+    if (updatedRoom && updatedRoom.current >= updatedRoom.max) {
+      await prisma.room.update({
+        where: { id: request.toRoomId },
+        data: { status: RoomStatus.FULL },
+      });
+    }
   });
 
   return { success: "Room change request approved" };
