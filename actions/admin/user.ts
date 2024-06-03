@@ -132,15 +132,20 @@ export const getUsers = async () => {
 };
 
 export const updateUserStatus = async (userId: string, status: UserStatus) => {
-    try {
-        await db.user.update({
-            where: { id: userId },
-            data: { status },
-        });
-        return { success: "User status updated successfully" };
-    } catch (error) {
-        return { error: "Failed to update user status" };
-    }
+  const isAdmin = await checkAdmin();
+
+  if (!isAdmin) {
+    return { error: "You must be an admin to create user!" };
+  }
+  try {
+    await db.user.update({
+      where: { id: userId },
+      data: { status },
+    });
+    return { success: "User status updated successfully" };
+  } catch (error) {
+    return { error: "Failed to update user status" };
+  }
 };
 
 export const updateUser = async (data: {
@@ -220,7 +225,10 @@ export const updateUser = async (data: {
           where: { id: previousRoomId },
           data: {
             current: previousRoomCurrentCount,
-            status: previousRoomCurrentCount === previousRoom.max ? RoomStatus.FULL : RoomStatus.AVAILABLE,
+            status:
+              previousRoomCurrentCount === previousRoom.max
+                ? RoomStatus.FULL
+                : RoomStatus.AVAILABLE,
           },
         });
       }
@@ -241,7 +249,10 @@ export const updateUser = async (data: {
           where: { id: newRoomId },
           data: {
             current: newRoomCurrentCount,
-            status: newRoomCurrentCount === newRoom.max ? RoomStatus.FULL : RoomStatus.AVAILABLE,
+            status:
+              newRoomCurrentCount === newRoom.max
+                ? RoomStatus.FULL
+                : RoomStatus.AVAILABLE,
           },
         });
       }
@@ -252,6 +263,3 @@ export const updateUser = async (data: {
     return { error: "Failed to update user" };
   }
 };
-
-
-

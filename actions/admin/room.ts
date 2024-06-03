@@ -148,8 +148,10 @@ export const updateRoom = async (data: z.infer<typeof updateRoomSchema>) => {
       select: { id: true },
     });
 
-    const currentUserIdsInRoom = currentUsersInRoom.map(user => user.id);
-    const usersToRemove = currentUserIdsInRoom.filter(id => !users.includes(id));
+    const currentUserIdsInRoom = currentUsersInRoom.map((user) => user.id);
+    const usersToRemove = currentUserIdsInRoom.filter(
+      (id) => !users.includes(id)
+    );
 
     const userTransfers = await Promise.all(
       users.map(async (userId) => {
@@ -232,6 +234,11 @@ export const updateRoom = async (data: z.infer<typeof updateRoomSchema>) => {
 export const createRoomWithFacilities = async (
   values: z.infer<typeof createRoomWithFacilitiesSchema>
 ) => {
+  const isAdmin = await checkAdmin();
+
+  if (!isAdmin) {
+    return { error: "You must be an admin to create user!" };
+  }
   const validatedFields = createRoomWithFacilitiesSchema.safeParse(values);
 
   if (!validatedFields.success) {
@@ -272,6 +279,12 @@ export const createRoomWithFacilities = async (
 };
 
 export const getRoomStatistics = async () => {
+  const isAdmin = await checkAdmin();
+
+  if (!isAdmin) {
+    return { error: "You must be an admin to create user!" };
+  }
+
   const totalRooms = await db.room.count();
 
   const maleRooms = await db.room.count({

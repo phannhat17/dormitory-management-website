@@ -3,21 +3,12 @@
 import { db } from "@/lib/db";
 import { RequestStatus, RoomStatus, UserStatus } from "@prisma/client";
 import { checkAdmin } from "./check-permission";
-import { currentUser } from "@/lib/auth";
 
 export const approveRoomChangeRequest = async (requestId: string) => {
-  const session = await currentUser();
-  if (!session?.email) {
-    return { error: "User not authenticated" };
-  }
+  const isAdmin = await checkAdmin();
 
-  const adminUser = await db.user.findUnique({
-    where: { email: session.email },
-    select: { role: true },
-  });
-
-  if (!adminUser || adminUser.role !== "ADMIN") {
-    return { error: "Permission denied" };
+  if (!isAdmin) {
+    return { error: "You must be an admin to approve room change requests!" };
   }
 
   const request = await db.roomChangeRequest.findUnique({
