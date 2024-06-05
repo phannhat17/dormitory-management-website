@@ -9,7 +9,7 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 import { useCurrentUser } from "@/hooks/use-current-user";
-
+import DOMPurify from 'dompurify';
 
 const ProfileCard = () => {
   const user = useCurrentUser();
@@ -23,15 +23,15 @@ const ProfileCard = () => {
       <CardContent>
         <div className="flex flex-row items-center justify-between my-4">
           <p className="font-medium mx-5">User ID</p>
-          <p className="font-medium mx-5">{user?.id}</p>
+          <p className="font-medium mx-5">{user?.id? DOMPurify.sanitize(user?.id) : ''}</p>
         </div>
         <div className="flex flex-row items-center justify-between my-4">
           <p className="font-medium mx-5">User Name</p>
-          <p className="font-medium mx-5">{user?.name}</p>
+          <p className="font-medium mx-5">{user?.name ? DOMPurify.sanitize(user?.name) : ''}</p>
         </div>
         <div className="flex flex-row items-center justify-between my-4">
           <p className="font-medium mx-5">Email</p>
-          <p className="font-medium mx-5">{user?.email}</p>
+          <p className="font-medium mx-5">{user?.email ? DOMPurify.sanitize(user?.email) : ''}</p>
         </div>
         <div className="flex flex-row items-center justify-between my-4">
           <p className="font-medium mx-5">Gender</p>
@@ -45,7 +45,7 @@ const ProfileCard = () => {
                   : ""
               }
             >
-              {user?.gender}
+              {user?.gender ? DOMPurify.sanitize(user?.gender) : ''}
             </Badge>
           </p>
         </div>
@@ -63,7 +63,7 @@ const ProfileCard = () => {
                     : ""
                 }
               >
-                {user?.status}
+                {user?.status ? DOMPurify.sanitize(user?.status) : ''}
               </Badge>
             </p>
           </div>
@@ -73,7 +73,7 @@ const ProfileCard = () => {
             <p className="font-medium mx-5">Role</p>
             <p className="font-medium mx-5">
               <Badge className="border-transparent bg-emerald-500 text-primary-foreground shadow hover:bg-emerald-500/80">
-                {user?.role}
+                {user?.role ? DOMPurify.sanitize(user?.role) : ''}
               </Badge>
             </p>
           </div>
