@@ -16,8 +16,8 @@ import { addMinutes, differenceInMinutes, isBefore } from "date-fns";
 
 // minutes
 const MAX_FAILED_ATTEMPTS = 5;
-const LOCKOUT_DURATION = 10;
-const RESET_DURATION = 3;
+const LOCKOUT_DURATION = 15;
+const RESET_DURATION = 15;
 
 export const login = async (values: z.infer<typeof LoginSchema>) => {
   const validatedFields = LoginSchema.safeParse(values);

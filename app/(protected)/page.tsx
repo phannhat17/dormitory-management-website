@@ -7,8 +7,9 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { getUserInfo, getAvailableRooms, requestRoomChange } from "@/actions/student/user";
 import { getRoomChangeRequests, deleteRoomChangeRequest } from "@/actions/student/request";
-import { User, Room, Gender, RoomStatus, UserStatus, RequestStatus } from "@prisma/client";
+import { User, Room, RequestStatus } from "@prisma/client";
 import { DollarSign, Home, Users } from "lucide-react";
+import DOMPurify from "dompurify";
 
 interface Facility {
   id: number;
@@ -124,10 +125,10 @@ const Dashboard = () => {
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-xl font-bold">{user?.name ?? "N/A"}</div>
-              <p className="text-xs text-muted-foreground">{user?.id ?? "N/A"}</p>
-              <p className="text-xs text-muted-foreground">{user?.email ?? "N/A"}</p>
-              <Badge className="mt-2">{user?.role ?? "N/A"}</Badge>
+              <div className="text-xl font-bold">{user?.name ? DOMPurify.sanitize(user?.name) : "N/A"}</div>
+              <p className="text-xs text-muted-foreground">{user?.id ? DOMPurify.sanitize(user?.id) : "N/A"}</p>
+              <p className="text-xs text-muted-foreground">{user?.email ? DOMPurify.sanitize(user?.email) : "N/A"}</p>
+              <Badge className="mt-2">{user?.role ? DOMPurify.sanitize(user?.role) : "N/A"}</Badge>
             </CardContent>
           </Card>
           <Card>
@@ -136,22 +137,20 @@ const Dashboard = () => {
               <Home className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-xl font-bold">
-                {user?.Room?.id ?? "No Room Assigned"}
-              </div>
+              <div className="text-xl font-bold">{user?.Room?.id ? DOMPurify.sanitize(user?.Room?.id) : "No Room Assigned"}</div>
               {user?.Room?.id && (
                 <p className="text-xs text-muted-foreground">
-                  Room Status: {user?.Room?.status}
+                  Room Status: {user?.Room?.status ? DOMPurify.sanitize(user?.Room?.status) : ''}
                 </p>
               )}
               <Badge className="mt-2">
-                {user?.gender === "MALE" ? "Male Dormitory" : "Female Dormitory"}
+                {user?.gender ? (user?.gender === "MALE" ? "Male Dormitory" : "Female Dormitory") : ''}
               </Badge>
               <div className="mt-2">
                 <p className="text-sm font-medium">Roommates:</p>
                 {user?.Room?.Users.map((roommate) => (
                   <div key={roommate.id} className="text-xs">
-                    {roommate.name} - {roommate.id}
+                    {roommate.name ? DOMPurify.sanitize(roommate.name) : ''} - {roommate.id ? DOMPurify.sanitize(roommate.id) : ''}
                   </div>
                 ))}
               </div>
@@ -159,7 +158,7 @@ const Dashboard = () => {
                 <p className="text-sm font-medium">Facilities:</p>
                 {user?.Room?.Facilities.map((facility) => (
                   <div key={facility.id} className="text-xs">
-                    {facility.name} x {facility.number}: {facility.status}
+                    {facility.name ? DOMPurify.sanitize(facility.name) : ''} x {facility.number}: {facility.status ? DOMPurify.sanitize(facility.status) : ''}
                   </div>
                 ))}
               </div>
@@ -188,6 +187,7 @@ const Dashboard = () => {
                   </div>
                 </div>
               ))}
+
             </CardContent>
           </Card>
         </div>
@@ -197,18 +197,13 @@ const Dashboard = () => {
             {availableRooms.map((room) => (
               <Card key={room.id}>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Room {room.id}</CardTitle>
+                  <CardTitle className="text-sm font-medium">Room {room.id ? DOMPurify.sanitize(room.id) : ''}</CardTitle>
                   <Home className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-xl font-bold">{room.gender}</div>
-                  <p className="text-xs text-muted-foreground">
-                    Price: {room.price} million dong
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Current Occupants: {room.current}/{room.max}
-                  </p>
-                  <Button
+                  <div className="text-xl font-bold">{room.gender ? DOMPurify.sanitize(room.gender) : ''}</div>
+                  <p className="text-xs text-muted-foreground">Price: {DOMPurify.sanitize(String(room.price))} million dong</p>
+                  <p className="text-xs text-muted-foreground">Current Occupants: {DOMPurify.sanitize(String(room.current))}/{DOMPurify.sanitize(String(room.max))}</p>                  <Button
                     className="mt-2"
                     onClick={() => handleRoomChange(room.id)}
                     disabled={isRequesting || hasPendingRequestForRoom(room.id) || user?.currentRoomId === room.id || pendingRequests.length > 0}
@@ -226,11 +221,11 @@ const Dashboard = () => {
             {pendingRequests.map((request) => (
               <Card key={request.id}>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Request to Room {request.toRoomId}</CardTitle>
+                  <CardTitle className="text-sm font-medium">Request to Room {request.toRoomId ? DOMPurify.sanitize(request.toRoomId) : ''}</CardTitle>
                   <Home className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-xl font-bold">Status: {request.status}</div>
+                  <div className="text-xl font-bold">Status: {request.status ? DOMPurify.sanitize(request.status) : ''}</div>
                   <Button
                     variant="outline"
                     className="mt-2"
