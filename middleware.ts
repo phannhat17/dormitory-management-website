@@ -8,6 +8,7 @@ import {
   authRoutes,
   publicRoutes,
 } from "./routes";
+import arcjet, { createMiddleware, detectBot } from "@arcjet/next";
 
 const { auth } = NextAuth(authConfig);
 

@@ -30,7 +30,9 @@ import ReCAPTCHA from "react-google-recaptcha";
 
 const LoginPage = () => {
   const [error, setError] = useState<string | undefined>("");
+  const [showTwoFA, setShowTwoFA] = useState(false);
   const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
+
   const [isPending, startTransition] = useTransition();
 
   const form = useForm<z.infer<typeof LoginSchema>>({
@@ -59,8 +61,12 @@ const LoginPage = () => {
     startTransition(() => {
       login(values)
         .then((data) => {
-          if (data && data.error) {
-            setError(data.error);
+          if (data) {
+            if (data.error) {
+              setError(data.error);
+            } else if (data.twoFA) {
+              setShowTwoFA(true);
+            }
           }
         }).catch((error) => {
           setError("Something went wrong. Please try again.");
@@ -83,55 +89,79 @@ const LoginPage = () => {
               onSubmit={form.handleSubmit(onSubmit)}
               className="grid gap-4"
             >
-              <div className="grid gap-2">
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          disabled={isPending}
-                          placeholder="email@example.com"
-                          type="email"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <div className="grid gap-2">
-                <FormField
-                  control={form.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <div className="flex items-center">
-                        <FormLabel>Password</FormLabel>
-                        <Link href="/auth/reset" className="ml-auto inline-block text-sm underline">
-                          Forgot your password?
-                        </Link>
-                      </div>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          disabled={isPending}
-                          placeholder="**********"
-                          type="password"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <ReCAPTCHA
-                sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "your-fallback-site-key"}
-                onChange={setRecaptchaToken}
-              />
+              {showTwoFA && (
+                <div className="grid gap-2">
+                  <FormField
+                    control={form.control}
+                    name="code"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Two FA code</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            disabled={isPending}
+                            placeholder="123456"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>)}
+              {!showTwoFA && (
+                <>
+                  <div className="grid gap-2">
+                    <FormField
+                      control={form.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Email</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              disabled={isPending}
+                              placeholder="email@example.com"
+                              type="email"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <FormField
+                      control={form.control}
+                      name="password"
+                      render={({ field }) => (
+                        <FormItem>
+                          <div className="flex items-center">
+                            <FormLabel>Password</FormLabel>
+                            <Link href="/auth/reset" className="ml-auto inline-block text-sm underline">
+                              Forgot your password?
+                            </Link>
+                          </div>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              disabled={isPending}
+                              placeholder="**********"
+                              type="password"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <ReCAPTCHA
+                    sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "site-key"}
+                    onChange={setRecaptchaToken}
+                  />
+                </>)}
+
               <FormError message={error} />
               <Button type="submit" disabled={isPending} className="w-full">
                 Login
