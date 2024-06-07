@@ -161,5 +161,5 @@ export const reset = async (values: z.infer<typeof ResetFromSchema>) => {
     passwordResetToken.token
   );
 
-  return { sucess: "Password reset email sent!" };
+  return { success: "Password reset email sent!" };
 };

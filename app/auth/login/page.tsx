@@ -1,6 +1,7 @@
 'use client';
 
 import { login } from "@/actions/auth/login";
+import { verifyRecaptcha } from "@/actions/auth/verifyRecaptcha"; // Import the server action
 import { FormError } from "@/components/form/form-error";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,11 +26,12 @@ import Link from "next/link";
 import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-
+import ReCAPTCHA from "react-google-recaptcha";
 
 const LoginPage = () => {
   const [error, setError] = useState<string | undefined>("");
   const [showTwoFA, setShowTwoFA] = useState(false);
+  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
 
   const [isPending, startTransition] = useTransition();
 
@@ -41,8 +43,20 @@ const LoginPage = () => {
     }
   });
 
-  const onSubmit = (values: z.infer<typeof LoginSchema>) => {
+  const onSubmit = async (values: z.infer<typeof LoginSchema>) => {
     setError("");
+
+    if (!recaptchaToken) {
+      setError("Please complete the reCAPTCHA.");
+      return;
+    }
+
+    const recaptchaValidation = await verifyRecaptcha(recaptchaToken);
+
+    if (!recaptchaValidation.success) {
+      setError("reCAPTCHA validation failed. Please try again.");
+      return;
+    }
 
     startTransition(() => {
       login(values)
@@ -56,9 +70,9 @@ const LoginPage = () => {
           }
         }).catch((error) => {
           setError("Something went wrong. Please try again.");
-        })
+        });
     });
-  }
+  };
 
   return (
     <div className="flex min-h-screen items-center justify-center">
@@ -76,25 +90,25 @@ const LoginPage = () => {
               className="grid gap-4"
             >
               {showTwoFA && (
-              <div className="grid gap-2">
-                <FormField
-                  control={form.control}
-                  name="code"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Two FA code</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          disabled={isPending}
-                          placeholder="123456"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>)}
+                <div className="grid gap-2">
+                  <FormField
+                    control={form.control}
+                    name="code"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Two FA code</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            disabled={isPending}
+                            placeholder="123456"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>)}
               {!showTwoFA && (
                 <>
                   <div className="grid gap-2">
@@ -142,6 +156,10 @@ const LoginPage = () => {
                       )}
                     />
                   </div>
+                  <ReCAPTCHA
+                    sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "site-key"}
+                    onChange={setRecaptchaToken}
+                  />
                 </>)}
 
               <FormError message={error} />

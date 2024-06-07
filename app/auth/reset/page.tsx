@@ -1,6 +1,7 @@
 'use client';
 
 import { reset } from "@/actions/auth/reset";
+import { verifyRecaptcha } from "@/actions/auth/verifyRecaptcha"; // Import the server action
 import { FormError } from "@/components/form/form-error";
 import { FormSuccess } from "@/components/form/form-success";
 import { Button } from "@/components/ui/button";
@@ -25,10 +26,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
+import ReCAPTCHA from "react-google-recaptcha";
 
 const ForgotPage = () => {
   const [error, setError] = useState<string | undefined>("");
   const [success, setSuccess] = useState<string | undefined>("");
+  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
   const form = useForm<z.infer<typeof ResetFromSchema>>({
@@ -38,16 +41,28 @@ const ForgotPage = () => {
     }
   });
 
-  const onSubmit = (values: z.infer<typeof ResetFromSchema>) => {
+  const onSubmit = async (values: z.infer<typeof ResetFromSchema>) => {
     setError("");
     setSuccess("");
+
+    if (!recaptchaToken) {
+      setError("Please complete the reCAPTCHA.");
+      return;
+    }
+
+    const recaptchaValidation = await verifyRecaptcha(recaptchaToken);
+
+    if (!recaptchaValidation.success) {
+      setError("reCAPTCHA validation failed. Please try again.");
+      return;
+    }
 
     startTransition(() => {
       reset(values) 
         .then((data) => {
           setError(data?.error);
-          setSuccess(data?.sucess);
-        })
+          setSuccess(data?.success);
+        });
     });
   };
 
@@ -86,6 +101,10 @@ const ForgotPage = () => {
                   )}
                 />
               </div>
+              <ReCAPTCHA
+                    sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "site-key"}
+                    onChange={setRecaptchaToken}
+              />
               <FormError message={error} />
               <FormSuccess message={success} />
               <Button type="submit" disabled={isPending} className="w-full">
