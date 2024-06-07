@@ -8,16 +8,33 @@ import {
   authRoutes,
   publicRoutes,
 } from "./routes";
-import arcjet, { createMiddleware, detectBot } from "@arcjet/next";
+import arcjet, { createMiddleware, shield } from "@arcjet/next";
+import type { NextMiddleware, NextRequest } from "next/server";
+import { NextResponse } from "next/server";
+// @ts-ignore
+import type { NextAuthRequest } from "next-auth";
 
+// Initialize NextAuth with your configuration
 const { auth } = NextAuth(authConfig);
 
-export default auth(async (req) => {
+// Arcjet configuration
+const aj = arcjet({
+  key: process.env.ARCJET_KEY!,
+  rules: [
+    shield({
+      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
+    }),
+    // Additional rate limiting or other rules can be added here
+  ],
+});
+
+// Auth middleware
+const authMiddleware: NextMiddleware = async (req: NextRequest) => {
   const { nextUrl } = req;
-  const isLoggedIn = !!req.auth;
-  // console.log("Authentication is enabled for " + req.auth?.user.status);
-  const isBanned = req.auth?.user.status === "BANNED";
-  const isAdmin = req.auth?.user.role === "ADMIN";
+  const session = await auth(req as unknown as NextAuthRequest); // Cast to the expected type for auth function
+  const isLoggedIn = !!session;
+  const isBanned = session?.user?.status === "BANNED";
+  const isAdmin = session?.user?.role === "ADMIN";
 
   const isAdminRoute = nextUrl.pathname.startsWith(adminPrefix);
   const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
@@ -26,41 +43,42 @@ export default auth(async (req) => {
   const isAllAccessRoute = allUserAcessRoute.includes(nextUrl.pathname);
 
   if (isApiAuthRoute) {
-    return;
+    return NextResponse.next();
   }
 
   if (isBanned) {
-    req.auth = null;
-    return Response.redirect(new URL("/auth/login", nextUrl));
+    return NextResponse.redirect(new URL("/auth/login", nextUrl));
   }
 
   if (isAuthRoute) {
     if (isLoggedIn) {
-      return Response.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl));
+      return NextResponse.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl));
     }
-    return;
+    return NextResponse.next();
   }
 
   if (isLoggedIn) {
     if (isAllAccessRoute) {
-      return;
+      return NextResponse.next();
     }
 
     if (!isAdmin && isAdminRoute) {
-      return Response.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl));
+      return NextResponse.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl));
     }
 
     if (isAdmin && !isAdminRoute) {
-      return Response.redirect(new URL("/admin", nextUrl));
+      return NextResponse.redirect(new URL("/admin", nextUrl));
     }
   }
 
   if (!isLoggedIn && !isPublicRoutes) {
-    return Response.redirect(new URL("/auth/login", nextUrl));
+    return NextResponse.redirect(new URL("/auth/login", nextUrl));
   }
-  return;
-});
 
+  return NextResponse.next();
+};
+
+// Middleware configuration
 export const config = {
   matcher: [
     // Exclude files with a "." followed by an extension, which are typically static files.
@@ -70,3 +88,6 @@ export const config = {
     "/(api|trpc)(.*)",
   ],
 };
+
+// Combine Arcjet and Auth middlewares
+export default createMiddleware(aj, authMiddleware);
