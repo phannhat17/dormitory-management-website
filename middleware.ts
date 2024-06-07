@@ -14,6 +14,7 @@ const { auth } = NextAuth(authConfig);
 export default auth((req) => {
   const { nextUrl } = req;
   const isLoggedIn = !!req.auth;
+  const isBanned = req.auth?.user.status === "BANNED" 
   const isAdmin = req.auth?.user.role === "ADMIN";
 
   const isAdminRoute = nextUrl.pathname.startsWith(adminPrefix);
@@ -24,6 +25,10 @@ export default auth((req) => {
 
   if (isApiAuthRoute) {
     return;
+  }
+
+  if (isBanned) {
+    return Response.redirect(new URL("/auth/login", nextUrl));
   }
 
   if (isAuthRoute) {
