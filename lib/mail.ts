@@ -6,7 +6,7 @@ export const sendPasswordResetEmail = async (
   email: string,
   token: string
 ) => {
-    const resetLink = `http://localhost:3000/auth/new-password?token=${token}`;
+    const resetLink = `https://dorm.phannhat.id.vn/auth/new-password?token=${token}`;
 
     await resend.emails.send({
       from: "dorm@phannhat.id.vn",
@@ -18,7 +18,7 @@ export const sendPasswordResetEmail = async (
 
 
 export const sendVerificationEmail = async (email: string, token: string) => {
-  const resetLink = `http://localhost:3000/auth/verification?token=${token}`;
+  const resetLink = `https://dorm.phannhat.id.vn/auth/verification?token=${token}`;
 
   await resend.emails.send({
     from: "dorm@phannhat.id.vn",
