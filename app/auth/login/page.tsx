@@ -46,16 +46,18 @@ const LoginPage = () => {
   const onSubmit = async (values: z.infer<typeof LoginSchema>) => {
     setError("");
 
-    if (!recaptchaToken) {
-      setError("Please complete the reCAPTCHA.");
-      return;
-    }
+    if (!showTwoFA) {
+      if (!recaptchaToken) {
+        setError("Please complete the reCAPTCHA.");
+        return;
+      }
 
-    const recaptchaValidation = await verifyRecaptcha(recaptchaToken);
+      const recaptchaValidation = await verifyRecaptcha(recaptchaToken);
 
-    if (!recaptchaValidation.success) {
-      setError("reCAPTCHA validation failed. Please try again.");
-      return;
+      if (!recaptchaValidation.success) {
+        setError("reCAPTCHA validation failed. Please try again.");
+        return;
+      }
     }
 
     startTransition(() => {
