@@ -1,6 +1,5 @@
 import NextAuth from "next-auth";
 import authConfig from "./auth.config";
-import { signOut } from "@/auth";
 import {
   DEFAULT_LOGIN_REDIRECT,
   adminPrefix,
@@ -15,6 +14,7 @@ const { auth } = NextAuth(authConfig);
 export default auth(async (req) => {
   const { nextUrl } = req;
   const isLoggedIn = !!req.auth;
+  // console.log("Authentication is enabled for " + req.auth?.user.status);
   const isBanned = req.auth?.user.status === "BANNED";
   const isAdmin = req.auth?.user.role === "ADMIN";
 
@@ -29,9 +29,7 @@ export default auth(async (req) => {
   }
 
   if (isBanned) {
-    if (isLoggedIn) {
-      await signOut();
-    }
+    req.auth = null;
     return Response.redirect(new URL("/auth/login", nextUrl));
   }
 

@@ -69,9 +69,13 @@ export default {
 
       if (!existingUser) return token;
 
-      token.role = existingUser.role;
-      token.status = existingUser.status;
-      token.gender = existingUser.gender;
+      if (existingUser.status === "BANNED") {
+        token.status = "BANNED";
+      } else {
+        token.role = existingUser.role;
+        token.status = existingUser.status;
+        token.gender = existingUser.gender;
+      }
 
       return token;
     },
