@@ -16,6 +16,7 @@ import { MoreHorizontal } from "lucide-react";
 import { useRouter } from 'next/navigation';
 import { useState } from "react";
 import { toast } from "sonner";
+import DOMPurify from 'dompurify';
 
 export type Feedbacktable = {
   id: number;
@@ -99,14 +100,14 @@ export const columns: ColumnDef<Feedbacktable>[] = [
     accessorKey: "userId",
     header: "User Id",
     cell: ({ row }) => (
-      <div>{row.getValue("userId")}</div>
+      <div>{DOMPurify.sanitize(row.getValue("userId"))}</div>
     ),
   },
   {
     accessorKey: "userName",
     header: "User Name",
     cell: ({ row }) => (
-      <div>{row.getValue("userName")}</div>
+      <div>{DOMPurify.sanitize(row.getValue("userName"))}</div>
     ),
   },
   {
@@ -119,7 +120,7 @@ export const columns: ColumnDef<Feedbacktable>[] = [
         textOverflow: 'ellipsis',
         whiteSpace: 'nowrap'
       }}>
-        {row.getValue("content")}
+        {DOMPurify.sanitize(row.getValue("content"))}
       </div>
     ),
   },
@@ -128,7 +129,7 @@ export const columns: ColumnDef<Feedbacktable>[] = [
     header: "Created At",
     cell: ({ row }: { row: { getValue: (key: string) => unknown } }) => (
       <div>
-        {(row.getValue("createdAt") as Date).toLocaleDateString()}
+        {DOMPurify.sanitize((row.getValue("createdAt") as Date).toLocaleString())}
       </div>
     ),
   },

@@ -19,6 +19,7 @@ import { MoreHorizontal } from "lucide-react";
 import { useRouter } from 'next/navigation';
 import { useState } from "react";
 import { toast } from "sonner";
+import DOMPurify from 'dompurify';
 
 export type Usertable = {
   id: string;
@@ -126,7 +127,7 @@ export const columns: ColumnDef<Usertable>[] = [
     accessorKey: "id",
     header: "ID",
     cell: ({ row }) => (
-      <div className="w-[80px] font-medium">{row.getValue("id")}</div>
+      <div className="w-[80px] font-medium">{DOMPurify.sanitize(row.getValue("id"))}</div>
     ),
     enableSorting: true,
   },
@@ -136,7 +137,7 @@ export const columns: ColumnDef<Usertable>[] = [
       <DataTableColumnHeader column={column} title="Name" />
     ),
     cell: ({ row }) => (
-      <div className="w-[150px] font-medium">{row.getValue("name")}</div>
+      <div className="w-[150px] font-medium">{DOMPurify.sanitize(row.getValue("name"))}</div>
     ),
     enableSorting: true,
   },
@@ -170,7 +171,7 @@ export const columns: ColumnDef<Usertable>[] = [
                   : ""
             }
           >
-            {row.getValue("gender")}
+            {DOMPurify.sanitize(row.getValue("gender"))}
           </Badge>
         </div>
       );
@@ -207,8 +208,8 @@ export const columns: ColumnDef<Usertable>[] = [
                   : ""
             }
           >
-            {row.getValue("status")}
-          </Badge>
+            {DOMPurify.sanitize(row.getValue("status"))}
+            </Badge>
         </div>
       );
     },

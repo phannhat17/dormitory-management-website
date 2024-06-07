@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { approveRoomChangeRequest, rejectRoomChangeRequest } from "@/actions/admin/request";
 import { useRouter } from 'next/navigation';
 import { DataTableColumnHeader } from "@/components/data-table/DataTableColumnHeader";
+import DOMPurify from 'dompurify';
 
 export type RoomChangeRequestTable = {
   id: string;
@@ -102,7 +103,7 @@ export const columns: ColumnDef<RoomChangeRequestTable>[] = [
         overflow: 'hidden',
         textOverflow: 'ellipsis',
         whiteSpace: 'nowrap'
-      }}>{row.getValue("id")}</div>
+      }}>{DOMPurify.sanitize(row.getValue("id"))}</div>
     ),
     enableSorting: true,
   },
@@ -110,6 +111,9 @@ export const columns: ColumnDef<RoomChangeRequestTable>[] = [
     accessorKey: "userId",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="User ID" />
+    ),
+    cell: ({ row }) => (
+      <div>{DOMPurify.sanitize(row.getValue("userId"))}</div>
     ),
     enableSorting: true,
   },
@@ -119,7 +123,7 @@ export const columns: ColumnDef<RoomChangeRequestTable>[] = [
       <DataTableColumnHeader column={column} title="From Room ID" />
     ),
     cell: ({ row }) => (
-      <div className="w-[150px] font-medium">{row.getValue("fromRoomId") || "N/A"}</div>
+      <div className="w-[150px] font-medium">{DOMPurify.sanitize(row.getValue("fromRoomId")) || "N/A"}</div>
     ),
     enableSorting: true,
   },
@@ -127,6 +131,9 @@ export const columns: ColumnDef<RoomChangeRequestTable>[] = [
     accessorKey: "toRoomId",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="To Room ID" />
+    ),
+    cell: ({ row }) => (
+      <div className="w-[150px] font-medium">{DOMPurify.sanitize(row.getValue("toRoomId") || "N/A")}</div>
     ),
     enableSorting: true,
   },
@@ -137,7 +144,7 @@ export const columns: ColumnDef<RoomChangeRequestTable>[] = [
     ),
     cell: ({ row }) => {
       const status = statuses.find(
-        (status) => status.value === row.getValue("status")
+        (status) => DOMPurify.sanitize(status.value) === DOMPurify.sanitize(row.getValue("status"))
       );
 
       if (!status) {
@@ -156,7 +163,7 @@ export const columns: ColumnDef<RoomChangeRequestTable>[] = [
                   : ""
             }
           >
-            {row.getValue("status")}
+            {DOMPurify.sanitize(row.getValue("status"))}
           </Badge>
         </div>
       );
@@ -174,7 +181,7 @@ export const columns: ColumnDef<RoomChangeRequestTable>[] = [
     ),
     cell: ({ row }: { row: { getValue: (key: string) => unknown } }) => (
       <div>
-        {(row.getValue("createdAt") as Date).toLocaleString()}
+        {DOMPurify.sanitize((row.getValue("createdAt") as Date).toLocaleString())}
       </div>
     ),
     enableSorting: true,

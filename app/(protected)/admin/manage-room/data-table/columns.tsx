@@ -19,6 +19,7 @@ import { MoreHorizontal } from "lucide-react";
 import { useRouter } from 'next/navigation';
 import { useState } from "react";
 import { toast } from "sonner";
+import DOMPurify from 'dompurify';
 
 export type Roomstable = {
   id: string;
@@ -48,7 +49,7 @@ export const genders = [
     label: "Female",
     value: Gender.FEMALE,
   },
-]; 
+];
 export const excelColumn = [
   { header: "ID", key: "id", width: 10 },
   { header: "Gender", key: "gender", width: 10 },
@@ -124,7 +125,7 @@ export const columns: ColumnDef<Roomstable>[] = [
     accessorKey: "id",
     header: "ID",
     cell: ({ row }) => (
-      <div className="w-[80px] font-medium">{row.getValue("id")}</div>
+      <div className="w-[80px] font-medium">{DOMPurify.sanitize(row.getValue("id"))}</div>
     ),
     enableSorting: true,
   },
@@ -135,7 +136,7 @@ export const columns: ColumnDef<Roomstable>[] = [
     ),
     cell: ({ row }) => {
       const gender = genders.find(
-        (gender) => gender.value === row.getValue("gender")
+        (gender) => DOMPurify.sanitize(gender.value) === DOMPurify.sanitize(row.getValue("gender"))
       );
 
       if (!gender) {
@@ -149,11 +150,11 @@ export const columns: ColumnDef<Roomstable>[] = [
               row.getValue("gender") === "MALE"
                 ? "border-transparent bg-emerald-500 text-primary-foreground shadow hover:bg-emerald-500/80"
                 : row.getValue("gender") === "FEMALE"
-                ? "border-transparent bg-[#d7dbfa] text-[#543107]-foreground shadow hover:bg-[#d7dbfa]/80"
-                : ""
+                  ? "border-transparent bg-[#d7dbfa] text-[#543107]-foreground shadow hover:bg-[#d7dbfa]/80"
+                  : ""
             }
           >
-            {row.getValue("gender")}
+            {DOMPurify.sanitize(row.getValue("gender"))}
           </Badge>
         </div>
       );
@@ -194,7 +195,7 @@ export const columns: ColumnDef<Roomstable>[] = [
     ),
     cell: ({ row }) => {
       const status = statuses.find(
-        (status) => status.value === row.getValue("status")
+        (status) => DOMPurify.sanitize(status.value) === DOMPurify.sanitize(row.getValue("status"))
       );
 
       if (!status) {
@@ -211,7 +212,7 @@ export const columns: ColumnDef<Roomstable>[] = [
                 : ""
             }
           >
-            {row.getValue("status")}
+            {DOMPurify.sanitize(row.getValue("status"))}
           </Badge>
         </div>
       );
@@ -232,7 +233,7 @@ export const columns: ColumnDef<Roomstable>[] = [
         style: "currency",
         currency: "VND",
       }).format(row.getValue("price"));
-      return <div className="w-[80px] font-medium">{formattedPrice}</div>;
+      return <div className="w-[80px] font-medium">{DOMPurify.sanitize(formattedPrice)}</div>;
     },
     enableSorting: true,
   },
