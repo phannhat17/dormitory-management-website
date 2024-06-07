@@ -113,31 +113,31 @@ export const login = async (values: z.infer<typeof LoginSchema>) => {
     }
   }
 
-  // if (existingUser.twoFA) {
-  //   if (code) {
-  //     const twoFAToken = await getTwoFATokenByEmail(existingUser.email);
+  if (existingUser.twoFA) {
+    if (code) {
+      const twoFAToken = await getTwoFATokenByEmail(existingUser.email);
 
-  //     if (!twoFAToken || twoFAToken.token !== code) {
-  //       return { error: "Invalid two-factor authentication token!" };
-  //     }
+      if (!twoFAToken || twoFAToken.token !== code) {
+        return { error: "Invalid two-factor authentication token!" };
+      }
 
-  //     const hasExpired = new Date() > new Date(twoFAToken.expires);
+      const hasExpired = new Date() > new Date(twoFAToken.expires);
 
-  //     if (hasExpired) {
-  //       return { error: "Token has expired!" };
-  //     }
+      if (hasExpired) {
+        return { error: "Token has expired!" };
+      }
 
-  //     await db.twoFAToken.delete({
-  //       where: { id: twoFAToken.id },
-  //     });
-  //   } else {
-  //     const twoFAToken = await generateTwoFAToken(existingUser.email);
+      await db.twoFAToken.delete({
+        where: { id: twoFAToken.id },
+      });
+    } else {
+      const twoFAToken = await generateTwoFAToken(existingUser.email);
 
-  //     await sendTwoFATokenEmail(twoFAToken.email, twoFAToken.token);
+      await sendTwoFATokenEmail(twoFAToken.email, twoFAToken.token);
 
-  //     return { twoFA: true };
-  //   }
-  // }
+      return { twoFA: true };
+    }
+  }
 
   try {
     await signIn("credentials", {
