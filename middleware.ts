@@ -1,33 +1,37 @@
 import NextAuth from "next-auth";
 import authConfig from "./auth.config";
+import { signOut } from "@/auth";
 import {
-    DEFAULT_LOGIN_REDIRECT,
-    adminPrefix,
-    allUserAcessRoute,
-    apiAuthPrefix,
-    authRoutes,
-    publicRoutes,
+  DEFAULT_LOGIN_REDIRECT,
+  adminPrefix,
+  allUserAcessRoute,
+  apiAuthPrefix,
+  authRoutes,
+  publicRoutes,
 } from "./routes";
 
 const { auth } = NextAuth(authConfig);
 
-export default auth((req) => {
+export default auth(async (req) => {
   const { nextUrl } = req;
   const isLoggedIn = !!req.auth;
-  const isBanned = req.auth?.user.status === "BANNED" 
+  const isBanned = req.auth?.user.status === "BANNED";
   const isAdmin = req.auth?.user.role === "ADMIN";
 
   const isAdminRoute = nextUrl.pathname.startsWith(adminPrefix);
   const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
   const isPublicRoutes = publicRoutes.includes(nextUrl.pathname);
   const isAuthRoute = authRoutes.includes(nextUrl.pathname);
-  const isAllAccessRoute = allUserAcessRoute.includes(nextUrl.pathname);;
+  const isAllAccessRoute = allUserAcessRoute.includes(nextUrl.pathname);
 
   if (isApiAuthRoute) {
     return;
   }
 
   if (isBanned) {
+    if (isLoggedIn) {
+      await signOut();
+    }
     return Response.redirect(new URL("/auth/login", nextUrl));
   }
 
