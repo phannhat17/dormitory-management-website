@@ -70,7 +70,7 @@ export default {
       if (!existingUser) return token;
 
       if (existingUser.status === "BANNED") {
-        token.status = "BANNED";
+        throw new AuthError("BannedUser via JWT");
       } else {
         token.role = existingUser.role;
         token.status = existingUser.status;
