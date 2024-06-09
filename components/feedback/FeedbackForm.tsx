@@ -7,11 +7,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useState, useTransition } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
+import { verifyRecaptcha } from "@/actions/auth/verifyRecaptcha";
+import ReCAPTCHA from "react-google-recaptcha";
 
 const FeedbackForm = () => {
   const [error, setError] = useState<string | undefined>("");
   const [success, setSuccess] = useState<string | undefined>("");
   const [isPending, startTransition] = useTransition();
+  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
 
   const form = useForm<z.infer<typeof FeedbackSchema>>({
     resolver: zodResolver(FeedbackSchema),
@@ -20,9 +23,21 @@ const FeedbackForm = () => {
     },
   });
 
-  const onSubmit = (values: z.infer<typeof FeedbackSchema>) => {
+  const onSubmit = async (values: z.infer<typeof FeedbackSchema>) => {
     setError("");
     setSuccess("");
+
+    if (!recaptchaToken) {
+      setError("Please complete the reCAPTCHA.");
+      return;
+    }
+
+    const recaptchaValidation = await verifyRecaptcha(recaptchaToken);
+
+    if (!recaptchaValidation.success) {
+      setError("reCAPTCHA validation failed. Please try again.");
+      return;
+    }
 
     startTransition(() => {
       feedback(values).then((data) => {
@@ -39,6 +54,7 @@ const FeedbackForm = () => {
         error={error}
         success={success}
         onSubmit={onSubmit}
+        setRecaptchaToken={setRecaptchaToken}
       />
     </FormProvider>
   );

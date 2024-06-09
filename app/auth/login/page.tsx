@@ -1,7 +1,7 @@
 'use client';
 
 import { login } from "@/actions/auth/login";
-import { verifyRecaptcha } from "@/actions/auth/verifyRecaptcha"; // Import the server action
+import { verifyRecaptcha } from "@/actions/auth/verifyRecaptcha";
 import { FormError } from "@/components/form/form-error";
 import { Button } from "@/components/ui/button";
 import {
