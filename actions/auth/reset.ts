@@ -7,9 +7,9 @@ import { db } from "@/lib/db";
 import { sendPasswordResetEmail } from "@/lib/mail";
 import { generatePasswordResetToken } from "@/lib/token";
 import {
-    ResetFromSchema,
-    ResetPassword,
-    ResetPasswordLoggedIn,
+  ResetFromSchema,
+  ResetPassword,
+  ResetPasswordLoggedIn,
 } from "@/schemas";
 import bcrypt from "bcryptjs";
 import { addMinutes, differenceInMinutes, isBefore } from "date-fns";
@@ -70,6 +70,27 @@ export const resetPassword = async (
   if (!session?.user.id) {
     return { error: "You must be logged in to change password!" };
   }
+
+  const validatedFields = ResetPasswordLoggedIn.safeParse(values);
+
+  if (!validatedFields.success) {
+    return { error: "Invalid fields!" };
+  }
+
+  const { recaptchaToken } = validatedFields.data;
+
+  // Always verify the CAPTCHA token
+  if (!recaptchaToken) {
+    return { error: "reCAPTCHA token is required" };
+  }
+
+  // Validate reCAPTCHA token server-side
+  const recaptchaValidation = await verifyRecaptcha(recaptchaToken);
+
+  if (!recaptchaValidation.success) {
+    return { error: "reCAPTCHA validation failed." };
+  }
+
   const user = await getUserById(session.user.id);
   if (!user) return { error: "Cannot found user!" };
 
@@ -80,7 +101,7 @@ export const resetPassword = async (
       error:
         "Your account is temporarily locked due to multiple failed attempts.",
     };
-  }   
+  }
 
   if (
     user.lastFailedAttempt &&
@@ -90,12 +111,6 @@ export const resetPassword = async (
       where: { id: user.id },
       data: { failedAttempts: 0 },
     });
-  }
-
-  const validatedFields = ResetPasswordLoggedIn.safeParse(values);
-
-  if (!validatedFields.success) {
-    return { error: "Invalid fields!" };
   }
 
   const { oldPassword, newPassword } = validatedFields.data;
@@ -142,7 +157,6 @@ export const resetPassword = async (
 };
 
 export const reset = async (values: z.infer<typeof ResetFromSchema>) => {
-  console.log(1);
   const validatedFields = ResetFromSchema.safeParse(values);
 
   if (!validatedFields.success) {
@@ -150,7 +164,7 @@ export const reset = async (values: z.infer<typeof ResetFromSchema>) => {
   }
 
   const { email, recaptchaToken } = validatedFields.data;
-  
+
   // Always verify the CAPTCHA token
   if (!recaptchaToken) {
     return { error: "reCAPTCHA token is required" };
@@ -177,4 +191,3 @@ export const reset = async (values: z.infer<typeof ResetFromSchema>) => {
 
   return { success: "Password reset email sent!" };
 };
-

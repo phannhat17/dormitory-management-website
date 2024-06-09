@@ -86,7 +86,7 @@ export const ResetPasswordLoggedIn = z
     oldPassword: z.string().min(1, {
       message: "Old password is required",
     }),
-
+    recaptchaToken: z.optional(z.string()),
     newPassword: passwordPolicySchema,
     confirmPassword: passwordPolicySchema,
   })
@@ -117,6 +117,7 @@ export const FeedbackSchema = z.object({
   feedback: z.string().min(10, {
     message: "Feedback must be at least 10 characters.",
   }),
+  recaptchaToken: z.optional(z.string()),
 });
 
 export const CreateContractSchema = z.object({

@@ -32,15 +32,8 @@ const FeedbackForm = () => {
       return;
     }
 
-    const recaptchaValidation = await verifyRecaptcha(recaptchaToken);
-
-    if (!recaptchaValidation.success) {
-      setError("reCAPTCHA validation failed. Please try again.");
-      return;
-    }
-
     startTransition(() => {
-      feedback(values).then((data) => {
+      feedback({ ...values, recaptchaToken }).then((data) => {
         setError(data.error);
         setSuccess(data.success);
       });

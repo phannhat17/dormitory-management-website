@@ -6,6 +6,7 @@ import { FeedbackSchema } from "@/schemas";
 import escapeHtml from "escape-html";
 import * as z from "zod";
 import { checkAdmin } from "./check-permission";
+import { verifyRecaptcha } from "../auth/verifyRecaptcha";
 
 export const feedback = async (values: z.infer<typeof FeedbackSchema>) => {
   const session = await auth();
@@ -14,15 +15,26 @@ export const feedback = async (values: z.infer<typeof FeedbackSchema>) => {
     return { error: "You must be logged in to submit feedback!" };
   }
 
-  const currentUserId = session.user.id;
   const validatedFields = FeedbackSchema.safeParse(values);
 
   if (!validatedFields.success) {
     return { error: "Invalid fields!" };
   }
 
-  const { feedback } = validatedFields.data;
+  const { feedback, recaptchaToken } = validatedFields.data;
   const sanitizedDeedback = escapeHtml(feedback);
+  // Always verify the CAPTCHA token
+  if (!recaptchaToken) {
+    return { error: "reCAPTCHA token is required" };
+  }
+
+  // Validate reCAPTCHA token server-side
+  const recaptchaValidation = await verifyRecaptcha(recaptchaToken);
+  
+  if (!recaptchaValidation.success) {
+    return { error: "reCAPTCHA validation failed." };
+  }
+  const currentUserId = session.user.id;
 
   await db.feedback.create({
     data: {
