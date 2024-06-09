@@ -1,7 +1,6 @@
 'use client';
 
 import { reset } from "@/actions/auth/reset";
-import { verifyRecaptcha } from "@/actions/auth/verifyRecaptcha";
 import { FormError } from "@/components/form/form-error";
 import { FormSuccess } from "@/components/form/form-success";
 import { Button } from "@/components/ui/button";
@@ -50,18 +49,14 @@ const ForgotPage = () => {
       return;
     }
 
-    const recaptchaValidation = await verifyRecaptcha(recaptchaToken);
-
-    if (!recaptchaValidation.success) {
-      setError("reCAPTCHA validation failed. Please try again.");
-      return;
-    }
-
     startTransition(() => {
-      reset(values) 
+      reset({ ...values, recaptchaToken })
         .then((data) => {
           setError(data?.error);
           setSuccess(data?.success);
+        })
+        .catch((error) => {
+          setError("Something went wrong. Please try again.");
         });
     });
   };
@@ -102,8 +97,8 @@ const ForgotPage = () => {
                 />
               </div>
               <ReCAPTCHA
-                    sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "site-key"}
-                    onChange={setRecaptchaToken}
+                sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "site-key"}
+                onChange={setRecaptchaToken}
               />
               <FormError message={error} />
               <FormSuccess message={success} />

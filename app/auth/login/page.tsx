@@ -1,7 +1,6 @@
 'use client';
 
 import { login } from "@/actions/auth/login";
-import { verifyRecaptcha } from "@/actions/auth/verifyRecaptcha";
 import { FormError } from "@/components/form/form-error";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,7 +22,7 @@ import { Input } from "@/components/ui/input";
 import { LoginSchema } from "@/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import { useState, useTransition } from "react";
+import { useState, useTransition, useRef } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import ReCAPTCHA from "react-google-recaptcha";
@@ -32,6 +31,7 @@ const LoginPage = () => {
   const [error, setError] = useState<string | undefined>("");
   const [showTwoFA, setShowTwoFA] = useState(false);
   const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
+  const recaptchaRef = useRef<ReCAPTCHA>(null);
 
   const [isPending, startTransition] = useTransition();
 
@@ -46,31 +46,27 @@ const LoginPage = () => {
   const onSubmit = async (values: z.infer<typeof LoginSchema>) => {
     setError("");
 
-    if (!showTwoFA) {
-      if (!recaptchaToken) {
-        setError("Please complete the reCAPTCHA.");
-        return;
-      }
-
-      const recaptchaValidation = await verifyRecaptcha(recaptchaToken);
-
-      if (!recaptchaValidation.success) {
-        setError("reCAPTCHA validation failed. Please try again.");
-        return;
-      }
+    if (!recaptchaToken) {
+      setError("Please complete the reCAPTCHA.");
+      return;
     }
 
     startTransition(() => {
-      login(values)
+      login({ ...values, recaptchaToken })
         .then((data) => {
           if (data) {
             if (data.error) {
               setError(data.error);
             } else if (data.twoFA) {
               setShowTwoFA(true);
+              if (recaptchaRef.current) {
+                recaptchaRef.current.reset();
+                setRecaptchaToken(null);
+              }
             }
           }
-        }).catch((error) => {
+        })
+        .catch((error) => {
           setError("Something went wrong. Please try again.");
         });
     });
@@ -87,10 +83,7 @@ const LoginPage = () => {
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(onSubmit)}
-              className="grid gap-4"
-            >
+            <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
               {showTwoFA && (
                 <div className="grid gap-2">
                   <FormField
@@ -100,17 +93,14 @@ const LoginPage = () => {
                       <FormItem>
                         <FormLabel>Two FA code</FormLabel>
                         <FormControl>
-                          <Input
-                            {...field}
-                            disabled={isPending}
-                            placeholder="123456"
-                          />
+                          <Input {...field} disabled={isPending} placeholder="123456" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                </div>)}
+                </div>
+              )}
               {!showTwoFA && (
                 <>
                   <div className="grid gap-2">
@@ -121,12 +111,7 @@ const LoginPage = () => {
                         <FormItem>
                           <FormLabel>Email</FormLabel>
                           <FormControl>
-                            <Input
-                              {...field}
-                              disabled={isPending}
-                              placeholder="email@example.com"
-                              type="email"
-                            />
+                            <Input {...field} disabled={isPending} placeholder="email@example.com" type="email" />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -146,23 +131,19 @@ const LoginPage = () => {
                             </Link>
                           </div>
                           <FormControl>
-                            <Input
-                              {...field}
-                              disabled={isPending}
-                              placeholder="**********"
-                              type="password"
-                            />
+                            <Input {...field} disabled={isPending} placeholder="**********" type="password" />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
                   </div>
-                  <ReCAPTCHA
-                    sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "site-key"}
-                    onChange={setRecaptchaToken}
-                  />
-                </>)}
+                </>
+              )}
+              <ReCAPTCHA
+                ref={recaptchaRef}
+                sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "site-key"}
+                onChange={setRecaptchaToken} />
 
               <FormError message={error} />
               <Button type="submit" disabled={isPending} className="w-full">

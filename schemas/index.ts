@@ -56,6 +56,7 @@ export const LoginSchema = z.object({
   password: z.string().min(1, {
     message: "Password is required",
   }),
+  recaptchaToken: z.optional(z.string()),
   code: z.optional(
     z.string().min(1, {
       message: "Password is required",
@@ -67,6 +68,7 @@ export const ResetFromSchema = z.object({
   email: z.string().email().min(1, {
     message: "Email is required",
   }),
+  recaptchaToken: z.optional(z.string()),
 });
 
 export const ResetPassword = z
@@ -152,12 +154,13 @@ export const CreateFacilitySchema = z.object({
   price: z.number().positive("Price must be a positive number"),
 });
 
-
 export const createRoomWithFacilitiesSchema = z.object({
   rooms: z.array(
     z.object({
       roomId: z.string().min(1, { message: "Room ID is required" }),
-      gender: z.enum(["MALE", "FEMALE"], { errorMap: () => ({ message: "Invalid gender" }) }),
+      gender: z.enum(["MALE", "FEMALE"], {
+        errorMap: () => ({ message: "Invalid gender" }),
+      }),
       price: z.number().positive(),
       max: z.number().positive(),
       facilities: z.array(

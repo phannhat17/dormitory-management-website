@@ -15,6 +15,7 @@ import bcrypt from "bcryptjs";
 import { addMinutes, differenceInMinutes, isBefore } from "date-fns";
 import escapeHtml from "escape-html";
 import * as z from "zod";
+import { verifyRecaptcha } from "./verifyRecaptcha";
 
 const MAX_FAILED_ATTEMPTS = 5;
 const LOCKOUT_DURATION = 10;
@@ -141,13 +142,26 @@ export const resetPassword = async (
 };
 
 export const reset = async (values: z.infer<typeof ResetFromSchema>) => {
+  console.log(1);
   const validatedFields = ResetFromSchema.safeParse(values);
 
   if (!validatedFields.success) {
-    return { error: "Invalid email!" };
+    return { error: "Invalid fields!" };
   }
 
-  const { email } = validatedFields.data;
+  const { email, recaptchaToken } = validatedFields.data;
+  
+  // Always verify the CAPTCHA token
+  if (!recaptchaToken) {
+    return { error: "reCAPTCHA token is required" };
+  }
+
+  // Validate reCAPTCHA token server-side
+  const recaptchaValidation = await verifyRecaptcha(recaptchaToken);
+  if (!recaptchaValidation.success) {
+    return { error: "reCAPTCHA validation failed." };
+  }
+
   const sanitizedEmail = escapeHtml(email.toLowerCase());
   const existingUser = await getUserByEmail(sanitizedEmail);
 
@@ -163,3 +177,4 @@ export const reset = async (values: z.infer<typeof ResetFromSchema>) => {
 
   return { success: "Password reset email sent!" };
 };
+

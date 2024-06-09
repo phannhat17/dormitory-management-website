@@ -13,21 +13,36 @@ import { sendTwoFATokenEmail } from "@/lib/mail";
 import { getTwoFATokenByEmail } from "@/data/two-fa-token";
 import { db } from "@/lib/db";
 import { addMinutes, differenceInMinutes, isBefore } from "date-fns";
+import { verifyRecaptcha } from "./verifyRecaptcha";
 
 // minutes
 const MAX_FAILED_ATTEMPTS = 5;
 const LOCKOUT_DURATION = 15;
 const RESET_DURATION = 15;
 
-export const login = async (values: z.infer<typeof LoginSchema>) => {
+export const login = async (
+  values: z.infer<typeof LoginSchema>
+) => {
   const validatedFields = LoginSchema.safeParse(values);
 
   if (!validatedFields.success) {
     return { error: "Invalid fields!" };
   }
 
-  const { email, password, code } = validatedFields.data;
+  const { email, password, code, recaptchaToken } = validatedFields.data;
   const sanitizedEmail = escapeHtml(email.toLowerCase());
+
+  // Always verify the CAPTCHA token
+  if (!recaptchaToken) {
+    return { error: "reCAPTCHA token is required" };
+  }
+
+  const verify = await verifyRecaptcha(recaptchaToken);
+  if (!verify.success) {
+    return {
+      error: "reCAPTCHA validation failed. Please try again",
+    };
+  }
 
   const existingUser = await getUserByEmail(sanitizedEmail);
 
@@ -113,30 +128,28 @@ export const login = async (values: z.infer<typeof LoginSchema>) => {
     }
   }
 
-  if (existingUser.twoFA) {
-    if (code) {
-      const twoFAToken = await getTwoFATokenByEmail(existingUser.email);
+  if (code) {
+    const twoFAToken = await getTwoFATokenByEmail(existingUser.email);
 
-      if (!twoFAToken || twoFAToken.token !== code) {
-        return { error: "Invalid two-factor authentication token!" };
-      }
-
-      const hasExpired = new Date() > new Date(twoFAToken.expires);
-
-      if (hasExpired) {
-        return { error: "Token has expired!" };
-      }
-
-      await db.twoFAToken.delete({
-        where: { id: twoFAToken.id },
-      });
-    } else {
-      const twoFAToken = await generateTwoFAToken(existingUser.email);
-
-      await sendTwoFATokenEmail(twoFAToken.email, twoFAToken.token);
-
-      return { twoFA: true };
+    if (!twoFAToken || twoFAToken.token !== code) {
+      return { error: "Invalid two-factor authentication token!" };
     }
+
+    const hasExpired = new Date() > new Date(twoFAToken.expires);
+
+    if (hasExpired) {
+      return { error: "Token has expired!" };
+    }
+
+    await db.twoFAToken.delete({
+      where: { id: twoFAToken.id },
+    });
+  } else {
+    const twoFAToken = await generateTwoFAToken(existingUser.email);
+
+    await sendTwoFATokenEmail(twoFAToken.email, twoFAToken.token);
+
+    return { twoFA: true };
   }
 
   try {
