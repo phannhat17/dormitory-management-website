@@ -73,6 +73,7 @@ export const ResetFromSchema = z.object({
 
 export const ResetPassword = z
   .object({
+    recaptchaToken: z.optional(z.string()),
     newPassword: passwordPolicySchema,
     confirmPassword: passwordPolicySchema,
   })

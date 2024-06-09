@@ -24,6 +24,7 @@ import { ResetPassword } from "@/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
+import ReCAPTCHA from "react-google-recaptcha";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
@@ -35,6 +36,7 @@ const ResetPage = () => {
   const [error, setError] = useState<string | undefined>("");
   const [success, setSuccess] = useState<string | undefined>("");
   const [isPending, startTransition] = useTransition();
+  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
 
   const form = useForm<z.infer<typeof ResetPassword>>({
     resolver: zodResolver(ResetPassword),
@@ -48,8 +50,13 @@ const ResetPage = () => {
     setError("");
     setSuccess("");
 
+    if (!recaptchaToken) {
+      setError("Please complete the reCAPTCHA.");
+      return;
+    }
+
     startTransition(() => {
-      forgotPassword(values, token)
+      forgotPassword({ ...values, recaptchaToken }, token)
         .then((data) => {
           setError(data?.error);
           setSuccess(data?.success);
@@ -125,6 +132,10 @@ const ResetPage = () => {
               </div>
               <FormError message={error} />
               <FormSuccess message={success} />
+              <ReCAPTCHA
+                sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "site-key"}
+                onChange={setRecaptchaToken}
+              />
               <Button type="submit" disabled={isPending} className="w-full">
                 Reset Password
               </Button>

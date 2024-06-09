@@ -33,6 +33,19 @@ export const forgotPassword = async (
   if (!validatedFields.success) {
     return { error: "Invalid fields!" };
   }
+  const { recaptchaToken } = validatedFields.data;
+
+  // Always verify the CAPTCHA token
+  if (!recaptchaToken) {
+    return { error: "reCAPTCHA token is required" };
+  }
+
+  // Validate reCAPTCHA token server-side
+  const recaptchaValidation = await verifyRecaptcha(recaptchaToken);
+
+  if (!recaptchaValidation.success) {
+    return { error: "reCAPTCHA validation failed." };
+  }
 
   const existingToken = await getPasswordResetTokenByToken(token);
   if (!existingToken) {
