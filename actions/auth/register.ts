@@ -8,6 +8,7 @@ import { db } from "@/lib/db";
 import bcrypt from "bcryptjs";
 import { generateVerificationToken } from "@/lib/token";
 import { sendVerificationEmail } from "@/lib/mail";
+import { verifyRecaptcha } from "./verifyRecaptcha";
 
 export const register = async (values: z.infer<typeof RegisterSchema>) => {
   const validatedFields = RegisterSchema.safeParse(values);
@@ -16,7 +17,20 @@ export const register = async (values: z.infer<typeof RegisterSchema>) => {
     return { error: "Invalid fields!" };
   }
 
-  const { id, name, gender, email, password } = validatedFields.data;
+  const { id, name, gender, email, password, recaptchaToken } =
+    validatedFields.data;
+
+  // Always verify the CAPTCHA token
+  if (!recaptchaToken) {
+    return { error: "reCAPTCHA token is required" };
+  }
+
+  // Validate reCAPTCHA token server-side
+  const recaptchaValidation = await verifyRecaptcha(recaptchaToken);
+
+  if (!recaptchaValidation.success) {
+    return { error: "reCAPTCHA validation failed." };
+  }
   const sanitizedEmail = escapeHtml(email.toLowerCase());
   const sanitizedId = escapeHtml(id);
   const sanitizedName = escapeHtml(name);

@@ -26,10 +26,12 @@ import Link from "next/link";
 import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
+import ReCAPTCHA from "react-google-recaptcha";
 
 const RegisterPage = () => {
   const [error, setError] = useState<string | undefined>("");
   const [success, setSuccess] = useState<string | undefined>("");
+  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
 
   const [isPending, startTransition] = useTransition();
 
@@ -48,8 +50,13 @@ const RegisterPage = () => {
   const onSubmit = (values: z.infer<typeof RegisterSchema>) => {
     setError("");
 
+    if (!recaptchaToken) {
+      setError("Please complete the reCAPTCHA.");
+      return;
+    }
+
     startTransition(() => {
-      register(values)
+      register({ ...values, recaptchaToken })
         .then((data) => {
           if (data) {
             setSuccess(data.success);
@@ -194,6 +201,10 @@ const RegisterPage = () => {
               </div>
               <FormError message={error} />
               <FormSuccess message={success} />
+              <ReCAPTCHA
+                sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "site-key"}
+                onChange={setRecaptchaToken}
+              />
               <Button type="submit" disabled={isPending} className="w-full">
                 Register
               </Button>

@@ -40,6 +40,7 @@ export const RegisterSchema = z
     gender: z.nativeEnum(Gender, {
       errorMap: () => ({ message: "Invalid gender" }),
     }),
+    recaptchaToken: z.optional(z.string()),
     email: emailSchema,
     password: passwordPolicySchema,
     confirmPassword: passwordPolicySchema,
